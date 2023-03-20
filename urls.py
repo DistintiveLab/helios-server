@@ -14,11 +14,11 @@ admin.autodiscover()
 urlpatterns = [
     url(r'^auth/', include('helios_auth.urls')),
     url(r'^helios/', include('helios.urls')),
-    url(r'^admin/', include(admin.site.urls)),
+    url(r'^admin/', admin.site.urls),
     url(r'^jsi18n/$', JavaScriptCatalog.as_view(), name='i18n@JSCatalog'),
 ]
 
-if settings.AUTH_DEFAULT_AUTH_SYSTEM == 'shibboleth':
+if settings.AUTH_DEFAULT_SYSTEM == 'shibboleth':
     urlpatterns += [
         url(r'^', include('heliosinstitution.urls')),
     ]

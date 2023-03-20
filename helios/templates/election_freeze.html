@@ -47,10 +47,9 @@ You must freeze the ballot before you can contact voters.
 {% else %}
 <form method="post" action="">
 <input type="hidden" name="csrf_token" value="{{csrf_token}}" />
-    
 
 <button class="btn btn-primary">{% trans "Freeze the ballot"%}</button>
-<button class="btn btn-danger" onclick="document.location='{% url "election@view" election.uuid %}'; return false;">{% trans "never mind" %}</button>
+<button class="btn btn-danger" onclick="document.location='{% url "election@view" election.uuid %}'; return false;">{% trans "do NOT freeze yet" %}</button>
 </form>
 {% endif %}
 

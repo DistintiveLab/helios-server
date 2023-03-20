@@ -8,9 +8,9 @@ import copy
 from celery import shared_task
 from celery.utils.log import get_logger
 
-import signals
-from models import CastVote, Election, Voter, VoterFile
-from view_utils import render_template_raw
+from . import signals
+from .models import CastVote, Election, Voter, VoterFile
+from .view_utils import render_template_raw
 
 from django.conf import settings
 from django.utils.translation import ugettext as _
@@ -72,6 +72,7 @@ def single_voter_email(voter_uuid, subject_template, body_template, extra_vars={
     voter = Voter.objects.get(uuid=voter_uuid)
 
     the_vars = copy.copy(extra_vars)
+    the_vars.update({'election': voter.election})
     the_vars.update({'voter': voter})
 
     subject = render_template_raw(None, subject_template, the_vars)

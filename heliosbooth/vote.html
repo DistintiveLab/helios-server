@@ -1,10 +1,9 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<!DOCTYPE html>
+<html lang="en">
 <head>
-  <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
   <title>Cabine de Votação</title>
-  <link rel="stylesheet" type="text/css" media="screen" href="/static/bootstrap/css/bootstrap.min.css" />
   <link rel="stylesheet" type="text/css" href="css/booth.css" />
   <link rel="stylesheet" type="text/css" href="css/forms.css" />
   <link rel="stylesheet" type="text/css" href="/static/css/custom.css" />
@@ -14,10 +13,14 @@
 
   <script language="javascript" src="js/20180214-helios-booth-compressed.js"></script>
 </head>
+
 <body>
 <div id="wrapper">
-<span style="float:right; padding: 7px 15px 5px 10px;"><a class="link-booth" href="javascript:BOOTH.exit();">[sair]</a></span>
-<div id="banner">Cabine de Votação</div>
+<div id="banner" class="edge">
+  <div style="text-align:center; width: 100%;">Cabine de Votação
+      <div style="float: right; margin-right: 10px; font-size: 0.8em;"><span><a href="javascript:BOOTH.exit();">sair</a></span></div>
+  </div>
+</div>
 <div id="content">
 
 <div id="header">
@@ -179,8 +182,8 @@ BOOTH.setup_election = function(raw_json, election_metadata) {
     // initialize array so it is the identity permutation
     $(ordering).each(function(j, answer) {ordering[j]=j;});
 
-    // if we want reordering, then we shuffle the array
-    if (election_metadata && election_metadata.randomize_answer_order) {
+    // if we want reordering, at election or question level, then we shuffle the array
+    if ((election_metadata && election_metadata.randomize_answer_order) || question.randomize_answer_order) {
       shuffleArray(ordering);
     }
 
@@ -199,7 +202,7 @@ BOOTH.show = function(el) {
 };
 
 BOOTH.show_election = function() {
-  BOOTH.show($('#election_div')).processTemplate({'election' : BOOTH.election});
+  BOOTH.show($('#election_div')).processTemplate({'election' : BOOTH.election, 'election_metadata': BOOTH.election_metadata});
 };
 
 BOOTH.launch_async_encryption_answer = function(question_num) {
@@ -341,6 +344,9 @@ BOOTH.click_checkbox = function(question_num, answer_num, checked_p) {
        checkbox.disabled = false;
      });
      $('#warning_box').html("");
+     if (BOOTH.election.questions[question_num].max != null && (BOOTH.ballot.answers[question_num].length < BOOTH.election.questions[question_num].max)) {
+        $('#warning_box').html("You may select up to " + BOOTH.election.questions[question_num].max + " choices total.");
+     }
   }
 };
 
@@ -582,7 +588,6 @@ BOOTH.cast_ballot = function() {
 };
 
 BOOTH.show_receipt = function() {
-    //UTILS.open_window_with_content("Your smart ballot tracker for " + BOOTH.election.name + ": " + BOOTH.encrypted_ballot_hash);
     UTILS.open_window_with_content("Seu rastreador de cédula para " + BOOTH.election.name + ": " + BOOTH.encrypted_ballot_hash);
 };
 
@@ -592,9 +597,13 @@ BOOTH.do_done = function() {
 
 </script>
 <div id="page">
-  <div id="progress_div" style="display:none; max-width: 500px; width: 100%; margin:auto;">
-      <table width="80%" class="table table-bordered">
-          <tr><td id="progress_1">(1) Marcar</td><td id="progress_2">(2) Revisar</td><td id="progress_3">(3) Depositar</td></tr>
+  <div id="progress_div" style="display:none">
+      <table>
+          <tr>
+              <td id="progress_1">(1) Marcar</td>
+              <td id="progress_2">(2) Revisar</td>
+              <td id="progress_3">(3) Depositar</td>
+          </tr>
       </table>
   </div>
   <div id="election_div" class="panel list-group">
@@ -642,7 +651,7 @@ BOOTH.do_done = function() {
 
 <br clear="both" />
 </div>
-<div id="footer">&nbsp;</div>
+<div id="footer" class="edge">&nbsp;</div>
 </div>
 <div id="applet_div">
 </div>

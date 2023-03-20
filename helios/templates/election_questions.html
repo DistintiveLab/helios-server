@@ -40,8 +40,8 @@
       var max = null;
       if (form.max.value != "")
         max = parseInt(form.max.value);
-
-      var new_q = {'question' : form.question.value, 'min': parseInt(form.min.value), 'max': max, 'short_name': form.question.value, 'answers': [], 'answer_urls': [], 'choice_type': form.choice_type.value, 'tally_type': 'homomorphic', 'result_type': form.result_type.value};
+        
+      var new_q = {'question' : form.question.value, 'min': parseInt(form.min.value), 'max': max, 'short_name': form.question.value, 'answers': [], 'answer_urls': [], 'choice_type': form.choice_type.value, 'tally_type': 'homomorphic', 'result_type': form.result_type.value, 'randomize_answer_order': form.randomize_answer_order.value == "1"};
       var i = 0;
       while(true) {
           i += 1;
@@ -85,6 +85,8 @@
     form[0].max.value = q_data.max;
     form[0].question.value = q_data.question;
     form[0].result_type.value = q_data.result_type;
+    form[0].randomize_answer_order.value = q_data.randomize_answer_order ? "1" : "0";
+
     // add the answers
     var answer_table = $('#answer_table_' + q_num);
     add_answers(answer_table, q_data.answers.length);

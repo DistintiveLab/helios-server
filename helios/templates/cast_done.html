@@ -18,6 +18,11 @@
   <tt style="font-size: 10pt;width: 10em; word-wrap: break-word; font-weight: bold; ">  {{vote_hash}}</tt>
 </span>
 </p>
+<p>
+  {% blocktrans %}
+  This ballot tracker mathematically ensures that your ballot is counted. You can check all ballot trackers by viewing the <a href="{% url "election@voters@list-pretty" election.uuid %}">voter list</a>, where your ballot tracker should appear within a few minutes.
+  {% endblocktrans %}
+</p>
 <br><br>
 {% if logout %}
 <p><span>{% trans "For your safety, we have logged you out." %}</span></p>

@@ -10,10 +10,10 @@ You have uploaded a file of voters. The first few rows of this file are:
 {% endblocktrans %}
 </p>
 
-<table class="table table-striped">
-<tr><th>{% trans "Voter Login" %}</th><th>{% trans "Email Address" %}</th><th>{% trans "Name" %}</th></tr>
+<table>
+<tr><th>{% trans "Voter Type" %}</th><th>{% trans "Voter Login" %}</th><th>{% trans "Email Address" %}</th><th>{% trans "Name" %}</th></tr>
 {% for v in voters %}
-<tr><td>{{v.voter_id}}</td><td>{{v.email}}</td><td>{{v.name}}</td></tr>
+<tr><td>{{v.voter_type}}</td><td>{{v.voter_id}}</td><td>{{v.email}}</td><td>{{v.name}}</td></tr>
 {% endfor %}
 </table>
 

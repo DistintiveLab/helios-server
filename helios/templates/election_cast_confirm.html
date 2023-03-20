@@ -48,6 +48,12 @@ window.onbeforeunload = function(evt) {
     <img src="{% static "loading.gif" %}" />
 </div>
 
+<div style="word-wrap: break-word; width: 90vw;">
+Your ballot tracker is:<br>
+<b>{{vote_fingerprint}}</b>
+<br><br>
+</div>
+
 <div id="all_forms">
 
 {% if voter %}

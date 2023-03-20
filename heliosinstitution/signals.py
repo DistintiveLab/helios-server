@@ -19,7 +19,7 @@ def update_permissions_after_migration(sender, **kwargs):
     from django.apps import apps
     from django.contrib.auth.management import create_permissions
     
-    create_permissions(sender, apps.get_models(), 2 if settings.DEBUG else 0)
+    create_permissions(sender, 2 if settings.DEBUG else 0)
     if sender.name == "heliosinstitution":
         """
         Permissions must exist in sender model, otherwise an error
@@ -36,13 +36,13 @@ def update_permissions_after_migration(sender, **kwargs):
             ],
         }
         if verbosity>0:
-            print "Initialising data post_migrate"
+            print("Initialising data post_migrate")
         for group in heliosinstitution_group_permissions:
             role, created = Group.objects.get_or_create(name=group)
             if verbosity > 1 and created:
-                print 'Creating group', group
+                print(f"Creating group {group}")
                 for perm in heliosinstitution_group_permissions[group]:
                     role.permissions.add(Permission.objects.get(codename=perm))
                     if verbosity > 1:
-                        print 'Permitting', group, 'to', perm
+                        print(f"Permitting {group} to {perm}")
                         role.save()  

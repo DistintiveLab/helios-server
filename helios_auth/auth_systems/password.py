@@ -52,7 +52,7 @@ def password_login_view(request):
     # set this in case we came here straight from the multi-login chooser
     # and thus did not have a chance to hit the "start/password" URL
     request.session['auth_system_name'] = 'password'
-    if request.POST.has_key('return_url'):
+    if 'return_url' in request.POST:
       request.session['auth_return_url'] = request.POST.get('return_url')
 
     if form.is_valid():
@@ -119,9 +119,8 @@ def update_status(token, message):
   
 def send_message(user_id, user_name, user_info, subject, body):
   email = user_id
-  name = user_name or user_info.get('name', email)
-  send_mail(subject, '', settings.SERVER_EMAIL, ["\"%s\" <%s>" % (name, email)],
-  fail_silently=False, html_message=body)
+  name = user_name or email
+  send_mail(subject, body, settings.SERVER_EMAIL, ["\"%s\" <%s>" % (name, email)], fail_silently=False)    
 
 
 #

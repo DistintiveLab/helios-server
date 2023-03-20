@@ -14,6 +14,9 @@
 <p>Código de Identificação da Eleição: {{election_hash}}</p>
 <br>
 
+Election URL (click to begin voting):
+{{election_vote_url}}
+
 {% ifequal voter.voter_type "password" %}
 <p>
     <strong>Seu ID de eleitor</strong>: {{voter.voter_login_id}}<br>
