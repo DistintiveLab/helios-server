@@ -1334,7 +1334,7 @@ def voters_eligibility(request, election):
       status=200)
 
   return HttpResponseRedirect(settings.SECURE_URL_HOST + reverse(voters_list_pretty, args=[election.uuid]))
-  
+
 @election_admin()
 def voters_upload(request, election):
   """
@@ -1360,19 +1360,24 @@ def voters_upload(request, election):
       # we need to confirm
       if 'voters_file' in request.FILES:
         voters_file = request.FILES['voters_file']
+        voter_file_obj = election.add_voters_file(voters_file)
+
+        request.session['voter_file_id'] = voter_file_obj.id
+
         problems = []
-        voters = []
+
+        # import the first few lines to check
         try:
           voters = [v for v in voter_file_obj.itervoters()][:5]
           if len(voters) == 0:
-            raise Exception(_("no valid lines found in voter file"))
+            raise Exception("no valid lines found in voter file")
         except Exception as e:
           voters = []
           problems.append(_("your CSV file could not be processed because %s" % str(e)))
 
         return render_template(request, 'voters_upload_confirm', {'election': election, 'voters': voters, 'problems': problems})
       else:
-        return HttpResponseRedirect("%s?%s" % (settings.SECURE_URL_HOST + reverse(voters_upload, args=[election.uuid]), urlencode({'e':_('no voter file specified, try again')})))
+        return HttpResponseRedirect("%s?%s" % (settings.SECURE_URL_HOST + reverse(voters_upload, args=[election.uuid]), urlencode({'e':'no voter file specified, try again'})))
 
 @election_admin()
 def voters_upload_cancel(request, election):

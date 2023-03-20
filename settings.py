@@ -180,6 +180,7 @@ TEMPLATES = [
             'debug': DEBUG,
             'context_processors': [
                 "django.contrib.auth.context_processors.auth",
+                "django.contrib.messages.context_processors.messages",
             ],
         }
     },
@@ -200,8 +201,8 @@ INSTALLED_APPS = (
     'server_ui',
     'helioslog',
     'heliosinstitution',
-    'django_celery_results',
-    'django_celery_beat'
+   # 'django_celery_results',
+    # 'django_celery_beat'
 )
 
 ANYMAIL = {
@@ -336,8 +337,8 @@ CELERY_BROKER_URL = get_from_env('CELERY_BROKER_URL', 'redis://127.0.0.1:6379')
 CELERY_ACCEPT_CONTENT = ['application/json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
-CELERY_RESULT_BACKEND = 'django-db'
-CELERY_CACHE_BACKEND = 'django-cache'
+#CELERY_RESULT_BACKEND = 'django-db'
+#CELERY_CACHE_BACKEND = 'django-cache'
 CELERY_RESULT_EXPIRES = 5184000  # 60 dias
 
 # see configuration example at https://pythonhosted.org/django-auth-ldap/example.html

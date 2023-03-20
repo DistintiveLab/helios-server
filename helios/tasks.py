@@ -89,12 +89,7 @@ def single_voter_notify(voter_uuid, notification_template, extra_vars={}):
     the_vars = copy.copy(extra_vars)
     the_vars.update({'voter': voter})
 
-    try:
-        default_from_name = settings.DEFAULT_FROM_NAME.decode('utf8')
-    except UnicodeDecodeError:
-        default_from_name = settings.DEFAULT_FROM_NAME.decode('latin1')
-
-    the_vars.update({'default_from_name': default_from_name})
+    the_vars.update({'default_from_name': settings.DEFAULT_FROM_NAME})
 
     notification = render_template_raw(None, notification_template, the_vars)
 
@@ -144,16 +139,12 @@ def voter_file_process(voter_file_id):
     subject = _(u'voter file processed')
     body = _(u'Your voter file upload for %(election_name)s has been processed\n ') % {'election_name': voter_file.election.name}
     body += _(u'%(number_of_voters)s voters have been created \n\n') % {'number_of_voters': voter_file.num_voters}
-    try:
-        default_from_name = settings.DEFAULT_FROM_NAME.decode('utf8')
-    except UnicodeDecodeError:
-        default_from_name = settings.DEFAULT_FROM_NAME.decode('latin1')
 
     body += """
     --
     \n
     %s
-    """ % default_from_name
+    """ % settings.DEFAULT_FROM_NAME
     election_id = voter_file.election.id
     election_notify_admin.delay(election_id, subject, body)
 
