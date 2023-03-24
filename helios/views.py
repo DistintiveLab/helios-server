@@ -1445,10 +1445,6 @@ def voters_email(request, election):
       # the client knows to submit only once with a specific voter_id
       subject_template = 'email/%s_subject.txt' % template
       body_template = 'email/%s_body.txt' % template
-      try:
-          default_from_name = settings.DEFAULT_FROM_NAME.decode('utf8')
-      except UnicodeDecodeError:
-          default_from_name = settings.DEFAULT_FROM_NAME.decode('latin1')
 
       extra_vars = {
         'custom_subject' : email_form.cleaned_data['subject'],

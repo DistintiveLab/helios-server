@@ -54,7 +54,15 @@
       {#/for}
           <option value="">- (ilimitado)</option>
       </select>
-       alternativas.</td></tr>
+       alternativas.
+       <br><br>
+      Tornar ordem das respostas aleatória:
+      <select name="randomize_answer_order">
+      <option selected value="0">não</option>
+        <option value="1">sim</option>
+      </select>
+    </td>
+  </tr>
 </td>
     </tr>
   </tbody>
@@ -113,7 +121,14 @@
     {#/for}
         <option value="">- (ilimitado)</option>
     </select>
-     alternativas.</td></tr>
+     alternativas.
+    <br><br>
+  Tornar ordem das respostas aleatória:
+  <select name="randomize_answer_order">
+    <option selected value="0">não</option>
+    <option value="1">sim</option>
+  </select>
+    </td></tr>
       </tbody>
       <tfoot>
         <tr><th colspan="2"></th><th><a href="javascript:add_answers($('#answer_table'), 5)">adicionar mais 5 respostas</a> <i title="Se precisar mais campos de resposta. Não vai ser necessário preencher todos." class="glyphicon glyphicon-question-sign"></i></th></tr>
