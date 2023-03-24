@@ -1,5 +1,5 @@
 from django.conf import settings
-from . import password, twitter, linkedin, cas, facebook, google, yahoo, clever, github
+from . import password, twitter, linkedin, cas, facebook, google, yahoo, clever, github, ldapauth
 
 AUTH_SYSTEMS = {}
 
@@ -12,7 +12,7 @@ AUTH_SYSTEMS['google'] = google
 AUTH_SYSTEMS['yahoo'] = yahoo
 AUTH_SYSTEMS['clever'] = clever
 AUTH_SYSTEMS['github'] = github
-
+AUTH_SYSTEMS['ldap'] = ldapauth
 # not ready
 #import live
 #AUTH_SYSTEMS['live'] = live
