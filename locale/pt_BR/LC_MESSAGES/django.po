@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: helios-ifsc\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-03-29 08:57-0300\n"
-"PO-Revision-Date: 2023-03-29 08:58-0300\n"
+"POT-Creation-Date: 2023-03-29 10:10-0300\n"
+"PO-Revision-Date: 2023-03-29 10:10-0300\n"
 "Last-Translator: Shirlei Chaves <shirlei@gmail.com>\n"
 "Language-Team: \n"
 "Language: pt_BR\n"
@@ -224,17 +224,17 @@ msgstr ""
 msgid "invalid voter email '%s' for voter id '%s'"
 msgstr "email inválido %s para o eleitor de login %s"
 
-#: helios/models.py:1031
+#: helios/models.py:1030
 msgid "password already exists"
 msgstr "senha já existe"
 
-#: helios/models.py:1158
+#: helios/models.py:1157
 msgid "cast vote is quarantined, verification and storage is delayed."
 msgstr ""
 "lançamento de votos está em quarentena, verificação e armazenamento estão "
 "postergados."
 
-#: helios/models.py:1183
+#: helios/models.py:1182
 msgid ""
 "the vote's election UUID does not match the election for which this vote is "
 "being cast"
@@ -434,7 +434,7 @@ msgid "Audited Ballots for "
 msgstr "Cédulas Auditadas para "
 
 #: helios/templates/election_audited_ballots.html:6
-#: helios/templates/election_view.html:345
+#: helios/templates/election_view.html:347
 msgid "Audited Ballots"
 msgstr "Cédulas Auditadas"
 
@@ -659,7 +659,7 @@ msgstr ""
 "\n"
 "Essa eleição está aberta para <em>eleitores registrados</em>, portanto "
 "conecte-se\n"
-"com a mesma conta com a qual você se registrou.\n"
+"com a mesma conta com a qual você se registrou ou foi registrado.\n"
 
 #: helios/templates/election_cast_confirm.html:122
 msgid ""
@@ -1128,12 +1128,12 @@ msgid "feature it"
 msgstr "destacar"
 
 #: helios/templates/election_view.html:45
-#: helios/templates/election_view.html:331
+#: helios/templates/election_view.html:333
 msgid "Election URL:"
 msgstr "URL da Eleição:"
 
 #: helios/templates/election_view.html:50
-#: helios/templates/election_view.html:336
+#: helios/templates/election_view.html:338
 msgid "Election Fingerprint:"
 msgstr "Código de Identificação da Eleição:"
 
@@ -1343,12 +1343,12 @@ msgid "voting is not yet open"
 msgstr "Esta eleição ainda não está aberta para votação."
 
 #: helios/templates/election_view.html:280
-#: helios/templates/election_view.html:356
+#: helios/templates/election_view.html:358
 msgid "verify"
 msgstr "Conferir a"
 
 #: helios/templates/election_view.html:280
-#: helios/templates/election_view.html:356
+#: helios/templates/election_view.html:358
 msgid "election tally"
 msgstr "apuração da eleição"
 
@@ -1391,11 +1391,17 @@ msgstr ""
 "\t\t\t\t\t  "
 
 #: helios/templates/election_view.html:307
-msgid "This {{election.election_type}} ends at the administrator's discretion."
+#, python-format
+msgid ""
+" \n"
+"\t\t\t\t  This %(election_type)s ends at the administrator's discretion.\n"
+"\t\t\t\t  "
 msgstr ""
-"Esta {{election.election_type}} termina quando o administrador a encerrar."
+" \n"
+"\t\t\t\t  Esta %(election_type)s termina quando o administrador encerrar. \n"
+"\t\t\t\t  "
 
-#: helios/templates/election_view.html:311
+#: helios/templates/election_view.html:313
 #, python-format
 msgid ""
 "\n"
@@ -1409,27 +1415,27 @@ msgstr ""
 "mas foi extendida até %(voting_extended_until)s.\n"
 "\t"
 
-#: helios/templates/election_view.html:317
+#: helios/templates/election_view.html:319
 msgid "extend voting"
 msgstr "estender votação"
 
-#: helios/templates/election_view.html:329
+#: helios/templates/election_view.html:331
 msgid "Audit Info"
 msgstr "Informação de auditoria"
 
-#: helios/templates/election_view.html:339
+#: helios/templates/election_view.html:341
 msgid "Your smart ballot tracker:"
 msgstr "O rastreador da sua cédula é:"
 
-#: helios/templates/election_view.html:344
+#: helios/templates/election_view.html:346
 msgid "Ballot Tracking Center"
 msgstr "Central de Rastreamento de Cédula"
 
-#: helios/templates/election_view.html:350
+#: helios/templates/election_view.html:352
 msgid "preview booth"
 msgstr "pré-visualização da urna"
 
-#: helios/templates/election_view.html:358
+#: helios/templates/election_view.html:360
 #, python-format
 msgid ""
 "\n"
