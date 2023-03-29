@@ -188,10 +188,10 @@ Após a compilação, arquivos `.mo` devem ter sido gerados em `locale/pt_BR/LC_
 
 Se você adicionou alguma mensagem nova para ser traduzida e gostaria que fossem adicionadas aos arquivos de tradução, execute os comandos abaixo.
 
-1. Para adicionar strings de arquivos python:
+1. Para adicionar strings de arquivos python (utilize o --ignore=venv se tiver um diretório de ambiente virtual no mesmo diretório):
 
 ```bash
-python manage.py makemessages -l pt_BR
+python manage.py makemessages -l pt_BR --ignore=venv
 ```
 2. Para adicionar strings de arquivos .js (os que passam pelo engine do Django):
 

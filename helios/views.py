@@ -28,6 +28,8 @@ from helios_auth import views as auth_views
 from helios_auth.auth_systems import AUTH_SYSTEMS, can_list_categories
 from helios_auth.models import AuthenticationExpired
 from helios_auth.security import check_csrf, login_required, get_user, save_in_session_across_logouts
+from helioslog.models import HeliosLog
+
 from . import datatypes
 from . import forms
 from . import tasks
@@ -1373,7 +1375,7 @@ def voters_upload(request, election):
             raise Exception("no valid lines found in voter file")
         except Exception as e:
           voters = []
-          problems.append(_("your CSV file could not be processed because %s" % str(e)))
+          problems.append(_("your CSV file could not be processed because %s") % str(e))
 
         return render_template(request, 'voters_upload_confirm', {'election': election, 'voters': voters, 'problems': problems})
       else:
@@ -1390,7 +1392,7 @@ def voters_upload_cancel(request, election):
     vf.delete()
   del request.session['voter_file_id']
 
-  return HttpResponseRedirect(settings.SECURE_URL_HOST + reverse(url_names.election.ELECTION_VIEW, args=[election.uuid]))
+  return HttpResponseRedirect(settings.SECURE_URL_HOST + reverse(url_names.election.ELECTION_VOTERS_UPLOAD, args=[election.uuid]))
 
 @election_admin(frozen=True)
 def voters_email(request, election):

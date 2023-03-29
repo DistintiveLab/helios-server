@@ -27,8 +27,8 @@ You have uploaded a file of voters. The first few rows of this file are:
 {% endfor %}
 </p>
 <br />
-
-<a href="{% url "election@voters@upload-cancel" election.uuid %}">{% trans "never mind, upload a different file" %}</a>
+<a href="{% url "election@voters@upload-cancel" election.uuid %}" class="btn btn-primary" >{% trans "never mind, upload a different file" %}</a>
+<a href="{% url "election@view" election.uuid %}" class="btn btn-danger" >{% trans "back to election" %}</a>
 </p>
 </div>
 <div class="col-md-12">
@@ -46,9 +46,9 @@ You have uploaded a file of voters. The first few rows of this file are:
 <div class="form-group">
 <a class="btn btn-danger" href="{% url "election@voters@upload-cancel" election.uuid %}">{% trans "no, let me upload a different file" %}</a>
  <a class="btn btn-danger" href="{% url "election@view" election.uuid %}"> {% trans "back to election" %}</a>
-</div>
-</div>
 
 {% endif %}
+</div>
+</div>
 
 {% endblock %}

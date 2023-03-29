@@ -98,9 +98,9 @@
 </div>
 
 <p>
-{% if election.help_email and admin_p%}Help Email Address: {{election.help_email}}<br />{% endif %}
-{% if election.voting_start_at %}Voting start at {{election.voting_start_at}}<br />{% endif %}
-{% if election.voting_end_at %}Voting end at {{election.voting_end_at}}<br />{% endif %}
+{% if election.help_email and admin_p%}{% trans "Help Email Address:" %} {{election.help_email}}<br />{% endif %}
+{% if election.voting_start_at %}{% trans "Voting start at"%} {{election.voting_start_at|date:'d/m/Y H:m:s'}}<br />{% endif %}
+{% if election.voting_end_at %}{% trans "Voting end at" %} {{election.voting_end_at|date:'d/m/Y H:m:s'}}<br />{% endif %}
 </p>
 
 {% if election.election_info_url %}
@@ -129,7 +129,7 @@
 	{% if admin_p %}
 		{% if election.frozen_p %}
 		<div style="background: lightyellow; padding:5px; padding-left: 10px; margin-top: 15px; border: 1px solid #aaa; width: 720px;" class="round">
-			<a href="#" onclick="$('#badgebody').slideToggle(250);">Embed an Election Badge</a>
+			<a href="#" onclick="$('#badgebody').slideToggle(250);">{% trans "Embed an Election Badge" %}</a>
 			<div id="badgebody" style="display:none;">
 			<br />
 				<form action="#">

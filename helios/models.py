@@ -778,15 +778,15 @@ class VoterFile(models.Model):
       voter_id = voter_fields[1].strip()
 
       if not voter_type in AUTH_SYSTEMS:
-        raise Exception("invalid voter type '%s' for voter id '%s', available voter types are %s" % (voter_type, voter_id, ",".join(AUTH_SYSTEMS.keys())))
+        raise Exception(_("invalid voter type '%s' for voter id '%s', available voter types are %s") % (voter_type, voter_id, ",".join(AUTH_SYSTEMS.keys())))
 
       # default to having email be the same as voter_id
       voter_email = voter_id
       if len(voter_fields) > 2:
         # but if it's supplied, it will be the 3rd field.
         voter_email = voter_fields[2].strip()
-      if voter_type == "password" and not validate_email(voter_email):
-        raise Exception("invalid voter email '%s' for voter id '%s'" % (voter_email, voter_id))
+      if voter_type == "password" or voter_type == "ldap" and not validate_email(voter_email):
+        raise Exception(_("invalid voter email '%s' for voter id '%s'") % (voter_email, voter_id))
 
       # same thing for voter display name.
       voter_name = voter_email
@@ -830,7 +830,12 @@ class VoterFile(models.Model):
               new_voter.alias = "V%s" % alias_num
           new_voter.save()
       else:
-          user, _ = User.objects.get_or_create(user_type=voter['voter_type'], user_id=voter['voter_id'], defaults = {'name': voter['voter_id'], 'info': {}, 'token': None})
+          user, _ = User.objects.get_or_create(user_type=voter['voter_type'], user_id=voter['voter_id'],
+                                              defaults = {'name': voter['voter_id'], 'token': None})
+          if voter['voter_type'] == 'ldap':
+            info = {'email': voter['email']}
+            user.info = info
+            user.save()
           existing_voter = Voter.get_by_election_and_user(self.election, user)
           if not existing_voter:
               Voter.register_user_in_election(user, self.election)
