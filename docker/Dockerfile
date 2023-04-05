@@ -28,10 +28,9 @@ RUN pip install --no-compile --no-cache-dir -r /tmp/pip-tmp/requirements.txt
 
 WORKDIR /var/www/helios-server
 RUN chown helios:helios /var/www/helios-server
-COPY --chown=helios  ./docker/docker-entrypoint.sh ./docker/start-celeryworker ./docker/start-celerybeat /
-RUN  chmod +x /docker-entrypoint.sh /start-celerybeat /start-celeryworker
+COPY --chown=helios  ./docker/docker-entrypoint.sh ./docker/start-celeryworker ./docker/start-celerybeat ./docker/start /
+RUN  chmod +x /docker-entrypoint.sh /start-celerybeat /start-celeryworker /start
 
 USER helios
-
 
 ENTRYPOINT ["/docker-entrypoint.sh"]
