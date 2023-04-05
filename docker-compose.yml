@@ -5,12 +5,13 @@ x-app: &app
     build:
         dockerfile: ./docker/Dockerfile
         context: ./
+        args:
+            UID: "${UID:-1000}"
+            GID: "${GID:-1000}"
     image: djangobase
     env_file:
         - .env
-    environment:
-        - "UID=${UID:-1000}"
-        - "GID=${GID:-1000}"
+
     networks:
         - helios-network
     restart: "${DOCKER_RESTART_POLICY:-unless-stopped}"
