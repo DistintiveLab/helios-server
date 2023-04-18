@@ -34,7 +34,7 @@ if settings.DEBUG:  # otherwise, they should be served by a webserver like apach
         url(r'verifier/(?P<path>.*)$', serve, {'document_root' : settings.ROOT_PATH + '/heliosverifier'}),
 
         url(r'static/auth/(?P<path>.*)$', serve, {'document_root' : settings.ROOT_PATH + '/helios_auth/media'}),
-        url(r'static/helios/(?P<path>.*)$', serve, {'document_root' : settings.ROOT_PATH + '/helios/media'}),
+        url(r'static/static_templates/(?P<path>.*)$', serve, {'document_root' : settings.ROOT_PATH + '/helios/media/static_templates'}),
         url(r'static/heliosinstitution/(?P<path>.*)$', serve, {'document_root' : settings.ROOT_PATH + '/heliosinstitution/media'}),
         url(r'static/(?P<path>.*)$', serve, {'document_root' : settings.ROOT_PATH + '/server_ui/media'}),
     ]
