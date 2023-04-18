@@ -108,7 +108,7 @@ MEDIA_URL = ''
 # Examples: "http://foo.com/media/", "/media/".
 STATIC_URL = '/media/'
 
-STATIC_ROOT = ROOT_PATH + '/sitestatic'
+STATIC_ROOT = ROOT_PATH + '/staticfiles'
 
 STATICFILES_DIRS = (
     ROOT_PATH + '/heliosbooth',

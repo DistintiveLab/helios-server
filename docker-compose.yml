@@ -28,7 +28,7 @@ x-celery: &celery
 services:
     helios:
         <<: *app
-        command: bash -c "python manage.py migrate && /start"
+        command: bash -c "python manage.py migrate && python manage.py collectstatic --noinput && /start"
         ports:
             - "80:80"
             - "443:443"
@@ -63,6 +63,23 @@ services:
             - 127.0.0.1:6379:6379
         networks:
             - helios-network
+    nginx:
+        build:
+            dockerfile: ./docker/nginx/Dockerfile
+            context: ./
+        volumes:
+            - ./staticfiles:/var/www/html/static
+            - logs_volume:/var/log/nginx
+        ports:
+            - 1337:80
+        # para o redis rodar no mesmo uid e gid do usuário do host, 
+        # para evitar problemas de permissão na leitura de staticfiles 
+        user: $UID:$GID 
+        depends_on:
+            - helios
+        networks:
+            - helios-network
+        restart: unless-stopped
 
     db:
         image: postgres:12.0-alpine
