@@ -11,7 +11,6 @@ RUN \
     libsasl2-dev \
     libldap2-dev \
     gettext \
-    vim less \
     # Instala a dependência para o wait-for
     netcat &&\
     rm -rf /var/lib/apt/lists/* && \
