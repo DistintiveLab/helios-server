@@ -4,10 +4,10 @@
 
 - [Guia de instalação e configuração do Helios](#guia-de-instalação-e-configuração-do-helios)
   - [Personalizações feitas no Helios](#personalizações-feitas-no-helios)
-  - [Instalação dos pacotes necessários (Ubuntu 18.04)](#instalação-dos-pacotes-necessários-ubuntu-1804)
-    - [Softwares necessários](#softwares-necessários)
-  - [Preparação do ambiente para instalação do Helios](#preparação-do-ambiente-para-instalação-do-helios)
+  - [Instalação dos softwares necessários](#instalação-dos-softwares-necessários)
+  - [Preparação do ambiente para execução do Helios](#preparação-do-ambiente-para-execução-do-helios)
     - [Configuração do banco de dados PostgreSQL](#configuração-do-banco-de-dados-postgresql)
+    - [Obtenção de código fonte e preparo da aplicação](#obtenção-de-código-fonte-e-preparo-da-aplicação)
     - [Compilando arquivos com as traduções para português](#compilando-arquivos-com-as-traduções-para-português)
     - [Configuração dos módulos de autenticação](#configuração-dos-módulos-de-autenticação)
       - [Autenticação em uma base LDAP](#autenticação-em-uma-base-ldap)
@@ -25,6 +25,8 @@
       - [Habilitando instituições da federação para usarem o serviço Helios](#habilitando-instituições-da-federação-para-usarem-o-serviço-helios)
   - [Usando docker para desenvolvimento](#usando-docker-para-desenvolvimento)
   - [Alguns lembretes finais cruciais para o ambiente de produção](#alguns-lembretes-finais-cruciais-para-o-ambiente-de-produção)
+    - [Histórico](#histórico)
+      - [virtualenv](#virtualenv)
 
 # Guia de instalação e configuração do Helios
 
@@ -32,10 +34,12 @@
 > 
 > Se você está interessado em informações sobre o repositório de uso no IFSC (http://www.ifsc.edu.br), por favor acesse https://github.com/ifsc/helios-server
 
+As instruções de configuração e disponibilização descritas neste README vão considerar especificamente o uso em ambiente containerizado, considerando como base a imagem [python:3.6.15-buster](https://hub.docker.com/layers/library/python/3.6.15-buster/images/sha256-08e91f391139ff24d82df572307b30ee850b78884ec633cf10f5a6e990dd9920?context=explore), considerando a última atualização do projeto do [Helios](https://github.com/benadida/helios-server) pelo mantenedor para a versão [3.6 do python](https://github.com/benadida/helios-server/commit/64f603375298d45f5a74d172fcd9a3763af5e587) 
 
-Neste tutorial são descritos os principais passos para disponibilização do Helios em um servidor com a distribuição Linux Ubuntu (testado nas versões LTS 14.04, 16.04 e 18.04), embora já tenha sido feita instalação com sucesso no CentOS. 
 
-Para seguir esse tutorial é necessário tenha alguma experiência com administração de sistemas Linux (instalação de pacotes, configuração de serviços, etc.).
+> Obs.: A maioria dos passos aqui descritos foram historicamente executados para disponibilização do Helios em um servidor com a distribuição Linux Ubuntu (testado nas versões LTS 14.04, 16.04 e 18.04), embora já tenha sido feita instalação com sucesso no CentOS, e devem continuar válidos para distribuições mais recentes do Ubuntu, por exemplo, com suporte à Python 3.6
+
+Para seguir esse tutorial é necessário tenha alguma experiência com administração de sistemas Linux (instalação de pacotes, configuração de serviços, etc.) e também uso do docker.
 
 
 ## Personalizações feitas no Helios
@@ -47,8 +51,8 @@ Personalizações e contribuições que fizemos que estão aqui e que não foram
 - Melhorias em algumas páginas e adequação para serem responsivas
 - Criação de manuais para eleitores e para gestores de eleição
 - Módulo de autenticação LDAP
-- Módulo de autenticação Shibboleth
-- Ajustes na página inicial e interface de administração para operação do Helios em ambiente Federado (Ex: Federação CAFe)
+- Módulo de autenticação Shibboleth (ainda a ser validado com as atualizações para Python 3)
+- Ajustes na página inicial e interface de administração para operação do Helios em ambiente Federado (Ex: Federação CAFe) (ainda a ser validado com as atualizações para Python 3)
 - Esse próprio arquivo com instruções para instalação do Helios :smile:
 
 Publicamos dois artigos sobre essas personalizações:
@@ -57,36 +61,29 @@ Publicamos dois artigos sobre essas personalizações:
 - CHAVES, S. A., MELLO, E. R. O uso de um sistema de votação on-line para escolha do conselho universitário In: WTE - Workshop de Tecnologia Eleitoral, 2014, Belo Horizonte. XIV Simpósio Brasileiro em Segurança da Informação e de Sistemas Computacionais 
 
 
-## Instalação dos pacotes necessários (Ubuntu 18.04)
+## Instalação dos softwares necessários
 
-### Softwares necessários
+> Considerando a imagem [python:3.6.15-buster](https://hub.docker.com/layers/library/python/3.6.15-buster/images/sha256-08e91f391139ff24d82df572307b30ee850b78884ec633cf10f5a6e990dd9920?context=explore), baseada no debian, que já contém o python 3.6 instalado.
 
-* python2.7
-* apache2
-* libapache2-mod-wsgi
 * postgresql e postgresql-contrib 
   * [Aqui tem um bom tutorial](https://www.digitalocean.com/community/tutorials/how-to-install-and-use-postgresql-on-ubuntu-18-04) de como instalar no Ubuntu 18.04
-* build-essential
-* git
 * gettext 
   * para uso das funcionalidade de compilação de mensagens traduzidas
-* python-pip
-* python-ldap python-dev libsasl2-dev libldap2-dev
+* python3-dev
+* libsasl2-dev libldap2-dev
   * para utilização do módulo de autenticação LDAP
+* netcat
+  * dependência para o [wait-for](docker/docker-entrypoint.sh)
 
-Para instalação dos pacotes apresentados acima foi necessário editar o arquivo  `/etc/apt/sources.list` e adicionar na seguinte linha a opção `universe`
+Todos os pacotes listados acima estão presentes no [Dockerfile](docker/Dockerfile) exemplo. Considere o referido Dockerfile como um tutorial do que deve ser instalado em configurado em termos de ambiente no caso de você optar por instalar diretamente num host sem utilizar o docker.
 
-```bash
-deb http://archive.ubuntu.com/ubuntu bionic main universe
-```
+## Preparação do ambiente para execução do Helios
 
-Depois é só fazer um `sudo apt update` e instalar os pacotes apresentados acima com o `sudo apt install`
+*Você vai precisar de um host em que possa executar o docker e o docker-compose.*
 
-> A versão do Django utilizada nesta versão do Helios é a [1.8.18](https://docs.djangoproject.com/en/1.8/).
+Recomendo que crie um usuário no sistema específico para o helios, por exemplo, usuário `helios`.
 
-## Preparação do ambiente para instalação do Helios
-
-Recomendo que crie um usuário no sistema específico para o helios, por exemplo, usuário `helios`. 
+No [docker-compose.yml](docker-compose.yml) exemplo que acompanha este repositório, está se utilizando o postgres conteinerizado. Em ambiente de produção isso pode não ser desejado por diversas razões. Se for realizar uma instalação do postgres localmente para utilização, na seção [Configuração do banco de dados PostgreSQL](#configuração-do-banco-de-dados-postgresql) abaixo são listadas algumas informações/configurações importantes a serem realizadas após a instalação do Postgres. Se você já tem uma instalação disponível ou pretende utilizar como container, pode pular para a seção [Obtenção de código fonte e preparo da aplicação](#obtenção-de-código-fonte-e-preparo-da-aplicação)
 
 ### Configuração do banco de dados PostgreSQL
 
@@ -121,6 +118,9 @@ FATAL:  Peer authentication failed for user "helios"
 >LocalForward PORTALOCAL 127.0.0.1:PORTAREMOTA
 >```
 
+
+### Obtenção de código fonte e preparo da aplicação
+
 Todas as instruções abaixo devem ser executadas com o usuário `helios` e não com o superusuário (root).
 
 Baixe o código fonte desse repositório:
@@ -128,52 +128,31 @@ Baixe o código fonte desse repositório:
 git clone https://github.com/shirlei/helios-server.git
 ```
 
-Não é obrigatório, mas é uma boa prática, criar um ambiente virtual python para a disponibilização do Helios, pois isso permite separar as dependências do projeto e não interferir em outros sistemas na mesma máquina. 
+Copie ou renomeie o o arquivo [.env.sample](.env.sample) para .env e edite os valores de acordo.
 
-Instale o `virtualenv` por meio do `pip`:
+Se você já tem uma instalação do Postgres na qual foi criada uma base de dados para uso pelo helios e para a qual lhe forneceram os dados de acesso (host, db, user, password), basta informar estes dados no arquivo .env (conferir nome das variáveis em [settings.py](settings.py), na seção DATABASES). Alternativamente, você pode informar esses valores diretamente no arquivo settings.py
 
-```bash
-pip install virtualenv
-```
-
-Dentro do diretório onde o Helios foi baixado, execute o comando:
-
-```bash
-virtualenv venv
-```
-
-Isso criará um ambiente virtual python dentro do subdiretório chamado `venv`. Por fim, carregue o script `venv/bin/activate` para fazer uso do ambiente virtual: 
-
-```bash
-source venv/bin/activate
-```
-
-Com o ambiente virtual ativado, instale os pacotes que estão listados no arquivo `requirements.txt`:
-```bash
-pip install -r requirements.txt
-```
-
-> **ATENÇÃO:** Utilize o `requirements.txt` deste repositório para instalar o pacote `django-auth-ldap` e outros necessários para as personalizações que foram feitas no Helios. Lembrando também que apesar de se pretender manter este repositório atualizado com o do [Ben Adida](https://github.com/benadida/helios-server), não necessariamente vai ser simultâneo, então se você utilizar o dele, pode haver versões diferentes de pacotes.
-
-Edite o arquivo `settings.py` e localize a seção databases. Adicione as informações para conexão no banco de dados, conforme o exemplo:
+Edite o arquivo `settings.py` e localize a seção databases. Adicione as informações para conexão no banco de dados, conforme o exemplo. `get_from_env` vai tentar obter o valor da variável a partir das variáveis de ambiente configuradas no arquivo .env e se ausentes, o valor atribuído manualmente. Por exemplo, se DB_NAME ausente, utilizará o valor `helios` na config abaixo.
 
 ```bash
 DATABASES = {
-'default': {
-'ENGINE': 'django.db.backends.postgresql_psycopg2',
-'NAME': 'helios',
-'USER': 'helios',
-'HOST': 'localhost',
-'PASSWORD': 'SENHADOHELIOS'
-}}
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': get_from_env('DB_NAME', 'helios'),
+        'USER': get_from_env('DB_USER', 'helios'),
+        'PASSWORD': get_from_env('DB_PWD', 'helios'),
+        'HOST': get_from_env('POSTGRES_HOST', 'db'),
+        'PORT': get_from_env('POSTGRES_PORT', '5432'),
+        'CONN_MAX_AGE': 600,
+    }
+}
 ```
 
-Por fim, você precisará executar o script `reset.sh` (não faça como root) que fará a inicialização do esquema no banco de dados (criará as tabelas, etc.)
-```bash
-./reset.sh
-```
+Com os valores das variáveis configuradas em .env, execute o seguinte comando:
 
-> **Observação:** Se tiver algum problema ao executar o script acima, provavelmente vai ser relacionado à configuração do PostgreSQL e, nesse caso, o *Google é seu amigo.* Porém, o erro mais comum é que você tenha executado o script como root e o `postgres` acuse que não há um usuário root. Recomendo criar um usuário que não seja root (por exemplo, helios) e usar o mesmo nome para usuário do banco. Ou executar os comandos contidos no script com o usuário adequado do banco.
+`docker-compose up -d --build`
+
+O comando acima irá realizar os builds necessários e iniciar os containers dos serviços listados na seção `service` do arquivo [docker-compose.yml](docker-compose.yml)
 
 ### Compilando arquivos com as traduções para português
 
@@ -270,6 +249,8 @@ Na seção anterior foi usado o servidor web de desenvolvimento provido pelo pr�
 É possível trabalhar com diversos servidores web, porém no caso em questão optou-se pelo [Apache](https://docs.djangoproject.com/en/1.8/topics/install/#install-apache-and-mod-wsgi).
 
 ### Configuração apache
+
+> Considerando uma distro Ubuntu, ncssário instalar `apache2` e `libapache2-mod-wsgi`
 
 Módulos a serem habilitados, para a configuração exemplo:
 ```bash
@@ -484,8 +465,50 @@ Importante destacar que para variáveis que não sejam informadas, será utiliza
 
 >**Observação**: Todos os valores de configuração e escolhas de organização de serviços e containeres foram feitas pensando em ambiente de desenvolvimento local, para facilitar configurar o ambiente especialmente considerando questões de versões de software (como o Python2, por exemplo). Questões de segurança e até melhores práticas de separação de serviços por containers e etc não estão aqui consideradas!
 
+
+
+
 ## Alguns lembretes finais cruciais para o ambiente de produção
 
 - Em `settings.py` alterar de `True` para `False` o valor da constante `DEBUG`
 - Alterar obrigatoriamente o valor do [SECRET_KEY](https://docs.djangoproject.com/en/dev/ref/settings/#std:setting-SECRET_KEY). Há ferramentas na web pra isso, como a disponível em [http://www.miniwebtool.com/django-secret-key-generator/](http://www.miniwebtool.com/django-secret-key-generator/)
 - Conforme indicado no `settings.py`, não se deve alterar o valor da opção `SECURE_URL_HOST` após você já ter o sistema em produção, com eleições criadas (em andamento ou finalizadas), pois caso contrário a URL para depósito da cédula se tornará inválida.
+
+
+
+### Histórico
+
+Por questões históricas, mantendo nesta algumas anotações de versões anteriores deste tutorial, baseadas em uma instalação no próprio host.
+
+#### virtualenv
+
+> Tutorial abaixo era pra python2. Do python 3.6 em diante a criação de um ambiente virtual pode ser feita com o comando `python3 -m venv /path/to/new/virtual/environment`. Esse comando cobre os passos 1 e 2 abaixo. Os demais seguem iguais. 
+
+
+Não é obrigatório, mas é uma boa prática, criar um ambiente virtual python para a disponibilização do Helios, pois isso permite separar as dependências do projeto e não interferir em outros sistemas na mesma máquina. 
+
+
+1. Instale o `virtualenv` por meio do `pip`:
+
+```bash
+pip install virtualenv
+```
+
+2. Dentro do diretório onde o Helios foi baixado, execute o comando:
+
+```bash
+virtualenv venv
+```
+
+Isso criará um ambiente virtual python dentro do subdiretório chamado `venv`. 
+
+3. Por fim, carregue o script `venv/bin/activate` para fazer uso do ambiente virtual: 
+
+```bash
+source venv/bin/activate
+```
+
+4. Com o ambiente virtual ativado, instale os pacotes que estão listados no arquivo `requirements.txt`:
+```bash
+pip install -r requirements.txt
+```
