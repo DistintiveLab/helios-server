@@ -8,23 +8,33 @@ var voter_id = null;
 voter_id = '{{voter.voter_id}}';
 {% endif %}
 </script>
+<div class="row">
 <div class="col-md-10">
   <h2 class="title">{% trans "Contact Voters" %} <span style="font-size:0.7em;">[<a href="{% url "election@view" election.uuid %}">{% trans "back to election" %}</a>]</span></h2>
-  <h2 class="title">{{election.name}}</h2>
+  <h3 class="title">{{election.name}}</h3>
+  
+  {% if email_form.errors %}
+    <div class="alert alert-danger alert-dismissable">{% trans "One or more errors have occurred, please check bellow" %}
+      <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+    </div>
+  {% endif %}
+
 
 {% if voter %}  
   <p>
-
   {% trans "You are sending this email to a specific user:" %} <b>{{voter.name}} ({{voter.voter_id}})</b>
-
   </p>
 {% endif %}
 <br>
-
-<h3>{% trans "Choose the email type you want to send:" %}</h3>
 </div>
+</div>
+<div class="row">
+<div class="panel panel-default">
+  <div class="panel-body">
 <div class="col-md-6">
-<ul class="nav nav-pills nav-stacked">
+
+<h4>1. {% trans "Choose the email type you want to send:" %}</h4>
+<ul class="nav nav-pills nav-stacked ">
 {% for template_option in templates %}
 {% if template_option.0 == template %}
 <li class="active"><a href="?template={{template_option.1}}">{{template_option.1}}</a></li>
@@ -34,50 +44,66 @@ voter_id = '{{voter.voter_id}}';
 {% endfor %}
 </ul>
 </div>
-<div class="col-md-10">
-<pre style="margin:10px; border: 1px solid #888; padding:20px">
-{% trans "Subject:" %} {{default_subject}}
 
-{{default_body|safe}}
-</pre>
+<div class="col-md-10">
+  <h4>2. {% trans "Inform the subject and the body (both are required fields)" %}</h4>
+
+    <form class="form" role="form" action="" method="POST" id="email_form">
+      {{ email_form.non_field_errors }}
+      <input type="hidden" name="csrf_token" value="{{csrf_token}}" />
+      <input type="hidden" name="template" value="{{template}}" />
+      <input type="hidden" name="voter_id" value="{{voter.voter_login_id}}" />
+      <div class="form-group {% if email_form.subject.errors %}has-error{% endif %}" id="form-group-subject">
+      <label for="id_subject">{% if email_form.fields.subject.required %}*{% endif %}{% trans "Subject" %}</label>
+      <p>
+        {% trans "You may tweak the subject and add a custom message using the form below." %}
+        </p>
+      <input type="text" name="subject" class="form-control" id="id_subject" placeholder="{% trans "Subject" %}">
+  
+      <label class="alert-danger" id='subject-error'>{{email_form.subject.errors.0}}</label>
+      </div>
+      <div class="form-group {% if email_form.body.errors %}has-error{% endif %}" id="form-group-body">
+      <label for="body">{% if email_form.fields.subject.required %}*{% endif %}{% trans "Body" %}</label><br>
+      {% blocktrans %} What you type in here is what you get in the BODY tag on the template above {% endblocktrans %}
+        <a href="#" class="float-right" data-toggle="modal" data-target="#templateModal">{% trans "View selected template." %}</a>
+      <textarea name="body" class="form-control" id="id_body" rows="4" cols="50" placeholder="{% trans "Body" %}">
+      </textarea>
+  
+      <label class="alert-danger" id="body-error">{{email_form.body.errors.0}}</label>
+      </div>
+  
+      <div id="send_to" class="form-group {% if email_form.send_to.errors %}has-error{% endif %}">
+      <label for="send_to">{% trans "Send To" %}</label>
+      {{email_form.send_to}}
+      {{email_form.send_to.errors}}
+      </div>
+      <div class="form-group">
+            <button type="submit" id="send_button" class="btn btn-primary">{% trans "Send" %}</button>
+      </div>
+    </form>
+   </div>
+  </div>
+</div>
 </div>
 
-<div class="col-md-10">
-<p>
-{% trans "You may tweak the subject and add a custom message using the form below." %}
-</p>
-  <form class="form" role="form" action="" method="POST" id="email_form">
-    {{ email_form.non_field_errors }}
-    <input type="hidden" name="csrf_token" value="{{csrf_token}}" />
-    <input type="hidden" name="template" value="{{template}}" />
-    <input type="hidden" name="voter_id" value="{{voter.voter_login_id}}" />
-    <div class="form-group {% if email_form.subject.errors %}has-error{% endif %}">
-    <label for="id_subject">{% if email_form.fields.subject.required %}*{% endif %}{% trans "Subject" %}</label>
-    <input type="text" name="subject" class="form-control" id="id_subject" placeholder="{% trans "Subject" %}">
-
-    {{email_form.subject.errors}}
+<div class="modal fade" id="templateModal" tabindex="-1" role="dialog" aria-labelledby="templateModal" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title" id="myModalLabel">{% trans "Template for email" %} </h4>
+      </div>
+      <div class="modal-body">
+          {% trans "Subject" %} : {{default_subject}}
+          {{default_body|safe}}
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">{% trans "Close" %}</button>
+      </div>
     </div>
-    <div class="form-group {% if email_form.body.errors %}has-error{% endif %}">
-    <label for="body">{% trans "Body" %}</label><br>
-    {% blocktrans %} What you type in here is what you get in the BODY tag on the template above {% endblocktrans %}
-    <textarea name="body" class="form-control" id="id_body" rows="4" cols="50" placeholder="{% trans "Body" %}">
-    </textarea>
-
-    {{email_form.body.errors}}
-    </div>
-
-    <div id="send_to" class="form-group {% if email_form.send_to.errors %}has-error{% endif %}">
-    <label for="send_to">{% trans "Send To" %}</label>
-    {{email_form.send_to}}
-    {{email_form.send_to.errors}}
-    </div>
-
-
-  <div class="form-group">
-   <button type="submit" id="send_button" class="btn btn-primary">{% trans "Send" %}</button>
   </div>
-  </form>
- </div>
+</div>
+
   <div id="processing">
   </div>
   
@@ -96,5 +122,17 @@ voter_id = '{{voter.voter_id}}';
     $('div#send_to').hide();
   });
 {% endif %}
+
+
+$('#id_subject').click(function(event){
+  $('#subject-error').hide();
+  $('#form-group-subject').removeClass('has-error');
+});
+
+$('#id_body').click(function(event){
+  $('#body-error').hide();
+  $('#form-group-body').removeClass('has-error');
+});
+
 </script>
 {% endblock %}

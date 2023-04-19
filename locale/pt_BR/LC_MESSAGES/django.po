@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: helios-ifsc\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-03-29 10:10-0300\n"
-"PO-Revision-Date: 2023-03-29 10:10-0300\n"
+"POT-Creation-Date: 2023-04-19 18:22-0300\n"
+"PO-Revision-Date: 2023-04-19 18:26-0300\n"
 "Last-Translator: Shirlei Chaves <shirlei@gmail.com>\n"
 "Language-Team: \n"
 "Language: pt_BR\n"
@@ -146,7 +146,7 @@ msgstr "Data e horário da extensão da votação"
 msgid "Voting extended until"
 msgstr "Votação estentida até"
 
-#: helios/forms.py:83 helios/forms.py:89 helios/templates/voters_email.html:70
+#: helios/forms.py:83 helios/forms.py:89 helios/templates/voters_email.html:76
 msgid "Send To"
 msgstr "Enviar"
 
@@ -352,7 +352,7 @@ msgstr "CONFIRMAR"
 msgid "Login"
 msgstr "Conectar"
 
-#: helios/templates/basenonav.html:46 server_ui/templates/base.html:60
+#: helios/templates/basenonav.html:46 server_ui/templates/base.html:61
 #: server_ui/templates/basenonav.html:46
 msgid "logged in as"
 msgstr "Conectado como"
@@ -442,8 +442,8 @@ msgstr "Cédulas Auditadas"
 #: helios/templates/election_build.html:4
 #: helios/templates/election_compute_tally.html:31
 #: helios/templates/election_questions.html:6
-#: helios/templates/list_trustees.html:6 helios/templates/voters_email.html:12
-#: helios/templates/voters_email.html:85 helios/templates/voters_list.html:9
+#: helios/templates/list_trustees.html:6 helios/templates/voters_email.html:13
+#: helios/templates/voters_email.html:111 helios/templates/voters_list.html:9
 #: helios/templates/voters_manage.html:5 helios/templates/voters_search.html:4
 #: helios/templates/voters_upload.html:6 helios/templates/voters_upload.html:46
 #: helios/templates/voters_upload_confirm.html:31
@@ -1193,8 +1193,6 @@ msgid "Next Step:"
 msgstr "O que você ainda precisa fazer:"
 
 #: helios/templates/election_view.html:152
-#: passkeysenv/lib/python3.8/site-packages/django/db/models/base.py:1165
-#: passkeysenv/lib/python3.8/site-packages/django/forms/models.py:756
 msgid "and"
 msgstr "e"
 
@@ -1391,9 +1389,13 @@ msgstr ""
 "\t\t\t\t\t  "
 
 #: helios/templates/election_view.html:307
-#, python-format
+#, fuzzy, python-format
+#| msgid ""
+#| " \n"
+#| "\t\t\t\t  This %(election_type)s ends at the administrator's discretion.\n"
+#| "\t\t\t\t  "
 msgid ""
-" \n"
+"\n"
 "\t\t\t\t  This %(election_type)s ends at the administrator's discretion.\n"
 "\t\t\t\t  "
 msgstr ""
@@ -2007,53 +2009,70 @@ msgstr "configurar eligibilidade"
 msgid "Contact Voters for"
 msgstr "Contactar Eleitores para"
 
-#: helios/templates/voters_email.html:12
+#: helios/templates/voters_email.html:13
 msgid "Contact Voters"
 msgstr "Contactar Eleitores"
 
-#: helios/templates/voters_email.html:18
+#: helios/templates/voters_email.html:17
+msgid "One or more errors have occurred, please check bellow"
+msgstr "Ocorreram erros ao tentar enviar o(s) email(s), verifique abaixo"
+
+#: helios/templates/voters_email.html:25
 msgid "You are sending this email to a specific user:"
 msgstr "Você está enviando esse email para:"
 
-#: helios/templates/voters_email.html:24
+#: helios/templates/voters_email.html:36
 msgid "Choose the email type you want to send:"
 msgstr "Escolha o tipo de email que você quer enviar:"
 
-#: helios/templates/voters_email.html:39
-msgid "Subject:"
-msgstr "Assunto:"
+#: helios/templates/voters_email.html:49
+msgid "Inform the subject and the body (both are required fields)"
+msgstr "Preencha o assunto e o corpo do email (ambos são obrigatórios)"
 
-#: helios/templates/voters_email.html:47
+#: helios/templates/voters_email.html:57 helios/templates/voters_email.html:61
+#: helios/templates/voters_email.html:97
+msgid "Subject"
+msgstr "Assunto"
+
+#: helios/templates/voters_email.html:59
 msgid ""
 "You may tweak the subject and add a custom message using the form below."
 msgstr ""
 "Você deve ajustar o assunto e, opcionalmente, adicionar uma mensagem "
 "personalizada no corpo do email, utilizando o formulário abaixo."
 
-#: helios/templates/voters_email.html:55 helios/templates/voters_email.html:56
-msgid "Subject"
-msgstr "Assunto"
-
-#: helios/templates/voters_email.html:61 helios/templates/voters_email.html:63
+#: helios/templates/voters_email.html:66 helios/templates/voters_email.html:69
 msgid "Body"
 msgstr "Corpo"
 
-#: helios/templates/voters_email.html:62
+#: helios/templates/voters_email.html:67
 msgid ""
 " What you type in here is what you get in the BODY tag on the template above "
 msgstr ""
 " O que você informar aqui é o que vai ser exibido no elemento BODY destacado "
-"no template acima. "
+"no template escolhido. "
 
-#: helios/templates/voters_email.html:77
+#: helios/templates/voters_email.html:68
+msgid "View selected template."
+msgstr "Visualizar template selecionado."
+
+#: helios/templates/voters_email.html:81
 msgid "Send"
 msgstr "Enviar"
 
-#: helios/templates/voters_email.html:85
+#: helios/templates/voters_email.html:94
+msgid "Template for email"
+msgstr "Template do email"
+
+#: helios/templates/voters_email.html:101
+msgid "Close"
+msgstr ""
+
+#: helios/templates/voters_email.html:111
 msgid "Done, go"
 msgstr "Pronto, ir"
 
-#: helios/templates/voters_email.html:89
+#: helios/templates/voters_email.html:115
 msgid ""
 "\n"
 "    Error emailing participants. Check server settings, make sure there's an "
@@ -2832,12 +2851,10 @@ msgid "Expires at"
 msgstr "Expira em"
 
 #: heliosinstitution/templates/institution_users.html:24
-#: passkeysenv/lib/python3.8/site-packages/django/forms/widgets.py:710
 msgid "Yes"
 msgstr "Sim"
 
 #: heliosinstitution/templates/institution_users.html:24
-#: passkeysenv/lib/python3.8/site-packages/django/forms/widgets.py:711
 msgid "No"
 msgstr "Não"
 
@@ -2871,7 +2888,6 @@ msgstr "Delegar Gestor da Instituição"
 
 #: heliosinstitution/templates/manage_users.html:11
 #: heliosinstitution/templates/manage_users.html:23
-#: passkeysenv/lib/python3.8/site-packages/django/db/models/fields/__init__.py:1646
 msgid "Email address"
 msgstr "Endereço de e-mail"
 
@@ -2974,7 +2990,6 @@ msgid "Institution does not exist"
 msgstr "A instituição não existe"
 
 #: helioslog/models.py:21
-#: passkeysenv/lib/python3.8/site-packages/django/forms/formsets.py:375
 msgid "Delete"
 msgstr "Apagar"
 
@@ -2985,1343 +3000,6 @@ msgstr "Modificar"
 #: helioslog/models.py:29
 msgid " object of "
 msgstr " objeto de "
-
-#: passkeysenv/lib/python3.8/site-packages/IPython/core/tests/test_completer.py:420
-msgid "open('foo"
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/IPython/core/tests/test_completer.py:424
-msgid "open(\"foo"
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/IPython/core/tests/test_completer.py:428
-#, python-format
-msgid "%ls foo"
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/IPython/core/tests/test_completer.py:563
-msgid "a[0]."
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/IPython/core/tests/test_completer.py:570
-msgid "a[0].r"
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/IPython/core/tests/test_completer.py:578
-msgid "a[0].from_"
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/IPython/core/tests/test_completer.py:585
-msgid "assert str.star"
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/IPython/core/tests/test_completer.py:592
-msgid "d['a b'].str"
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/IPython/core/tests/test_completer.py:1552
-#: passkeysenv/lib/python3.8/site-packages/IPython/core/tests/test_completer.py:1574
-#: passkeysenv/lib/python3.8/site-packages/IPython/core/tests/test_completer.py:1577
-msgid "do not suppress"
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/IPython/core/tests/test_completer.py:1553
-#: passkeysenv/lib/python3.8/site-packages/IPython/core/tests/test_completer.py:1565
-#: passkeysenv/lib/python3.8/site-packages/IPython/core/tests/test_completer.py:1568
-#: passkeysenv/lib/python3.8/site-packages/IPython/core/tests/test_completer.py:1571
-msgid "suppress all"
-msgstr "suprimir todas"
-
-#: passkeysenv/lib/python3.8/site-packages/IPython/core/tests/test_completer.py:1554
-#, fuzzy
-#| msgid "suppress all"
-msgid "suppress all but a"
-msgstr "suprimir todas"
-
-#: passkeysenv/lib/python3.8/site-packages/IPython/core/tests/test_completer.py:1555
-#, fuzzy
-#| msgid "suppress all"
-msgid "suppress all but c"
-msgstr "suprimir todas"
-
-#: passkeysenv/lib/python3.8/site-packages/IPython/core/tests/test_completer.py:1603
-#: passkeysenv/lib/python3.8/site-packages/IPython/core/tests/test_completer.py:1606
-msgid "---"
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/IPython/core/tests/test_completer.py:1609
-msgid "--"
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/contrib/messages/apps.py:7
-msgid "Messages"
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/contrib/sitemaps/apps.py:7
-msgid "Site Maps"
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/contrib/staticfiles/apps.py:9
-msgid "Static Files"
-msgstr "Arquivos estáticos"
-
-#: passkeysenv/lib/python3.8/site-packages/django/contrib/syndication/apps.py:7
-#, fuzzy
-#| msgid "Authentication"
-msgid "Syndication"
-msgstr "Autenticação"
-
-#: passkeysenv/lib/python3.8/site-packages/django/core/paginator.py:45
-msgid "That page number is not an integer"
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/core/paginator.py:47
-msgid "That page number is less than 1"
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/core/paginator.py:52
-msgid "That page contains no results"
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/core/validators.py:31
-#, fuzzy
-#| msgid "view the list of voters"
-msgid "Enter a valid value."
-msgstr "visualizar a lista de eleitores"
-
-#: passkeysenv/lib/python3.8/site-packages/django/core/validators.py:102
-#: passkeysenv/lib/python3.8/site-packages/django/forms/fields.py:658
-#, fuzzy
-#| msgid "Email address"
-msgid "Enter a valid URL."
-msgstr "Endereço de e-mail"
-
-#: passkeysenv/lib/python3.8/site-packages/django/core/validators.py:157
-#, fuzzy
-#| msgid "Email address"
-msgid "Enter a valid integer."
-msgstr "Endereço de e-mail"
-
-#: passkeysenv/lib/python3.8/site-packages/django/core/validators.py:168
-#, fuzzy
-#| msgid "Email address"
-msgid "Enter a valid email address."
-msgstr "Endereço de e-mail"
-
-#. Translators: "letters" means latin letters: a-z and A-Z.
-#: passkeysenv/lib/python3.8/site-packages/django/core/validators.py:242
-msgid ""
-"Enter a valid 'slug' consisting of letters, numbers, underscores or hyphens."
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/core/validators.py:249
-msgid ""
-"Enter a valid 'slug' consisting of Unicode letters, numbers, underscores, or "
-"hyphens."
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/core/validators.py:258
-#: passkeysenv/lib/python3.8/site-packages/django/core/validators.py:268
-#: passkeysenv/lib/python3.8/site-packages/django/core/validators.py:290
-#, fuzzy
-#| msgid "Email address"
-msgid "Enter a valid IPv4 address."
-msgstr "Endereço de e-mail"
-
-#: passkeysenv/lib/python3.8/site-packages/django/core/validators.py:275
-#: passkeysenv/lib/python3.8/site-packages/django/core/validators.py:291
-#, fuzzy
-#| msgid "Email address"
-msgid "Enter a valid IPv6 address."
-msgstr "Endereço de e-mail"
-
-#: passkeysenv/lib/python3.8/site-packages/django/core/validators.py:285
-#: passkeysenv/lib/python3.8/site-packages/django/core/validators.py:289
-#, fuzzy
-#| msgid "Email address"
-msgid "Enter a valid IPv4 or IPv6 address."
-msgstr "Endereço de e-mail"
-
-#: passkeysenv/lib/python3.8/site-packages/django/core/validators.py:319
-msgid "Enter only digits separated by commas."
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/core/validators.py:325
-#, python-format
-msgid "Ensure this value is %(limit_value)s (it is %(show_value)s)."
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/core/validators.py:357
-#, python-format
-msgid "Ensure this value is less than or equal to %(limit_value)s."
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/core/validators.py:366
-#, python-format
-msgid "Ensure this value is greater than or equal to %(limit_value)s."
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/core/validators.py:376
-#, python-format
-msgid ""
-"Ensure this value has at least %(limit_value)d character (it has "
-"%(show_value)d)."
-msgid_plural ""
-"Ensure this value has at least %(limit_value)d characters (it has "
-"%(show_value)d)."
-msgstr[0] ""
-msgstr[1] ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/core/validators.py:391
-#, python-format
-msgid ""
-"Ensure this value has at most %(limit_value)d character (it has "
-"%(show_value)d)."
-msgid_plural ""
-"Ensure this value has at most %(limit_value)d characters (it has "
-"%(show_value)d)."
-msgstr[0] ""
-msgstr[1] ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/core/validators.py:410
-#: passkeysenv/lib/python3.8/site-packages/django/forms/fields.py:290
-#: passkeysenv/lib/python3.8/site-packages/django/forms/fields.py:325
-msgid "Enter a number."
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/core/validators.py:412
-#, python-format
-msgid "Ensure that there are no more than %(max)s digit in total."
-msgid_plural "Ensure that there are no more than %(max)s digits in total."
-msgstr[0] ""
-msgstr[1] ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/core/validators.py:417
-#, python-format
-msgid "Ensure that there are no more than %(max)s decimal place."
-msgid_plural "Ensure that there are no more than %(max)s decimal places."
-msgstr[0] ""
-msgstr[1] ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/core/validators.py:422
-#, python-format
-msgid ""
-"Ensure that there are no more than %(max)s digit before the decimal point."
-msgid_plural ""
-"Ensure that there are no more than %(max)s digits before the decimal point."
-msgstr[0] ""
-msgstr[1] ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/core/validators.py:484
-#, python-format
-msgid ""
-"File extension '%(extension)s' is not allowed. Allowed extensions are: "
-"'%(allowed_extensions)s'."
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/core/validators.py:536
-#, fuzzy
-#| msgid "No special characters allowed in the short name."
-msgid "Null characters are not allowed."
-msgstr "Nenhum caracter especial é permitido no nome abreviado."
-
-#: passkeysenv/lib/python3.8/site-packages/django/db/models/base.py:1167
-#, python-format
-msgid "%(model_name)s with this %(field_labels)s already exists."
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/db/models/fields/__init__.py:104
-#, python-format
-msgid "Value %(value)r is not a valid choice."
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/db/models/fields/__init__.py:105
-#, fuzzy
-#| msgid "This election is not yet open."
-msgid "This field cannot be null."
-msgstr "Essa eleição ainda não está aberta."
-
-#: passkeysenv/lib/python3.8/site-packages/django/db/models/fields/__init__.py:106
-msgid "This field cannot be blank."
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/db/models/fields/__init__.py:107
-#, python-format
-msgid "%(model_name)s with this %(field_label)s already exists."
-msgstr ""
-
-#. Translators: The 'lookup_type' is one of 'date', 'year' or 'month'.
-#. Eg: "Title must be unique for pub_date year"
-#: passkeysenv/lib/python3.8/site-packages/django/db/models/fields/__init__.py:111
-#, python-format
-msgid ""
-"%(field_label)s must be unique for %(date_field_label)s %(lookup_type)s."
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/db/models/fields/__init__.py:128
-#, python-format
-msgid "Field of type: %(field_type)s"
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/db/models/fields/__init__.py:905
-#: passkeysenv/lib/python3.8/site-packages/django/db/models/fields/__init__.py:1772
-#, fuzzy
-#| msgid "all voters"
-msgid "Integer"
-msgstr "todos os eleitores"
-
-#: passkeysenv/lib/python3.8/site-packages/django/db/models/fields/__init__.py:909
-#: passkeysenv/lib/python3.8/site-packages/django/db/models/fields/__init__.py:1770
-#, python-format
-msgid "'%(value)s' value must be an integer."
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/db/models/fields/__init__.py:984
-#: passkeysenv/lib/python3.8/site-packages/django/db/models/fields/__init__.py:1850
-msgid "Big (8 byte) integer"
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/db/models/fields/__init__.py:996
-#, python-format
-msgid "'%(value)s' value must be either True or False."
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/db/models/fields/__init__.py:997
-#, python-format
-msgid "'%(value)s' value must be either True, False, or None."
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/db/models/fields/__init__.py:999
-msgid "Boolean (Either True or False)"
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/db/models/fields/__init__.py:1040
-#, python-format
-msgid "String (up to %(max_length)s)"
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/db/models/fields/__init__.py:1104
-msgid "Comma-separated integers"
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/db/models/fields/__init__.py:1153
-#, python-format
-msgid ""
-"'%(value)s' value has an invalid date format. It must be in YYYY-MM-DD "
-"format."
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/db/models/fields/__init__.py:1155
-#: passkeysenv/lib/python3.8/site-packages/django/db/models/fields/__init__.py:1298
-#, python-format
-msgid ""
-"'%(value)s' value has the correct format (YYYY-MM-DD) but it is an invalid "
-"date."
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/db/models/fields/__init__.py:1158
-msgid "Date (without time)"
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/db/models/fields/__init__.py:1296
-#, python-format
-msgid ""
-"'%(value)s' value has an invalid format. It must be in YYYY-MM-DD HH:MM[:ss[."
-"uuuuuu]][TZ] format."
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/db/models/fields/__init__.py:1300
-#, python-format
-msgid ""
-"'%(value)s' value has the correct format (YYYY-MM-DD HH:MM[:ss[.uuuuuu]]"
-"[TZ]) but it is an invalid date/time."
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/db/models/fields/__init__.py:1304
-msgid "Date (with time)"
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/db/models/fields/__init__.py:1452
-#, python-format
-msgid "'%(value)s' value must be a decimal number."
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/db/models/fields/__init__.py:1454
-msgid "Decimal number"
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/db/models/fields/__init__.py:1593
-#, python-format
-msgid ""
-"'%(value)s' value has an invalid format. It must be in [DD] [HH:[MM:]]ss[."
-"uuuuuu] format."
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/db/models/fields/__init__.py:1596
-#, fuzzy
-#| msgid "Documentation"
-msgid "Duration"
-msgstr "Documentação"
-
-#: passkeysenv/lib/python3.8/site-packages/django/db/models/fields/__init__.py:1669
-msgid "File path"
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/db/models/fields/__init__.py:1735
-#, python-format
-msgid "'%(value)s' value must be a float."
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/db/models/fields/__init__.py:1737
-msgid "Floating point number"
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/db/models/fields/__init__.py:1866
-#, fuzzy
-#| msgid "Email address"
-msgid "IPv4 address"
-msgstr "Endereço de e-mail"
-
-#: passkeysenv/lib/python3.8/site-packages/django/db/models/fields/__init__.py:1897
-#, fuzzy
-#| msgid "Email address"
-msgid "IP address"
-msgstr "Endereço de e-mail"
-
-#: passkeysenv/lib/python3.8/site-packages/django/db/models/fields/__init__.py:1977
-#: passkeysenv/lib/python3.8/site-packages/django/db/models/fields/__init__.py:1978
-#, python-format
-msgid "'%(value)s' value must be either None, True or False."
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/db/models/fields/__init__.py:1980
-msgid "Boolean (Either True, False or None)"
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/db/models/fields/__init__.py:2015
-msgid "Positive integer"
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/db/models/fields/__init__.py:2028
-#, fuzzy
-#| msgid "all voters"
-msgid "Positive small integer"
-msgstr "todos os eleitores"
-
-#: passkeysenv/lib/python3.8/site-packages/django/db/models/fields/__init__.py:2042
-#, python-format
-msgid "Slug (up to %(max_length)s)"
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/db/models/fields/__init__.py:2074
-#, fuzzy
-#| msgid "all voters"
-msgid "Small integer"
-msgstr "todos os eleitores"
-
-#: passkeysenv/lib/python3.8/site-packages/django/db/models/fields/__init__.py:2081
-msgid "Text"
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/db/models/fields/__init__.py:2109
-#, python-format
-msgid ""
-"'%(value)s' value has an invalid format. It must be in HH:MM[:ss[.uuuuuu]] "
-"format."
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/db/models/fields/__init__.py:2111
-#, python-format
-msgid ""
-"'%(value)s' value has the correct format (HH:MM[:ss[.uuuuuu]]) but it is an "
-"invalid time."
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/db/models/fields/__init__.py:2114
-msgid "Time"
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/db/models/fields/__init__.py:2240
-msgid "URL"
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/db/models/fields/__init__.py:2262
-msgid "Raw binary data"
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/db/models/fields/__init__.py:2312
-#, python-format
-msgid "'%(value)s' is not a valid UUID."
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/db/models/fields/__init__.py:2314
-msgid "Universally unique identifier"
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/db/models/fields/files.py:222
-msgid "File"
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/db/models/fields/files.py:362
-msgid "Image"
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/db/models/fields/related.py:778
-#, python-format
-msgid "%(model)s instance with %(field)s %(value)r does not exist."
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/db/models/fields/related.py:780
-msgid "Foreign Key (type determined by related field)"
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/db/models/fields/related.py:1007
-msgid "One-to-one relationship"
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/db/models/fields/related.py:1057
-#, python-format
-msgid "%(from)s-%(to)s relationship"
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/db/models/fields/related.py:1058
-#, python-format
-msgid "%(from)s-%(to)s relationships"
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/db/models/fields/related.py:1100
-msgid "Many-to-many relationship"
-msgstr ""
-
-#. Translators: If found as last label character, these punctuation
-#. characters will prevent the default label_suffix to be appended to the label
-#: passkeysenv/lib/python3.8/site-packages/django/forms/boundfield.py:146
-msgid ":?.!"
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/forms/fields.py:53
-msgid "This field is required."
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/forms/fields.py:245
-msgid "Enter a whole number."
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/forms/fields.py:396
-#: passkeysenv/lib/python3.8/site-packages/django/forms/fields.py:1126
-#, fuzzy
-#| msgid "Email address"
-msgid "Enter a valid date."
-msgstr "Endereço de e-mail"
-
-#: passkeysenv/lib/python3.8/site-packages/django/forms/fields.py:420
-#: passkeysenv/lib/python3.8/site-packages/django/forms/fields.py:1127
-#, fuzzy
-#| msgid "Email address"
-msgid "Enter a valid time."
-msgstr "Endereço de e-mail"
-
-#: passkeysenv/lib/python3.8/site-packages/django/forms/fields.py:442
-#, fuzzy
-#| msgid "Email address"
-msgid "Enter a valid date/time."
-msgstr "Endereço de e-mail"
-
-#: passkeysenv/lib/python3.8/site-packages/django/forms/fields.py:471
-#, fuzzy
-#| msgid "Email address"
-msgid "Enter a valid duration."
-msgstr "Endereço de e-mail"
-
-#: passkeysenv/lib/python3.8/site-packages/django/forms/fields.py:472
-#, python-brace-format
-msgid "The number of days must be between {min_days} and {max_days}."
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/forms/fields.py:532
-msgid "No file was submitted. Check the encoding type on the form."
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/forms/fields.py:533
-msgid "No file was submitted."
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/forms/fields.py:534
-msgid "The submitted file is empty."
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/forms/fields.py:536
-#, python-format
-msgid "Ensure this filename has at most %(max)d character (it has %(length)d)."
-msgid_plural ""
-"Ensure this filename has at most %(max)d characters (it has %(length)d)."
-msgstr[0] ""
-msgstr[1] ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/forms/fields.py:539
-msgid "Please either submit a file or check the clear checkbox, not both."
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/forms/fields.py:600
-msgid ""
-"Upload a valid image. The file you uploaded was either not an image or a "
-"corrupted image."
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/forms/fields.py:762
-#: passkeysenv/lib/python3.8/site-packages/django/forms/fields.py:852
-#: passkeysenv/lib/python3.8/site-packages/django/forms/models.py:1270
-#, python-format
-msgid "Select a valid choice. %(value)s is not one of the available choices."
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/forms/fields.py:853
-#: passkeysenv/lib/python3.8/site-packages/django/forms/fields.py:968
-#: passkeysenv/lib/python3.8/site-packages/django/forms/models.py:1269
-#, fuzzy
-#| msgid "view the list of voters"
-msgid "Enter a list of values."
-msgstr "visualizar a lista de eleitores"
-
-#: passkeysenv/lib/python3.8/site-packages/django/forms/fields.py:969
-#, fuzzy
-#| msgid "view the list of voters"
-msgid "Enter a complete value."
-msgstr "visualizar a lista de eleitores"
-
-#: passkeysenv/lib/python3.8/site-packages/django/forms/fields.py:1185
-#, fuzzy
-#| msgid "Email address"
-msgid "Enter a valid UUID."
-msgstr "Endereço de e-mail"
-
-#. Translators: This is the default suffix added to form field labels
-#: passkeysenv/lib/python3.8/site-packages/django/forms/forms.py:86
-msgid ":"
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/forms/forms.py:212
-#, python-format
-msgid "(Hidden field %(name)s) %(error)s"
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/forms/formsets.py:91
-msgid "ManagementForm data is missing or has been tampered with"
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/forms/formsets.py:338
-#, python-format
-msgid "Please submit %d or fewer forms."
-msgid_plural "Please submit %d or fewer forms."
-msgstr[0] ""
-msgstr[1] ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/forms/formsets.py:345
-#, python-format
-msgid "Please submit %d or more forms."
-msgid_plural "Please submit %d or more forms."
-msgstr[0] ""
-msgstr[1] ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/forms/formsets.py:371
-#: passkeysenv/lib/python3.8/site-packages/django/forms/formsets.py:373
-msgid "Order"
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/forms/models.py:751
-#, python-format
-msgid "Please correct the duplicate data for %(field)s."
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/forms/models.py:755
-#, python-format
-msgid "Please correct the duplicate data for %(field)s, which must be unique."
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/forms/models.py:761
-#, python-format
-msgid ""
-"Please correct the duplicate data for %(field_name)s which must be unique "
-"for the %(lookup)s in %(date_field)s."
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/forms/models.py:770
-msgid "Please correct the duplicate values below."
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/forms/models.py:1091
-msgid "The inline value did not match the parent instance."
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/forms/models.py:1158
-msgid "Select a valid choice. That choice is not one of the available choices."
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/forms/models.py:1272
-#, python-format
-msgid "\"%(pk)s\" is not a valid value."
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/forms/utils.py:162
-#, python-format
-msgid ""
-"%(datetime)s couldn't be interpreted in time zone %(current_timezone)s; it "
-"may be ambiguous or it may not exist."
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/forms/widgets.py:395
-msgid "Clear"
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/forms/widgets.py:396
-msgid "Currently"
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/forms/widgets.py:397
-msgid "Change"
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/forms/widgets.py:709
-msgid "Unknown"
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/template/defaultfilters.py:788
-msgid "yes,no,maybe"
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/template/defaultfilters.py:817
-#: passkeysenv/lib/python3.8/site-packages/django/template/defaultfilters.py:834
-#, python-format
-msgid "%(size)d byte"
-msgid_plural "%(size)d bytes"
-msgstr[0] ""
-msgstr[1] ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/template/defaultfilters.py:836
-#, python-format
-msgid "%s KB"
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/template/defaultfilters.py:838
-#, python-format
-msgid "%s MB"
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/template/defaultfilters.py:840
-#, python-format
-msgid "%s GB"
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/template/defaultfilters.py:842
-#, python-format
-msgid "%s TB"
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/template/defaultfilters.py:844
-#, python-format
-msgid "%s PB"
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/utils/dateformat.py:62
-msgid "p.m."
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/utils/dateformat.py:63
-msgid "a.m."
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/utils/dateformat.py:68
-msgid "PM"
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/utils/dateformat.py:69
-msgid "AM"
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/utils/dateformat.py:150
-msgid "midnight"
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/utils/dateformat.py:152
-msgid "noon"
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/utils/dates.py:6
-msgid "Monday"
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/utils/dates.py:6
-msgid "Tuesday"
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/utils/dates.py:6
-msgid "Wednesday"
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/utils/dates.py:6
-msgid "Thursday"
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/utils/dates.py:6
-msgid "Friday"
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/utils/dates.py:7
-msgid "Saturday"
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/utils/dates.py:7
-msgid "Sunday"
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/utils/dates.py:10
-msgid "Mon"
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/utils/dates.py:10
-#, fuzzy
-#| msgid "Trustee"
-msgid "Tue"
-msgstr "Apurador"
-
-#: passkeysenv/lib/python3.8/site-packages/django/utils/dates.py:10
-msgid "Wed"
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/utils/dates.py:10
-#, fuzzy
-#| msgid "Trustee"
-msgid "Thu"
-msgstr "Apurador"
-
-#: passkeysenv/lib/python3.8/site-packages/django/utils/dates.py:10
-msgid "Fri"
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/utils/dates.py:11
-#, fuzzy
-#| msgid "Start"
-msgid "Sat"
-msgstr "Início"
-
-#: passkeysenv/lib/python3.8/site-packages/django/utils/dates.py:11
-msgid "Sun"
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/utils/dates.py:14
-msgid "January"
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/utils/dates.py:14
-msgid "February"
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/utils/dates.py:14
-#, fuzzy
-#| msgid "search"
-msgid "March"
-msgstr "buscar"
-
-#: passkeysenv/lib/python3.8/site-packages/django/utils/dates.py:14
-msgid "April"
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/utils/dates.py:14
-msgid "May"
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/utils/dates.py:14
-msgid "June"
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/utils/dates.py:15
-msgid "July"
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/utils/dates.py:15
-msgid "August"
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/utils/dates.py:15
-msgid "September"
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/utils/dates.py:15
-msgid "October"
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/utils/dates.py:15
-msgid "November"
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/utils/dates.py:16
-msgid "December"
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/utils/dates.py:19
-#, fuzzy
-#| msgid "and"
-msgid "jan"
-msgstr "e"
-
-#: passkeysenv/lib/python3.8/site-packages/django/utils/dates.py:19
-msgid "feb"
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/utils/dates.py:19
-msgid "mar"
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/utils/dates.py:19
-msgid "apr"
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/utils/dates.py:19
-msgid "may"
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/utils/dates.py:19
-#, fuzzy
-#| msgid "and"
-msgid "jun"
-msgstr "e"
-
-#: passkeysenv/lib/python3.8/site-packages/django/utils/dates.py:20
-msgid "jul"
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/utils/dates.py:20
-msgid "aug"
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/utils/dates.py:20
-msgid "sep"
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/utils/dates.py:20
-msgid "oct"
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/utils/dates.py:20
-msgid "nov"
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/utils/dates.py:20
-msgid "dec"
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/utils/dates.py:23
-msgctxt "abbrev. month"
-msgid "Jan."
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/utils/dates.py:24
-msgctxt "abbrev. month"
-msgid "Feb."
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/utils/dates.py:25
-#, fuzzy
-#| msgid "search"
-msgctxt "abbrev. month"
-msgid "March"
-msgstr "buscar"
-
-#: passkeysenv/lib/python3.8/site-packages/django/utils/dates.py:26
-msgctxt "abbrev. month"
-msgid "April"
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/utils/dates.py:27
-msgctxt "abbrev. month"
-msgid "May"
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/utils/dates.py:28
-msgctxt "abbrev. month"
-msgid "June"
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/utils/dates.py:29
-msgctxt "abbrev. month"
-msgid "July"
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/utils/dates.py:30
-msgctxt "abbrev. month"
-msgid "Aug."
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/utils/dates.py:31
-msgctxt "abbrev. month"
-msgid "Sept."
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/utils/dates.py:32
-msgctxt "abbrev. month"
-msgid "Oct."
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/utils/dates.py:33
-msgctxt "abbrev. month"
-msgid "Nov."
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/utils/dates.py:34
-msgctxt "abbrev. month"
-msgid "Dec."
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/utils/dates.py:37
-msgctxt "alt. month"
-msgid "January"
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/utils/dates.py:38
-msgctxt "alt. month"
-msgid "February"
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/utils/dates.py:39
-#, fuzzy
-#| msgid "search"
-msgctxt "alt. month"
-msgid "March"
-msgstr "buscar"
-
-#: passkeysenv/lib/python3.8/site-packages/django/utils/dates.py:40
-msgctxt "alt. month"
-msgid "April"
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/utils/dates.py:41
-msgctxt "alt. month"
-msgid "May"
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/utils/dates.py:42
-msgctxt "alt. month"
-msgid "June"
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/utils/dates.py:43
-msgctxt "alt. month"
-msgid "July"
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/utils/dates.py:44
-msgctxt "alt. month"
-msgid "August"
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/utils/dates.py:45
-msgctxt "alt. month"
-msgid "September"
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/utils/dates.py:46
-msgctxt "alt. month"
-msgid "October"
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/utils/dates.py:47
-msgctxt "alt. month"
-msgid "November"
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/utils/dates.py:48
-msgctxt "alt. month"
-msgid "December"
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/utils/ipv6.py:8
-#, fuzzy
-#| msgid "Email address"
-msgid "This is not a valid IPv6 address."
-msgstr "Endereço de e-mail"
-
-#: passkeysenv/lib/python3.8/site-packages/django/utils/text.py:68
-#, python-format
-msgctxt "String to return when truncating text"
-msgid "%(truncated_text)s…"
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/utils/text.py:237
-msgid "or"
-msgstr ""
-
-#. Translators: This string is used as a separator between list elements
-#: passkeysenv/lib/python3.8/site-packages/django/utils/text.py:256
-#: passkeysenv/lib/python3.8/site-packages/django/utils/timesince.py:83
-msgid ", "
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/utils/timesince.py:9
-#, python-format
-msgid "%d year"
-msgid_plural "%d years"
-msgstr[0] ""
-msgstr[1] ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/utils/timesince.py:10
-#, python-format
-msgid "%d month"
-msgid_plural "%d months"
-msgstr[0] ""
-msgstr[1] ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/utils/timesince.py:11
-#, python-format
-msgid "%d week"
-msgid_plural "%d weeks"
-msgstr[0] ""
-msgstr[1] ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/utils/timesince.py:12
-#, python-format
-msgid "%d day"
-msgid_plural "%d days"
-msgstr[0] ""
-msgstr[1] ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/utils/timesince.py:13
-#, python-format
-msgid "%d hour"
-msgid_plural "%d hours"
-msgstr[0] ""
-msgstr[1] ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/utils/timesince.py:14
-#, python-format
-msgid "%d minute"
-msgid_plural "%d minutes"
-msgstr[0] ""
-msgstr[1] ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/utils/timesince.py:72
-msgid "0 minutes"
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/views/csrf.py:110
-msgid "Forbidden"
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/views/csrf.py:111
-msgid "CSRF verification failed. Request aborted."
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/views/csrf.py:115
-msgid ""
-"You are seeing this message because this HTTPS site requires a 'Referer "
-"header' to be sent by your Web browser, but none was sent. This header is "
-"required for security reasons, to ensure that your browser is not being "
-"hijacked by third parties."
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/views/csrf.py:120
-msgid ""
-"If you have configured your browser to disable 'Referer' headers, please re-"
-"enable them, at least for this site, or for HTTPS connections, or for 'same-"
-"origin' requests."
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/views/csrf.py:124
-msgid ""
-"If you are using the <meta name=\"referrer\" content=\"no-referrer\"> tag or "
-"including the 'Referrer-Policy: no-referrer' header, please remove them. The "
-"CSRF protection requires the 'Referer' header to do strict referer checking. "
-"If you're concerned about privacy, use alternatives like <a "
-"rel=\"noreferrer\" ...> for links to third-party sites."
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/views/csrf.py:132
-msgid ""
-"You are seeing this message because this site requires a CSRF cookie when "
-"submitting forms. This cookie is required for security reasons, to ensure "
-"that your browser is not being hijacked by third parties."
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/views/csrf.py:137
-msgid ""
-"If you have configured your browser to disable cookies, please re-enable "
-"them, at least for this site, or for 'same-origin' requests."
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/views/csrf.py:142
-msgid "More information is available with DEBUG=True."
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/views/generic/dates.py:41
-msgid "No year specified"
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/views/generic/dates.py:61
-#: passkeysenv/lib/python3.8/site-packages/django/views/generic/dates.py:111
-#: passkeysenv/lib/python3.8/site-packages/django/views/generic/dates.py:208
-msgid "Date out of range"
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/views/generic/dates.py:90
-msgid "No month specified"
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/views/generic/dates.py:142
-msgid "No day specified"
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/views/generic/dates.py:188
-msgid "No week specified"
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/views/generic/dates.py:338
-#: passkeysenv/lib/python3.8/site-packages/django/views/generic/dates.py:367
-#, python-format
-msgid "No %(verbose_name_plural)s available"
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/views/generic/dates.py:589
-#, python-format
-msgid ""
-"Future %(verbose_name_plural)s not available because %(class_name)s."
-"allow_future is False."
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/views/generic/dates.py:623
-#, python-format
-msgid "Invalid date string '%(datestr)s' given format '%(format)s'"
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/views/generic/detail.py:54
-#, python-format
-msgid "No %(verbose_name)s found matching the query"
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/views/generic/list.py:67
-msgid "Page is not 'last', nor can it be converted to an int."
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/views/generic/list.py:72
-#, python-format
-msgid "Invalid page (%(page_number)s): %(message)s"
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/views/generic/list.py:154
-#, python-format
-msgid "Empty list and '%(class_name)s.allow_empty' is False."
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/views/static.py:40
-#, fuzzy
-#| msgid "No special characters allowed in the short name."
-msgid "Directory indexes are not allowed here."
-msgstr "Nenhum caracter especial é permitido no nome abreviado."
-
-#: passkeysenv/lib/python3.8/site-packages/django/views/static.py:42
-#, fuzzy, python-format
-#| msgid "Institution does not exist"
-msgid "\"%(path)s\" does not exist"
-msgstr "A instituição não existe"
-
-#: passkeysenv/lib/python3.8/site-packages/django/views/static.py:80
-#, python-format
-msgid "Index of %(directory)s"
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/views/templates/default_urlconf.html:6
-msgid "Django: the Web framework for perfectionists with deadlines."
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/views/templates/default_urlconf.html:345
-#, python-format
-msgid ""
-"View <a href=\"https://docs.djangoproject.com/en/%(version)s/releases/\" "
-"target=\"_blank\" rel=\"noopener\">release notes</a> for Django %(version)s"
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/views/templates/default_urlconf.html:367
-msgid "The install worked successfully! Congratulations!"
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/views/templates/default_urlconf.html:368
-#, python-format
-msgid ""
-"You are seeing this page because <a href=\"https://docs.djangoproject.com/en/"
-"%(version)s/ref/settings/#debug\" target=\"_blank\" "
-"rel=\"noopener\">DEBUG=True</a> is in your settings file and you have not "
-"configured any URLs."
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/views/templates/default_urlconf.html:383
-#, fuzzy
-#| msgid "Documentation"
-msgid "Django Documentation"
-msgstr "Documentação"
-
-#: passkeysenv/lib/python3.8/site-packages/django/views/templates/default_urlconf.html:384
-msgid "Topics, references, &amp; how-to's"
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/views/templates/default_urlconf.html:395
-msgid "Tutorial: A Polling App"
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/views/templates/default_urlconf.html:396
-msgid "Get started with Django"
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/django/views/templates/default_urlconf.html:407
-#, fuzzy
-#| msgid "Documentation"
-msgid "Django Community"
-msgstr "Documentação"
-
-#: passkeysenv/lib/python3.8/site-packages/django/views/templates/default_urlconf.html:408
-msgid "Connect, get help, or contribute"
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/httplib2/__init__.py:404
-#, python-format
-msgid "Content purported to be compressed with %s but failed to decompress."
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/httplib2/__init__.py:568
-#, python-format
-msgid "Unsupported value for qop: %s."
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/httplib2/__init__.py:572
-#: passkeysenv/lib/python3.8/site-packages/httplib2/__init__.py:650
-#, python-format
-msgid "Unsupported value for algorithm: %s."
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/httplib2/__init__.py:645
-msgid "The challenge doesn't contain a server nonce, or this one is empty."
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/httplib2/__init__.py:655
-#, python-format
-msgid "Unsupported value for pw-algorithm: %s."
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/httplib2/__init__.py:1464
-msgid "Redirected but the response is missing a Location: header."
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/kombu/transport/qpid.py:1301
-#, python-format
-msgid "Attempting to connect to qpid with SASL mechanism %s"
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/kombu/transport/qpid.py:1306
-#, python-format
-msgid "Connected to qpid with SASL mechanism %s"
-msgstr ""
-
-#: passkeysenv/lib/python3.8/site-packages/kombu/transport/qpid.py:1324
-#, python-format
-msgid "Unable to connect to qpid with SASL mechanism %s"
-msgstr ""
 
 #: server_ui/glue.py:23
 #, python-format
@@ -4724,19 +3402,19 @@ msgid ""
 "</ul>\n"
 msgstr ""
 
-#: settings.py:88
+#: settings-production.py:72 settings.py:90
 msgid "English"
 msgstr "Inglês"
 
-#: settings.py:89
+#: settings-production.py:73 settings.py:91
 msgid "Brazilian Portuguese"
 msgstr "Português Brasileiro"
 
-#: settings.py:244
+#: settings-production.py:228 settings.py:246
 msgid "IFSC E-Voting System"
 msgstr "Sistema de Votação Online do IFSC"
 
-#: settings.py:252
+#: settings-production.py:236 settings.py:254
 msgid "Welcome to IFSC E-Voting System"
 msgstr "Bem Vindo ao Sistema de Votação Online do IFSC"
 
@@ -4772,6 +3450,207 @@ msgstr "Erro no servidor"
 #: templates/500.html:6
 msgid "There was an error while handling your request."
 msgstr "Houve um erro durante o processamento de sua requisição."
+
+#~ msgid "Subject:"
+#~ msgstr "Assunto:"
+
+#~ msgid "suppress all"
+#~ msgstr "suprimir todas"
+
+#, fuzzy
+#~| msgid "suppress all"
+#~ msgid "suppress all but a"
+#~ msgstr "suprimir todas"
+
+#, fuzzy
+#~| msgid "suppress all"
+#~ msgid "suppress all but c"
+#~ msgstr "suprimir todas"
+
+#~ msgid "Static Files"
+#~ msgstr "Arquivos estáticos"
+
+#, fuzzy
+#~| msgid "Authentication"
+#~ msgid "Syndication"
+#~ msgstr "Autenticação"
+
+#, fuzzy
+#~| msgid "view the list of voters"
+#~ msgid "Enter a valid value."
+#~ msgstr "visualizar a lista de eleitores"
+
+#, fuzzy
+#~| msgid "Email address"
+#~ msgid "Enter a valid URL."
+#~ msgstr "Endereço de e-mail"
+
+#, fuzzy
+#~| msgid "Email address"
+#~ msgid "Enter a valid integer."
+#~ msgstr "Endereço de e-mail"
+
+#, fuzzy
+#~| msgid "Email address"
+#~ msgid "Enter a valid email address."
+#~ msgstr "Endereço de e-mail"
+
+#, fuzzy
+#~| msgid "Email address"
+#~ msgid "Enter a valid IPv4 address."
+#~ msgstr "Endereço de e-mail"
+
+#, fuzzy
+#~| msgid "Email address"
+#~ msgid "Enter a valid IPv6 address."
+#~ msgstr "Endereço de e-mail"
+
+#, fuzzy
+#~| msgid "Email address"
+#~ msgid "Enter a valid IPv4 or IPv6 address."
+#~ msgstr "Endereço de e-mail"
+
+#, fuzzy
+#~| msgid "No special characters allowed in the short name."
+#~ msgid "Null characters are not allowed."
+#~ msgstr "Nenhum caracter especial é permitido no nome abreviado."
+
+#, fuzzy
+#~| msgid "This election is not yet open."
+#~ msgid "This field cannot be null."
+#~ msgstr "Essa eleição ainda não está aberta."
+
+#, fuzzy
+#~| msgid "all voters"
+#~ msgid "Integer"
+#~ msgstr "todos os eleitores"
+
+#, fuzzy
+#~| msgid "Documentation"
+#~ msgid "Duration"
+#~ msgstr "Documentação"
+
+#, fuzzy
+#~| msgid "Email address"
+#~ msgid "IPv4 address"
+#~ msgstr "Endereço de e-mail"
+
+#, fuzzy
+#~| msgid "Email address"
+#~ msgid "IP address"
+#~ msgstr "Endereço de e-mail"
+
+#, fuzzy
+#~| msgid "all voters"
+#~ msgid "Positive small integer"
+#~ msgstr "todos os eleitores"
+
+#, fuzzy
+#~| msgid "all voters"
+#~ msgid "Small integer"
+#~ msgstr "todos os eleitores"
+
+#, fuzzy
+#~| msgid "Email address"
+#~ msgid "Enter a valid date."
+#~ msgstr "Endereço de e-mail"
+
+#, fuzzy
+#~| msgid "Email address"
+#~ msgid "Enter a valid time."
+#~ msgstr "Endereço de e-mail"
+
+#, fuzzy
+#~| msgid "Email address"
+#~ msgid "Enter a valid date/time."
+#~ msgstr "Endereço de e-mail"
+
+#, fuzzy
+#~| msgid "Email address"
+#~ msgid "Enter a valid duration."
+#~ msgstr "Endereço de e-mail"
+
+#, fuzzy
+#~| msgid "view the list of voters"
+#~ msgid "Enter a list of values."
+#~ msgstr "visualizar a lista de eleitores"
+
+#, fuzzy
+#~| msgid "view the list of voters"
+#~ msgid "Enter a complete value."
+#~ msgstr "visualizar a lista de eleitores"
+
+#, fuzzy
+#~| msgid "Email address"
+#~ msgid "Enter a valid UUID."
+#~ msgstr "Endereço de e-mail"
+
+#, fuzzy
+#~| msgid "Trustee"
+#~ msgid "Tue"
+#~ msgstr "Apurador"
+
+#, fuzzy
+#~| msgid "Trustee"
+#~ msgid "Thu"
+#~ msgstr "Apurador"
+
+#, fuzzy
+#~| msgid "Start"
+#~ msgid "Sat"
+#~ msgstr "Início"
+
+#, fuzzy
+#~| msgid "search"
+#~ msgid "March"
+#~ msgstr "buscar"
+
+#, fuzzy
+#~| msgid "and"
+#~ msgid "jan"
+#~ msgstr "e"
+
+#, fuzzy
+#~| msgid "and"
+#~ msgid "jun"
+#~ msgstr "e"
+
+#, fuzzy
+#~| msgid "search"
+#~ msgctxt "abbrev. month"
+#~ msgid "March"
+#~ msgstr "buscar"
+
+#, fuzzy
+#~| msgid "search"
+#~ msgctxt "alt. month"
+#~ msgid "March"
+#~ msgstr "buscar"
+
+#, fuzzy
+#~| msgid "Email address"
+#~ msgid "This is not a valid IPv6 address."
+#~ msgstr "Endereço de e-mail"
+
+#, fuzzy
+#~| msgid "No special characters allowed in the short name."
+#~ msgid "Directory indexes are not allowed here."
+#~ msgstr "Nenhum caracter especial é permitido no nome abreviado."
+
+#, fuzzy
+#~| msgid "Institution does not exist"
+#~ msgid "\"%(path)s\" does not exist"
+#~ msgstr "A instituição não existe"
+
+#, fuzzy
+#~| msgid "Documentation"
+#~ msgid "Django Documentation"
+#~ msgstr "Documentação"
+
+#, fuzzy
+#~| msgid "Documentation"
+#~ msgid "Django Community"
+#~ msgstr "Documentação"
 
 #~ msgid ""
 #~ "\n"
