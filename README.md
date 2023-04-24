@@ -172,6 +172,12 @@ Se você adicionou alguma mensagem nova para ser traduzida e gostaria que fossem
 ```bash
 python manage.py makemessages -l pt_BR --ignore=venv
 ```
+
+docker:
+
+```bash
+docker exec -it helios-server-helios-1 python manage.py makemessages -l pt_BR --ignore=venv
+```
 2. Para adicionar strings de arquivos .js (os que passam pelo engine do Django):
 
 ```bash
