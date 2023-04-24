@@ -42,6 +42,15 @@ body {
   line-height: 100%;
 }
 
+#banner {
+  width: 100%;
+  text-align: center;
+  padding: 2px 0px 2px 0px;
+  background: #ccc;
+  font-size: 18pt;
+  border-bottom: 1px solid #666;
+}
+
 .edge {
   width: 100%;
   display: flex;
