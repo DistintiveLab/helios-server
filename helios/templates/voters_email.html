@@ -1,5 +1,6 @@
 {% extends TEMPLATE_BASE %}
 {% load i18n %}
+{% load modals %}
 {% block title %}{% trans "Contact Voters for" %} {{election.name}}{% endblock %}
 {% block content %}
 <script>
@@ -86,23 +87,10 @@ voter_id = '{{voter.voter_id}}';
 </div>
 </div>
 
-<div class="modal fade" id="templateModal" tabindex="-1" role="dialog" aria-labelledby="templateModal" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-        <h4 class="modal-title" id="myModalLabel">{% trans "Template for email" %} </h4>
-      </div>
-      <div class="modal-body">
+{% modal templateModal Template %}
           {% trans "Subject" %} : {{default_subject}}
           {{default_body|safe}}
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">{% trans "Close" %}</button>
-      </div>
-    </div>
-  </div>
-</div>
+{% endmodal %}
 
   <div id="processing">
   </div>
