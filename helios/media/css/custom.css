@@ -43,14 +43,14 @@ a:hover, a:focus {
 
 .panel-primary>.panel-heading {
     color: #fff;
-    background-color:#2f9e40;
-	border-color:#2f9e40;
+    background-color:#0d4f4d;
+	border-color:#0d4f4d;
 }
 
 .panel-default>.panel-heading {
     color: #fff;
-    background-color:#2f9e40;
-	border-color:#2f9e40;
+    background-color:#0d4f4d;
+	border-color:#0d4f4d;
 }
 
 .panel-primary {
