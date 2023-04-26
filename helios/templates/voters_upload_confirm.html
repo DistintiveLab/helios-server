@@ -1,13 +1,22 @@
 {% extends TEMPLATE_BASE %}
 {% load i18n %}
+{% load modals %}
+{% load voters_help %}
 {% block content %}
-<div id="header" class="col-md-12">
-  <h2 class="title">{% trans "Bulk Upload Voters &mdash; Confirm" %}</h2>
-  <h3 class="title">{{election.name}}</h3>
-<p>
+<div class="row">
+  <div class="col-md-12">
+   <h3> <a href="{% url "election@view" election.uuid %}"><< {{election.name}}</a></span></h3>
+  </div>
+</div>
+<div class="row">
+<div class="panel panel-default">
+<div class="panel-heading">{% trans "Bulk Upload Voters" %}</div>
+<div class="panel-body">
+<div class="col-md-12">
+  <p>
 {% blocktrans %}
-You have uploaded a file of voters. The first few rows of this file are:
-{% endblocktrans %}
+You have uploaded a file of voters. The first few rows of this file are
+{% endblocktrans %}   (<a href="#" class="float-right" data-toggle="modal" data-target="#votersConfirmModal">{% trans "click here for more details" %}</a>)
 </p>
 
 <table class="table table-striped">
@@ -51,4 +60,12 @@ You have uploaded a file of voters. The first few rows of this file are:
 </div>
 </div>
 
+</div>
+</div>
+</div>
+</div>
+
+{% modal votersConfirmModal Eleitores %}
+  {% voters_help_text "upload_confirm" %}
+{% endmodal %}
 {% endblock %}
