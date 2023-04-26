@@ -148,6 +148,9 @@
 	{% endif %}
   {% endif %}
 	<th>{% trans "Smart Ballot Tracker" %}</th>
+	{% if show_voter_upload_misc or not election.private_p %}
+	<th>{% trans "Voter Type" %}</th>
+	{% endif %}
 	</tr>
 	{% for voter in voters %}
 		<tr>
@@ -172,6 +175,10 @@
 			{% endif %}
 				<td><em>{% if voter.vote_hash %}{{voter.vote_hash}}{% else %}&mdash;{% endif %}</em></td>
 		{% endif %} <!-- ifadmin -->
+		{% if show_voter_upload_misc or not election.private_p %}
+			<td>{{ voter.voter_type }}</td>
+		{% endif %}
+
 		</tr>
 		{% endfor %}
 	</table>
