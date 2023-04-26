@@ -1058,6 +1058,19 @@ class Voter(HeliosModel):
     }
 
   @property
+  def pretty_email(self):
+    if self.voter_email:
+      return self.voter_email
+    if self.voter_type != 'password':
+      try:
+        user = User.objects.get(id=self.user_id)
+        if user.info and 'email' in user.info:
+          return user.info['email']
+      except User.DoesNotExist:
+        pass
+
+
+  @property
   def pretty_name(self):
     if self.voter_name:
       return self.voter_name
