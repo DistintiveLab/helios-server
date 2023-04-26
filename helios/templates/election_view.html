@@ -299,8 +299,8 @@ Visit <a target="_new" href="http://java.sun.com">java.sun.com</a> to install it
 			  {% endif %}
 			  <br>
 			  {% if election.voting_ends_at %}
-				  {% blocktrans  with voting_starts_at=election.voting_ends_at|date:"d/m/Y H:i"%}
-					  Election end: {{voting_starts_at}}
+				  {% blocktrans  with voting_ends_at=election.voting_ends_at|date:"d/m/Y H:i"%}
+					  Election end: {{voting_ends_at}}
 					  {% endblocktrans %}
 			  {% else %}
 				  {% blocktrans with election_type=election.pretty_type %}
