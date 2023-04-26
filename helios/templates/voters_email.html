@@ -10,27 +10,29 @@ voter_id = '{{voter.voter_id}}';
 {% endif %}
 </script>
 <div class="row">
-<div class="col-md-10">
-  <h2 class="title">{% trans "Contact Voters" %} <span style="font-size:0.7em;">[<a href="{% url "election@view" election.uuid %}">{% trans "back to election" %}</a>]</span></h2>
-  <h3 class="title">{{election.name}}</h3>
+  <div class="col-md-10">
   
-  {% if email_form.errors %}
-    <div class="alert alert-danger alert-dismissable">{% trans "One or more errors have occurred, please check bellow" %}
-      <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+    {% if email_form.errors %}
+      <div class="alert alert-danger alert-dismissable">{% trans "One or more errors have occurred, please check bellow" %}
+        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+      </div>
+    {% endif %}
     </div>
-  {% endif %}
+  </div>
 
+<div class="row">
+  <div class="col-md-12">
+   <h3> <a href="{% url "election@view" election.uuid %}"><< {{election.name}}</a></span></h3>
+  </div>
+</div>
 
-{% if voter %}  
-  <p>
-  {% trans "You are sending this email to a specific user:" %} <b>{{voter.name}} ({{voter.voter_id}})</b>
-  </p>
-{% endif %}
-<br>
-</div>
-</div>
 <div class="row">
 <div class="panel panel-default">
+  <div class="panel-heading">{% trans "Contact Voters" %}
+    {% if voter %}  
+  > {% trans "You are sending this email to a specific user:" %} <b>{{voter.name}} ({{voter.voter_id}})</b>
+{% endif %}
+  </div>
   <div class="panel-body">
 <div class="col-md-6">
 

@@ -1349,7 +1349,8 @@ def voters_upload(request, election):
   #  raise PermissionDenied()
 
   if request.method == "GET":
-    return render_template(request, 'voters_upload', {'election': election, 'error': request.GET.get('e',None)})
+    return render_template(request, 'voters_upload', {'election': election, 
+      'error': request.GET.get('e',None), 'show_voter_upload_misc': settings.SHOW_VOTER_UPLOAD_MISC})
     
   if request.method == "POST":
     if bool(request.POST.get('confirm_p', 0)):

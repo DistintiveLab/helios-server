@@ -12,7 +12,6 @@ def modal(parser, token):
         tag_name, modal_id, title = token.split_contents()
     except ValueError:
         raise TemplateSyntaxError("%r takes two arguments: the modal id and title" % token.contents.split()[0])
-    print(title)
     nodelist = parser.parse(('endmodal',))
     parser.delete_first_token()
     return ModalNode(modal_id, title, nodelist)

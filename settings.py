@@ -414,3 +414,7 @@ LOGGING = {
         }
      }
 }
+
+# Default voter type, to allow uploading a voter file without
+# informing voter type
+SHOW_VOTER_UPLOAD_MISC = False
