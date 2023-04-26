@@ -784,10 +784,22 @@ class VoterFile(models.Model):
         continue
 
       voter_type = voter_fields[0].strip()
+      
+      # lets have a default voter type
+      # allowing users to upload a voter file without informing
+      # voter type, as per previous versions of helios.
+      # if voter_type not in any of the existing AUTH_SYSTEMS, so we consider
+      # it was not provided
+      if voter_type not in AUTH_SYSTEMS and settings.DEFAULT_VOTER_TYPE:
+         voter_type = settings.DEFAULT_VOTER_TYPE
+         #lets append the voter_type at the "begining of the line"
+         voter_fields.insert(0,voter_type)
+         
       voter_id = voter_fields[1].strip()
-
-      if not voter_type in AUTH_SYSTEMS:
+      
+      if voter_type not in AUTH_SYSTEMS:
         raise Exception(_("invalid voter type '%s' for voter id '%s', available voter types are %s") % (voter_type, voter_id, ",".join(AUTH_SYSTEMS.keys())))
+
 
       # default to having email be the same as voter_id
       voter_email = voter_id

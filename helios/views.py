@@ -125,7 +125,6 @@ def election_shortcut(request, election_short_name):
 @election_view()
 def _election_vote_shortcut(request, election):
   vote_url = "%s/booth/vote.html?%s" % (settings.SECURE_URL_HOST, urlencode({'election_url' : reverse(url_names.election.ELECTION_HOME, args=[election.uuid])}))
-  
   test_cookie_url = "%s?%s" % (reverse(url_names.COOKIE_TEST), urlencode({'continue_url' : vote_url}))
 
   return HttpResponseRedirect(test_cookie_url)
@@ -1280,7 +1279,8 @@ def voters_list_pretty(request, election):
                           'upload_p': VOTERS_UPLOAD, 'q' : q,
                           'voter_files': voter_files,
                           'categories': categories,
-                          'eligibility_category_id' : eligibility_category_id})
+                          'eligibility_category_id' : eligibility_category_id,
+                          'show_voter_upload_misc': settings.SHOW_VOTER_UPLOAD_MISC})
 
 @election_admin()
 def voters_eligibility(request, election):

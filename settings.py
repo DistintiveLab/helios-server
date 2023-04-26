@@ -417,4 +417,6 @@ LOGGING = {
 
 # Default voter type, to allow uploading a voter file without
 # informing voter type
-SHOW_VOTER_UPLOAD_MISC = False
+# must be one type valid in AUTH_SYSTEMS (helios_auth/auth_systems/__init__.py)
+DEFAULT_VOTER_TYPE = 'password' 
+SHOW_VOTER_UPLOAD_MISC = True
