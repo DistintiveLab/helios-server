@@ -43,6 +43,7 @@ def home(request):
 
   if user:
     elections_voted = Election.get_by_user_as_voter(user, limit=5)
+    elections_can_vote = Election.get_by_user_as_can_vote(user, limit=15)
   else:
     elections_voted = None
  
@@ -56,6 +57,7 @@ def home(request):
   return render_template(request, "index", {'elections': featured_elections,
                                             'elections_administered' : elections_administered,
                                             'elections_voted' : elections_voted,
+                                            'elections_can_vote' : elections_can_vote,
                                             'create_p':create_p,
                                             'login_box' : login_box})
   
