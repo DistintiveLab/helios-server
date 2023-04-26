@@ -3,14 +3,16 @@
 <!--[if gt IE 8]><!--> <html class="no-js" lang="{% firstof settings.LANGUAGE_CODE 'en' %}"> <!--<![endif]-->
 {% load i18n %}
 {% load staticfiles %}
+{% load settings_value %}
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-  <title>{% block title %}{% endblock %}</title>
+  <title>{% block title %} {% settings_value "SITE_TITLE" %}{% endblock %}</title>
 
-  <link rel="stylesheet" type="text/css" media="screen" href="{% static "bootstrap/css/bootstrap.min.css" %}"/>
+  <link rel="stylesheet" type="text/css" media="screen" href="{% static "bootstrap/css/bootstrap.min.css" %}">
   <link rel="stylesheet" type="text/css" media="screen" href="{% static "css/custom.css" %}"/>
   <link rel="stylesheet" type="text/css" media="screen" href="{% static "css/ui-lightness/jquery-ui-1.8.1.custom.css" %}">
+  <link rel="stylesheet" type="text/css" media="screen" href="{% static "datetimepicker/jquery.datetimepicker.css" %}">
 
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700|Roboto+Mono">
     <style>
@@ -20,21 +22,21 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
 
   <script src={% static "foundation/js/vendor/custom.modernizr.js" %}></script>
-  <script language="javascript" src={% static "js/jquery-1.11.2.min.js" %}></script>
-  <script language="javascript" src={% static "js/jquery-ui-1.8.1.custom.min.js" %}></script>
-  <script language="javascript" src={% static "js/jqsplitdatetime.js" %}></script>
-  <script language="javascript" src={% static "bootstrap/js/bootstrap.min.js"%}></script>
-  <script language="javascript" src={% static "bootstrap/js/collapse.js" %}></script>
-  <script language="javascript" src={% static "js/jquery.json.min.js" %}></script>
-  <script language="javascript" src={% static "foundation/js/foundation.min.js" %}></script>
+  <script src={% static "js/jquery-1.11.2.min.js" %}></script>
+  <script src={% static "js/jquery-ui-1.8.1.custom.min.js" %}></script>
+  <script src={% static "js/jqsplitdatetime.js" %}></script>
+  <script src={% static "bootstrap/js/bootstrap.min.js"%}></script>
+  <script src={% static "bootstrap/js/collapse.js" %}></script>
+  <script src={% static "js/jquery.json.min.js" %}></script>
+  <script src={% static "foundation/js/foundation.min.js" %}></script>
 
   {% block js %}
   {% endblock %}
 
   {% block extra-head %}{% endblock %}
-  <script language="javascript" src={% static "datetimepicker/jquery.datetimepicker.full.js" %}></script>
-  <script language="javascript" src={% static "js/utils.js" %}></script>
-  <script type="text/javascript" src="{% url "i18n@JSCatalog" %}"></script>
+  <script src={% static "datetimepicker/jquery.datetimepicker.full.js" %}></script>
+  <script src={% static "js/utils.js" %}></script>
+  <script src="{% url "i18n@JSCatalog" %}"></script>
 </head>
 <body>
   {% include "navbar.html" %}
@@ -46,22 +48,19 @@
       {% endblock %}
   </div>
 
-      <script>
-	$(document).foundation();
-      </script>
-
-</body>
-<link rel="stylesheet" type="text/css" media="screen" href="{% static "datetimepicker/jquery.datetimepicker.css" %}"/ >
-<script language="javascript" src={% static "datetimepicker/jquery.datetimepicker.full.js" %}></script>
-
+  <script>
+	  $(document).foundation();
+  </script>
+  <script src={% static "datetimepicker/jquery.datetimepicker.full.js" %}></script>
   {% if user %}
       <div id="footer">
       <div class="container" id="container-footer">
       {% block footer %}
          {% trans "logged in as" %} <b>{{user.pretty_name|safe}}</b>
-          <br clear="right" />
+          <br>
       {% endblock footer%}
       </div>
       </div>
   {% endif %}
+</body>
 </html>

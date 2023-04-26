@@ -51,9 +51,9 @@ voter_id = '{{voter.voter_id}}';
 
     <form class="form" role="form" action="" method="POST" id="email_form">
       {{ email_form.non_field_errors }}
-      <input type="hidden" name="csrf_token" value="{{csrf_token}}" />
-      <input type="hidden" name="template" value="{{template}}" />
-      <input type="hidden" name="voter_id" value="{{voter.voter_login_id}}" />
+      <input type="hidden" name="csrf_token" value="{{csrf_token}}">
+      <input type="hidden" name="template" value="{{template}}">
+      <input type="hidden" name="voter_id" value="{{voter.voter_login_id}}">
       <div class="form-group {% if email_form.subject.errors %}has-error{% endif %}" id="form-group-subject">
       <label for="id_subject">{% if email_form.fields.subject.required %}*{% endif %}{% trans "Subject" %}</label>
       <p>
