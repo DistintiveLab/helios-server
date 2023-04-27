@@ -1426,9 +1426,11 @@ def voters_email(request, election):
   default_body = render_template_raw(None, 'email/%s_body.txt' % template, {
       'election_name' : election.name,
       'election_url' : election_url,
+      'private_p': election.private_p,
       'election_vote_url' : election_vote_url,
       'custom_subject' : default_subject,
       'custom_message': '&lt;BODY&gt;',
+      'election_hash': election.hash,
       'voter': {'vote_hash' : '<SMART_TRACKER>',
                 'name': '<VOTER_NAME>',
                 'voter_login_id': '<VOTER_LOGIN_ID>',
@@ -1450,6 +1452,7 @@ def voters_email(request, election):
       body_template = 'email/%s_body.txt' % template
 
       extra_vars = {
+        'election_hash': election.hash,
         'custom_subject' : email_form.cleaned_data['subject'],
         'custom_message' : email_form.cleaned_data['body'],
         'election_vote_url' : election_vote_url,

@@ -9,22 +9,21 @@
 <br>
 <p>{{custom_message|safe|linebreaksbr}}</p>
 <br>
-<p> URL da Eleição: {{election_vote_url}}</p>
-
-<p>Código de Identificação da Eleição: {{election_hash}}</p>
-<br>
-
-Election URL (click to begin voting):
-{{election_vote_url}}
-
 {% ifequal voter.voter_type "password" %}
+{% if private_p %}
+  <p> URL da Eleição: {{election_vote_url}}</p>
+<br>
+{% endif %}
+
 <p>
     <strong>Seu ID de eleitor</strong>: {{voter.voter_login_id}}<br>
     <strong>Sua senha para essa eleição</strong>: {{voter.voter_password}}<br>
 </p>
 {% else %}
-<p>Conecte-se com seu usuário e senha dos sistemas do IFSC.</p>
+<p>Conecte-se com seu usuário e senha dos sistemas do IFSC para acessar a lista de eleições nas quais você pode votar.</p>
+
 {% endifequal %}
+<p>Código de Identificação da Eleição: {{election_hash}}</p>
 
 {% if voter.vote_hash %}
 <p>
