@@ -46,6 +46,7 @@ def home(request):
     elections_can_vote = Election.get_by_user_as_can_vote(user, limit=15)
   else:
     elections_voted = None
+    elections_can_vote = None
  
   auth_systems = copy.copy(settings.AUTH_ENABLED_SYSTEMS)
   try:

@@ -22,7 +22,9 @@ voter_id = '{{voter.voter_id}}';
 
 <div class="row">
   <div class="col-md-12">
-   <h3> <a href="{% url "election@view" election.uuid %}"><< {{election.name}}</a></span></h3>
+   <h3> <a href="{% url "election@view" election.uuid %}"><< {{election.name}}</a></span>
+   <a href="{% url "election@voters@list-pretty" election.uuid %}"> << {% trans "voter list"%} </a>
+  </h3>
   </div>
 </div>
 

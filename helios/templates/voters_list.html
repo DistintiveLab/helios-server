@@ -2,13 +2,15 @@
 {% load i18n %}
 {% block title %}{% trans "Voters" %} &amp; {% trans "Ballot Tracking Center for" %} {{election.name}}{% endblock %}
 {% block content %}
-
+<div class="row">
+	<div class="col-md-12">
+	 <h3> <a href="{% url "election@view" election.uuid %}"><< {{election.name}}</a></span></h3>
+	</div>
+  </div>
 <div class="row">
 <div class="col-xs-12 col-md-12">
 <div id="header">
-  <h3 class="title">{% trans "Voters and Ballot Tracking Center" %} <span style="font-size:0.7em;">[<a href="{% url "election@view" election.uuid %}">{% trans "back to election" %}</a>]</span></h3>
-  <h3 class="title">{{election.name}}</h3>
-	<br /><br />
+  <h3 class="title">{% trans "Voters and Ballot Tracking Center" %}</h3>
 </div>
 	{% if admin_p and not election.frozen_at %}
 	{% if election.private_p %}

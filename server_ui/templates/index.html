@@ -12,6 +12,7 @@
   <p style="font-size: 1.4em;">
     {{settings.WELCOME_MESSAGE|safe}}
   </p>
+  {% if user %}
   <div class="col-md-6">
     <div class="panel panel-default">
       <div class="panel-heading">{% trans "Open elections that you can vote" %}</div>
@@ -43,7 +44,7 @@
     {% endif %}
     </div>
   </div>
-
+  {% endif %}
   </div>
   <div class="col-md-2">
     {% if settings.MASTER_HELIOS %}
