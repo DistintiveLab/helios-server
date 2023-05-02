@@ -63,10 +63,8 @@ Publicamos dois artigos sobre essas personalizações:
 
 ## Instalação dos softwares necessários
 
-> Considerando a imagem [python:3.6.15-buster](https://hub.docker.com/layers/library/python/3.6.15-buster/images/sha256-08e91f391139ff24d82df572307b30ee850b78884ec633cf10f5a6e990dd9920?context=explore), baseada no debian, que já contém o python 3.6 instalado.
+> Considerando a imagem [python:3.6.15-buster](https://hub.docker.com/layers/library/python/3.6.15-buster/images/sha256-08e91f391139ff24d82df572307b30ee850b78884ec633cf10f5a6e990dd9920?context=explore), baseada no debian, que já contém o python 3.6 instalado, abaixo são os pacotes extras necessários ao fazer o build da imagem, conforme em [docker/Dockerfile](docker/app/Dockerfile)
 
-* postgresql e postgresql-contrib 
-  * [Aqui tem um bom tutorial](https://www.digitalocean.com/community/tutorials/how-to-install-and-use-postgresql-on-ubuntu-18-04) de como instalar no Ubuntu 18.04
 * gettext 
   * para uso das funcionalidade de compilação de mensagens traduzidas
 * python3-dev
@@ -160,6 +158,10 @@ A interface do Helios foi traduzida para o português e assim é necessário que
 ```bash
 python manage.py compilemessages
 ```
+
+docker:
+
+`docker exec -it helios-server-helios-1 python manage.py compilemessages -l pt_BR`
 
 Após a compilação, arquivos `.mo` devem ter sido gerados em `locale/pt_BR/LC_MESSAGES`
 
