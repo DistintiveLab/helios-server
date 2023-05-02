@@ -1,90 +1,92 @@
 {% extends TEMPLATE_BASE %}
 {% load i18n %}
+{% load modals %}
+{% load voters_help %}
 {% block title %}{% trans "Voters" %} &amp; {% trans "Ballot Tracking Center for" %} {{election.name}}{% endblock %}
 {% block content %}
 <div class="row">
-	<div class="col-md-12">
+	<div class="col-md-8">
 	 <h3> <a href="{% url "election@view" election.uuid %}"><< {{election.name}}</a></span></h3>
 	</div>
-  </div>
-<div class="row">
-<div class="col-xs-12 col-md-12">
-<div id="header">
-  <h3 class="title">{% trans "Voters and Ballot Tracking Center" %}</h3>
 </div>
-	{% if admin_p and not election.frozen_at %}
+{% if admin_p and not election.frozen_at %}
 	{% if election.private_p %}
-	<em>{% blocktrans %}Your election is marked private, which means you cannot open registration up more widely{% endblocktrans %}</em>.<br />
+	<div class="row">
+		<div class="panel panel-default">
+			<div id="header" class="panel-heading">{% trans "Voters and Ballot Tracking Center" %}</div>
+			<div class="panel-body">
+				<div class="col-xs-12 col-md-12">
+					<em>{% blocktrans %}Your election is marked private, which means you cannot open registration up more widely{% endblocktrans %}</em>.<br />
+					<br />
+					<br />
+				</div>
+			</div>
+		</div>
+	</div>
 	{% else %}
-	<br />
-	<br />
-
-</div>
-</div>
-
-<div class="row">
-<div class="col-sm-24 col-md-12">
-<div class="panel panel-primary">
-    <div id="header" class="panel-heading">
-		<label>{% trans "You can change this setting:" %}</label>
-	</div>
-    <div class="panel-body">
-        <form method="post" role="form" class="form-horizontal" action="{% url "election@voters@eligibility" election.uuid %}">
-            <input type="hidden" name="csrf_token" value="{{csrf_token}}" />
-            <div class="form-group">
-                <input type="radio" name="eligibility" value="openreg" {% if election.openreg and not election.eligibility %}CHECKED{% endif %} /> {% trans "anyone can vote" %}
-            </div>
-            <div class="form-group">
-                <input type="radio" name="eligibility" value="closedreg" {% if not election.openreg and not election.eligibility %}CHECKED{% endif %} /> {% trans "only voters listed explicitly below can vote" %}
-				<i title="{% trans "Do not forget to upload voters file, using the bulk upload voters button bellow." %}" class="glyphicon glyphicon-info-sign"></i>
-            </div>
-            {% if user.user_type in settings.AUTH_BIND_USERID_TO_VOTERID %}
-            <div class="form-group">
-                <input type="radio" name="eligibility" value="privatereg" {% if not election.openreg and election.eligibility %}CHECKED{% endif %} /> {% trans "only voters from the same system" %}
-				<i title="{% trans "Do not forget to upload voters file, using the bulk upload voters button bellow." %}" class="glyphicon glyphicon-info-sign"></i>
-            </div>
-            {% endif %}
-            {% if categories %}
-            <div class="form-group">
-                <input type="radio" name="eligibility" value="{% trans "limitedreg" %}" {% if election.eligibility %}CHECKED{% endif %} /> {% trans "only voters who are members of " %}
-            </div>
-            <div class="form-group">
-                <select name="category_id">
-                {% for category in categories %}
-                <option value="{{category.id}}" {% if eligibility_category_id == category.id %}SELECTED{% endif %}> {{category.name}}</option>
-            {% endfor %}
-            </select>
-            </div>
-            {% endif %}
-            <div class="form-group">
-            <button class="btn btn-primary">{% trans "update" %}</button>
-            </div>
-	    </form>
-    </div>
+	<div class="row">
+		<div class="panel panel-default">
+			<div id="header" class="panel-heading">{% trans "Voters and Ballot Tracking Center" %}</div>
+			<div class="panel-body">
+				<div class="col-sm-16 col-md-8">
+				<h4>{% trans "You can change this setting:" %}</h4>
+				<form method="post" role="form" class="form-horizontal" action="{% url "election@voters@eligibility" election.uuid %}">
+					<input type="hidden" name="csrf_token" value="{{csrf_token}}" />
+					<div class="form-group">
+						<input type="radio" name="eligibility" value="openreg" {% if election.openreg and not election.eligibility %}CHECKED{% endif %} onclick="upload_button(true);"> {% trans "anyone can vote" %}
+						(<a href="#" class="float-right" data-toggle="modal" data-target="#votersAnyModal">{% trans "click here for more details" %}</a>)
+					</div>
+					<div class="form-group">
+						<input type="radio" name="eligibility" value="closedreg" {% if not election.openreg and not election.eligibility %}CHECKED{% endif %} onclick="upload_button(false);"> {% trans "only voters listed explicitly below can vote" %}
+						(<a href="#" class="float-right" data-toggle="modal" data-target="#votersFileModal">{% trans "click here for more details" %}</a>)
+					</div>
+					{% if user.user_type in settings.AUTH_BIND_USERID_TO_VOTERID %}
+					<div class="form-group">
+						<input type="radio" name="eligibility" value="privatereg" {% if not election.openreg and election.eligibility %}CHECKED{% endif %} onclick="upload_button(false);"> {% trans "only voters from the same system" %}
+						(<a href="#" class="float-right" data-toggle="modal" data-target="#votersFileSameSystemModal">{% trans "click here for more details" %}</a>)
+					</div>
+					{% endif %}
+					{% if categories %}
+					<div class="form-group">
+						<input type="radio" name="eligibility" value="{% trans "limitedreg" %}" {% if election.eligibility %}CHECKED{% endif %} /> {% trans "only voters who are members of " %}
+					</div>
+					<div class="form-group">
+						<select name="category_id">
+						{% for category in categories %}
+						<option value="{{category.id}}" {% if eligibility_category_id == category.id %}SELECTED{% endif %}> {{category.name}}</option>
+					{% endfor %}
+					</select>
+					</div>
+					{% endif %}
+					<div class="form-group">
+						<button class="btn btn-primary">{% trans "update" %}</button>
+						<p class="help-block"><i class="glyphicon glyphicon-exclamation-sign"></i>
+							{% trans "You have to click this button to save your choice" %}</p>
+					</div>
+				</form>
+				</div>
+			</div>
+		</div> <!-- end column -->
 	</div>
 	{% endif %}
-	{% endif %}
+{% endif %}
 	{% if email_voters and election.frozen_at and admin_p %}
 	<p><a class="btn btn-primary" href="{% url "election@voters@email" election.uuid %}">{% trans "email voters" %}</a></p>
 	{% endif %}
 
-</div> <!-- end column -->
-</div>
-<br>
+
+
 <div class="row">
-<div class="col-md-12 col-xs-12">
+<div class="col-md-12 col-xs-24">
 	{% if admin_p %}
-	<!-- Add a Voter: WORK HERE-->
-		{% if upload_p and not election.openreg %}
-		<div class="form-group">
-			<a class="btn btn-primary" href="{% url "election@voters@upload" election_uuid=election.uuid %}">{% trans "bulk upload voters" %}</a>
-		</div>
+		<!-- Add a Voter: WORK HERE-->
+			{% if upload_p and not election.openreg %}
+			<div class="form-group" id="bulk_upload_voters">
+				<a class="btn btn-primary" href="{% url "election@voters@upload" election_uuid=election.uuid %}">{% trans "bulk upload voters" %}</a>
+			</div>
+			{% endif %}
 		{% endif %}
-	{% endif %}
-
-
 	<!-- who can vote info -->
-	<br>
 	<b>{% trans "Who can vote?" %}</b>
 	{% if election.openreg %}
 	<!--{{election.pretty_eligibility|safe}}-->
@@ -94,7 +96,6 @@
 	{% endif %}
 	<br><br>
 	<!-- end who can vote info -->
-
 	<!-- search voter -->
 
 	{% if election.num_voters > 20 %}
@@ -233,4 +234,27 @@
 		</ul>
 	{% endif %}
 {% endif %}
+{% modal votersAnyModal Eleitores %}
+  {% voters_help_text "any" %}
+{% endmodal %}
+
+{% modal votersFileModal Eleitores %}
+  {% voters_help_text "default" %}
+{% endmodal %}
+
+{% modal votersFileSameSystemModal Eleitores %}
+  {% voters_help_text "samesystem" %}
+{% endmodal %}
+
+<script>
+	function upload_button(hide){
+		if (hide=== true){
+			$('#bulk_upload_voters').hide();
+		} else {
+			$('#bulk_upload_voters').show();
+		}
+	};
+
+</script>
+
 {% endblock %}

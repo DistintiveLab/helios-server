@@ -99,8 +99,6 @@
 
 <p>
 {% if election.help_email and admin_p%}{% trans "Help Email Address:" %} {{election.help_email}}<br />{% endif %}
-{% if election.voting_start_at %}{% trans "Voting start at"%} {{election.voting_start_at|date:'d/m/Y H:m:s'}}<br />{% endif %}
-{% if election.voting_end_at %}{% trans "Voting end at" %} {{election.voting_end_at|date:'d/m/Y H:m:s'}}<br />{% endif %}
 </p>
 
 {% if election.election_info_url %}
