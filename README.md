@@ -75,6 +75,7 @@ Publicamos dois artigos sobre essas personalizações:
 
 Todos os pacotes listados acima estão presentes no [Dockerfile](docker/Dockerfile) exemplo. Considere o referido Dockerfile como um tutorial do que deve ser instalado em configurado em termos de ambiente no caso de você optar por instalar diretamente num host sem utilizar o docker.
 
+> Se você estiver rodando local pra testes e quiser rodar com o postgres conteinerizado também, habilite as informações do postgres comentadas no arquivo docker-compose.yml
 ## Preparação do ambiente para execução do Helios
 
 *Você vai precisar de um host em que possa executar o docker e o docker-compose.*

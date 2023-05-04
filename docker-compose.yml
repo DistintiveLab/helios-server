@@ -35,8 +35,8 @@ services:
             - 127.0.0.1:8000:8000
         networks:
             - helios-network
-        depends_on:
-            - db
+        # depends_on:
+        #     - db
 
     celeryworker:
         <<: *celery
@@ -81,17 +81,17 @@ services:
             - helios-network
         restart: unless-stopped
 
-    db:
-        image: postgres:12.0-alpine
-        ports:
-            - 5432:5432
-        env_file:
-            - .env
-        restart: unless-stopped
-        volumes:
-            - postgres_volume:/var/lib/postgresql/data/
-        networks:
-            - helios-network
+    # db:
+    #     image: postgres:12.0-alpine
+    #     ports:
+    #         - 5432:5432
+    #     env_file:
+    #         - .env
+    #     restart: unless-stopped
+    #     volumes:
+    #         - postgres_volume:/var/lib/postgresql/data/
+    #     networks:
+    #         - helios-network
 
 networks:
     helios-network:
@@ -104,9 +104,9 @@ volumes:
             o: bind
             type: none
             device: ~/docker-volumes/heliosapp/logs
-    postgres_volume:
-        driver: local
-        driver_opts:
-            o: bind
-            type: none
-            device: ~/docker-volumes/heliosapp/postgres
+    # postgres_volume:
+    #     driver: local
+    #     driver_opts:
+    #         o: bind
+    #         type: none
+    #         device: ~/docker-volumes/heliosapp/postgres
