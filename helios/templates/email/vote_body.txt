@@ -10,11 +10,8 @@
 <p>{{custom_message|safe|linebreaksbr}}</p>
 <br>
 {% ifequal voter.voter_type "password" %}
-{% if private_p %}
   <p> URL da Eleição: {{election_vote_url}}</p>
 <br>
-{% endif %}
-
 <p>
     <strong>Seu ID de eleitor</strong>: {{voter.voter_login_id}}<br>
     <strong>Sua senha para essa eleição</strong>: {{voter.voter_password}}<br>

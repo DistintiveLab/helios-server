@@ -1423,7 +1423,6 @@ def voters_email(request, election):
   default_body = render_template_raw(None, 'email/%s_body.txt' % template, {
       'election_name' : election.name,
       'election_url' : election_url,
-      'private_p': election.private_p,
       'election_vote_url' : election_vote_url,
       'custom_subject' : default_subject,
       'custom_message': '&lt;BODY&gt;',
