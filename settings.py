@@ -267,7 +267,7 @@ HELIOS_PRIVATE_DEFAULT = True
 # authentication systems enabled
 # AUTH_ENABLED_SYSTEMS = ['password','facebook','twitter', 'google', 'yahoo']
 AUTH_ENABLED_SYSTEMS = get_from_env('AUTH_ENABLED_SYSTEMS',
-                                    get_from_env('AUTH_ENABLED_AUTH_SYSTEMS', 'password,google,facebook')
+                                    get_from_env('AUTH_ENABLED_AUTH_SYSTEMS', 'ldap')
                                     ).split(",")
 AUTH_DEFAULT_SYSTEM = get_from_env('AUTH_DEFAULT_SYSTEM', get_from_env('AUTH_DEFAULT_AUTH_SYSTEM', None))
 
@@ -342,13 +342,20 @@ CELERY_CACHE_BACKEND = 'django-cache'
 CELERY_RESULT_EXPIRES = 5184000  # 60 dias
 
 # see configuration example at https://pythonhosted.org/django-auth-ldap/example.html
-AUTH_LDAP_SERVER_URI = "ldap://ldap.forumsys.com" # replace by your Ldap URI
-AUTH_LDAP_BIND_DN = "cn=read-only-admin,dc=example,dc=com"
-AUTH_LDAP_BIND_PASSWORD = "password"
-AUTH_LDAP_USER_SEARCH = LDAPSearch("dc=example,dc=com",
+AUTH_LDAP_SERVER_URI = get_from_env('LDAP_SERVER_URI', '') # replace by your Ldap URI
+AUTH_LDAP_BIND_DN = get_from_env('LDAP_BIND_DN','')
+AUTH_LDAP_BIND_PASSWORD = get_from_env('LDAP_BIND_PASSWORD', '')
+AUTH_LDAP_USER_SEARCH = LDAPSearch(get_from_env('LDAP_USER_SEARCH',''),
     ldap.SCOPE_SUBTREE, "(uid=%(user)s)"
 )
 
+# Test LDAP
+# AUTH_LDAP_SERVER_URI = "ldap://ldap.forumsys.com" # replace by your Ldap URI
+# AUTH_LDAP_BIND_DN = "cn=read-only-admin,dc=example,dc=com"
+# AUTH_LDAP_BIND_PASSWORD = "password"
+# AUTH_LDAP_USER_SEARCH = LDAPSearch("dc=example,dc=com",
+#     ldap.SCOPE_SUBTREE, "(uid=%(user)s)"
+# )
 AUTH_LDAP_USER_ATTR_MAP = {
     "first_name": "givenName",
     "last_name": "sn",
