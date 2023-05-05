@@ -63,7 +63,7 @@ Publicamos dois artigos sobre essas personalizações:
 
 ## Instalação dos softwares necessários
 
-> Considerando a imagem [python:3.6.15-buster](https://hub.docker.com/layers/library/python/3.6.15-buster/images/sha256-08e91f391139ff24d82df572307b30ee850b78884ec633cf10f5a6e990dd9920?context=explore), baseada no debian, que já contém o python 3.6 instalado, abaixo são os pacotes extras necessários ao fazer o build da imagem, conforme em [docker/Dockerfile](docker/app/Dockerfile)
+> Considerando a imagem [python:3.6.15-buster](https://hub.docker.com/layers/library/python/3.6.15-buster/images/sha256-08e91f391139ff24d82df572307b30ee850b78884ec633cf10f5a6e990dd9920?context=explore), baseada no debian, que já contém o python 3.6 instalado, abaixo são os pacotes extras necessários ao fazer o build da imagem, conforme em [docker/Dockerfile](docker/app/Dockerfile). Estes pacotes estão listados aqui apenas para informação, pois eles já estão no Dockerfile que será rodado pelo docker-compose para construir a imagem.
 
 * gettext 
   * para uso das funcionalidade de compilação de mensagens traduzidas
