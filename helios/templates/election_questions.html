@@ -2,13 +2,14 @@
 {% load i18n %}
 {% block title %}Questions for {{election.name}}{% endblock %}
 {% block content %}
-<div id="header">
-  <h2 class="title">{% trans "Questions" %} <span style="font-size:0.7em;">[<a href="{% url "election@view" election.uuid %}">{% trans "back to election" %}</a>]</span></h2>
-  <h3 class="title">{{election.name}}</h3>
+  <div class="row">
+    <div class="col-md-8">
+     <h3> <a href="{% url "election@view" election.uuid %}"><< {{election.name}}</a></span></h3>
+    </div>
   </div>
-<br><br>
+  <h3 class="title">{% trans "Questions" %}</h3>
 
-  <script language="javascript">
+<script language="javascript">
 {% if election.questions %}
   QUESTIONS = JSON.parse("{{questions_json|escapejs}}");
 {% else %}
