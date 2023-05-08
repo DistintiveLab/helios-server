@@ -70,7 +70,7 @@ def voters_notify(election_id, notification_template, extra_vars={}):
 def single_voter_email(voter_uuid, subject_template, body_template, extra_vars={}):
     activate(settings.LANGUAGE_CODE)
     voter = Voter.objects.get(uuid=voter_uuid)
-
+    print('voter: ', voter)
     the_vars = copy.copy(extra_vars)
     the_vars.update({'election': voter.election})
     the_vars.update({'voter': voter})

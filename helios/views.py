@@ -1427,7 +1427,7 @@ def voters_email(request, election):
   voter_id = request.GET.get('voter_id', None)
 
   if voter_id:
-    voter = Voter.get_by_election_and_voter_id(election, voter_id)
+    voter = Voter.get_by_election_and_unique_voter_id(election, voter_id)
   else:
     voter = None
   
@@ -1444,6 +1444,7 @@ def voters_email(request, election):
       'custom_subject' : default_subject,
       'custom_message': '&lt;BODY&gt;',
       'election_hash': election.hash,
+      'helios_url': settings.SECURE_URL_HOST,
       'voter': {'vote_hash' : '<SMART_TRACKER>',
                 'name': '<VOTER_NAME>',
                 'voter_login_id': '<VOTER_LOGIN_ID>',
@@ -1469,12 +1470,12 @@ def voters_email(request, election):
         'custom_subject' : email_form.cleaned_data['subject'],
         'custom_message' : email_form.cleaned_data['body'],
         'election_vote_url' : election_vote_url,
+        'helios_url': settings.SECURE_URL_HOST,
         'election_url' : election_url
         }
         
       voter_constraints_include = None
       voter_constraints_exclude = None
-
       if voter:
         tasks.single_voter_email.delay(voter_uuid = voter.uuid, subject_template = subject_template, body_template = body_template, extra_vars = extra_vars)
       else:

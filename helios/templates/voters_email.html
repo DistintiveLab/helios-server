@@ -6,7 +6,7 @@
 <script>
 var voter_id = null;
 {% if voter %}
-voter_id = '{{voter.voter_id}}';
+voter_id = '{{voter.unified_voter_email}}';
 {% endif %}
 </script>
 <div class="row">
@@ -32,7 +32,7 @@ voter_id = '{{voter.voter_id}}';
 <div class="panel panel-default">
   <div class="panel-heading">{% trans "Contact Voters" %}
     {% if voter %}  
-  > {% trans "You are sending this email to a specific user:" %} <b>{{voter.name}} ({{voter.voter_id}})</b>
+  > {% trans "You are sending this email to a specific user:" %} <b>{{voter.name}} ({{voter.unified_voter_email}})</b>
 {% endif %}
   </div>
   <div class="panel-body">
@@ -57,7 +57,7 @@ voter_id = '{{voter.voter_id}}';
       {{ email_form.non_field_errors }}
       <input type="hidden" name="csrf_token" value="{{csrf_token}}">
       <input type="hidden" name="template" value="{{template}}">
-      <input type="hidden" name="voter_id" value="{{voter.voter_login_id}}">
+      <input type="hidden" name="voter_id" value="{{voter.unified_voter_email}}">
       <div class="form-group {% if email_form.subject.errors %}has-error{% endif %}" id="form-group-subject">
       <label for="id_subject">{% if email_form.fields.subject.required %}*{% endif %}{% trans "Subject" %}</label>
       <p>

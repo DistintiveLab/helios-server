@@ -976,7 +976,14 @@ class Voter(HeliosModel):
       return cls.objects.get(election = election, voter_login_id = voter_id)
     except cls.DoesNotExist:
       return None
-    
+
+  @classmethod
+  def get_by_election_and_unique_voter_id(cls, election, voter_id):
+    try:
+      return cls.objects.get(election = election, id = voter_id)
+    except cls.DoesNotExist:
+      return None
+  
   @classmethod
   def get_by_election_and_user(cls, election, user):
     try:
@@ -1078,7 +1085,7 @@ class Voter(HeliosModel):
     }
 
   @property
-  def pretty_email(self):
+  def unified_voter_email(self):
     if self.voter_email:
       return self.voter_email
     if self.voter_type != 'password':
@@ -1089,6 +1096,17 @@ class Voter(HeliosModel):
       except User.DoesNotExist:
         pass
 
+  @property
+  def unified_voter_id(self):
+    if self.voter_login_id:
+      return self.voter_login_id
+    if self.voter_type != 'password':
+      try:
+        user = User.objects.get(id=self.user_id)
+        if user.info and 'email' in user.info:
+          return user.user_id
+      except User.DoesNotExist:
+        pass
 
   @property
   def pretty_name(self):
