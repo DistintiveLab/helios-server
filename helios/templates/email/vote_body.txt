@@ -17,7 +17,7 @@
     <strong>Sua senha para essa eleição</strong>: {{voter.voter_password}}<br>
 </p>
 {% else %}
-<p>Conecte-se com seu usuário e senha dos sistemas do IFSC para acessar a lista de eleições nas quais você pode votar.</p>
+<p><a href="{{helios_url}}"> Conecte-se com seu usuário e senha dos sistemas do IFSC para acessar a lista de eleições nas quais você pode votar.</a></p>
 
 {% endifequal %}
 <p>Código de Identificação da Eleição: {{election_hash}}</p>

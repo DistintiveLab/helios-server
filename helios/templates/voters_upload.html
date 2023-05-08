@@ -72,11 +72,11 @@
 </div>
 
 {% modal votersModal Eleitores %}
-  {% voters_help_text "default" %}
+  {% voters_help_text "default" election_auth_type %}
 {% endmodal %}
 
 {% modal votersMiscModal Eleitores %}
-  {% voters_help_text "misc" %}
+  {% voters_help_text "misc" election_auth_type %}
 {% endmodal %}
 
 {% endblock %}

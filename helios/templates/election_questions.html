@@ -5,9 +5,10 @@
   <div class="row">
     <div class="col-md-8">
      <h3> <a href="{% url "election@view" election.uuid %}"><< {{election.name}}</a></span></h3>
+     <h3 class="title">{% trans "Questions" %}</h3>
+     <br>
     </div>
   </div>
-  <h3 class="title">{% trans "Questions" %}</h3>
 
 <script language="javascript">
 {% if election.questions %}

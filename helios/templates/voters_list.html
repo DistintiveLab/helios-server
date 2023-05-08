@@ -160,7 +160,7 @@
 		{% if admin_p %}
 			<td>
 				{% if email_voters and election.frozen_at %}
-				<a href="{% url "election@voters@email" election.uuid %}?voter_id={{voter.voter_login_id}}"><i title="{% trans "Send email to this voter. This action will only be possible if the ballot is already frozen." %}" class="glyphicon glyphicon-envelope"></i></a>
+				<a href="{% url "election@voters@email" election.uuid %}?voter_id={{voter.id}}"><i title="{% trans "Send email to this voter. This action will only be possible if the ballot is already frozen." %}" class="glyphicon glyphicon-envelope"></i></a>
 				{% endif %}
 				<a href="{% url "election@voter@delete" election.uuid voter.uuid %}"><i data-name="{{voter.name}}" title="{% trans "Remove voter" %}" class="glyphicon glyphicon-remove remove_voter"></i></a>
 
@@ -168,7 +168,7 @@
 			{% if election.use_voter_aliases %}
 				<td>{{voter.alias}}</td>
 			{% endif %}
-			<td>{{voter.pretty_email}} </td>
+			<td>{{voter.unified_voter_email}} </td>
 			<td><em>{% if voter.vote_hash %}{{voter.vote_hash}}{% else %}&mdash;{% endif %}</em></td>
 	  	{% else %}
 			{% if election.use_voter_aliases %}
@@ -239,7 +239,7 @@
 {% endmodal %}
 
 {% modal votersFileModal Eleitores %}
-  {% voters_help_text "default" %}
+  {% voters_help_text "default" "password" %}
 {% endmodal %}
 
 {% modal votersFileSameSystemModal Eleitores %}
