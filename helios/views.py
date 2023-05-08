@@ -1345,14 +1345,28 @@ def voters_upload(request, election):
   #if election.frozen_at and not election.openreg:
   #  raise PermissionDenied()
 
+  # allowing upload voter file without explicitly indicating
+  # voter type in some cases
+  election_auth_type = None
+  user = get_user(request)
+  if election.eligibility:
+    for constraint in election.eligibility:
+      if constraint['auth_system'] == user.user_type and \
+          user.user_type in settings.AUTH_BIND_USERID_TO_VOTERID:
+        election_auth_type = user.user_type
+        break
+  else:
+    election_auth_type = 'password'
   if request.method == "GET":
     return render_template(request, 'voters_upload', {'election': election, 
-      'error': request.GET.get('e',None), 'show_voter_upload_misc': settings.SHOW_VOTER_UPLOAD_MISC})
+      'error': request.GET.get('e',None),
+      'election_auth_type': election_auth_type,
+      'show_voter_upload_misc': settings.SHOW_VOTER_UPLOAD_MISC})
     
   if request.method == "POST":
     if bool(request.POST.get('confirm_p', 0)):
       # launch the background task to parse that file
-      tasks.voter_file_process.delay(voter_file_id = request.session['voter_file_id'])
+      tasks.voter_file_process.delay(voter_file_id = request.session['voter_file_id'], election_auth_type=election_auth_type)
       del request.session['voter_file_id']
 
       return HttpResponseRedirect(settings.SECURE_URL_HOST + reverse(voters_list_pretty, args=[election.uuid]))
@@ -1365,17 +1379,20 @@ def voters_upload(request, election):
         request.session['voter_file_id'] = voter_file_obj.id
 
         problems = []
-
+          
         # import the first few lines to check
         try:
-          voters = [v for v in voter_file_obj.itervoters()][:5]
+          voters = [v for v in voter_file_obj.itervoters(election_auth_type)][:5]
           if len(voters) == 0:
             raise Exception("no valid lines found in voter file")
         except Exception as e:
           voters = []
           problems.append(_("your CSV file could not be processed because %s") % str(e))
 
-        return render_template(request, 'voters_upload_confirm', {'election': election, 'voters': voters, 'problems': problems})
+        return render_template(request, 'voters_upload_confirm',
+          {'election': election, 
+          'voters': voters, 'problems': problems,
+          'election_auth_type': election_auth_type})
       else:
         return HttpResponseRedirect("%s?%s" % (settings.SECURE_URL_HOST + reverse(voters_upload, args=[election.uuid]), urlencode({'e':'no voter file specified, try again'})))
 

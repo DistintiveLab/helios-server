@@ -753,7 +753,7 @@ class VoterFile(models.Model):
   class Meta:
     app_label = 'helios'
 
-  def itervoters(self):
+  def itervoters(self, election_auth_type=None):
     if self.voter_file_content:
       if isinstance(self.voter_file_content, str):
         content = self.voter_file_content.encode(encoding='utf-8')
@@ -791,7 +791,7 @@ class VoterFile(models.Model):
       # if voter_type not in any of the existing AUTH_SYSTEMS, so we consider
       # it was not provided
       if voter_type not in AUTH_SYSTEMS and settings.DEFAULT_VOTER_TYPE:
-         voter_type = settings.DEFAULT_VOTER_TYPE
+         voter_type = election_auth_type if election_auth_type else settings.DEFAULT_VOTER_TYPE
          #lets append the voter_type at the "begining of the line"
          voter_fields.insert(0,voter_type)
          
@@ -825,15 +825,23 @@ class VoterFile(models.Model):
     if close:
       voter_stream.close()
 
-  def process(self):
+  def process(self, election_auth_type=None):
     self.processing_started_at = timezone.now()
     self.save()
 
-    voters = list(self.itervoters())
+    voters = list(self.itervoters(election_auth_type))
     self.num_voters = len(voters)
     random.shuffle(voters)
 
     for voter in voters:
+      # lets have a default voter type
+      # allowing users to upload a voter file without informing
+      # voter type, as per previous versions of helios.
+      # if voter_type not in any of the existing AUTH_SYSTEMS, so we consider
+      # it was not provided
+      if voter['voter_type'] not in AUTH_SYSTEMS and settings.DEFAULT_VOTER_TYPE:
+         voter['voter_type'] = election_auth_type if election_auth_type else settings.DEFAULT_VOTER_TYPE
+
       if voter['voter_type'] == 'password':
           # does voter for this user already exist
           existing_voter = Voter.get_by_election_and_voter_id(self.election, voter['voter_id'])

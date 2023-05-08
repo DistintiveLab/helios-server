@@ -132,10 +132,10 @@ Helios
 
 
 @shared_task
-def voter_file_process(voter_file_id):
+def voter_file_process(voter_file_id, election_auth_type=None):
     activate(settings.LANGUAGE_CODE)
     voter_file = VoterFile.objects.get(id=voter_file_id)
-    voter_file.process()
+    voter_file.process(election_auth_type)
     subject = _(u'voter file processed')
     body = _(u'Your voter file upload for %(election_name)s has been processed\n ') % {'election_name': voter_file.election.name}
     body += _(u'%(number_of_voters)s voters have been created \n\n') % {'number_of_voters': voter_file.num_voters}
