@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: helios-ifsc\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-05-05 10:06-0300\n"
-"PO-Revision-Date: 2023-05-05 10:04-0300\n"
+"POT-Creation-Date: 2023-05-08 13:58-0300\n"
+"PO-Revision-Date: 2023-05-08 10:51-0300\n"
 "Last-Translator: Shirlei Chaves <shirlei@gmail.com>\n"
 "Language-Team: \n"
 "Language: pt_BR\n"
@@ -226,17 +226,17 @@ msgstr ""
 msgid "invalid voter email '%s' for voter id '%s'"
 msgstr "email inválido %s para o eleitor de login %s"
 
-#: helios/models.py:1051
+#: helios/models.py:1066
 msgid "password already exists"
 msgstr "senha já existe"
 
-#: helios/models.py:1191
+#: helios/models.py:1217
 msgid "cast vote is quarantined, verification and storage is delayed."
 msgstr ""
 "lançamento de votos está em quarentena, verificação e armazenamento estão "
 "postergados."
 
-#: helios/models.py:1216
+#: helios/models.py:1242
 msgid ""
 "the vote's election UUID does not match the election for which this vote is "
 "being cast"
@@ -562,7 +562,7 @@ msgid "Smart Ballot Tracker"
 msgstr "Rastreador da Cédula"
 
 #: helios/templates/election_build.html:4
-#: helios/templates/election_questions.html:10
+#: helios/templates/election_questions.html:8
 msgid "Questions"
 msgstr "Questões"
 
@@ -1223,9 +1223,10 @@ msgstr ""
 msgid "once you do this, the election will be immediately open for voting."
 msgstr ""
 "Após fazer isso, a eleição será aberta imediatamente para votação. <br /"
-">ATENÇÃO:  caso você tenha cadastrado uma lista de eleitores, é necessário "
-"enviar email para os mesmos, para que recebam usuário e senha para votação. "
-"Sem esses dados, eles não poderão votar."
+">ATENÇÃO:  caso você tenha cadastrado uma lista de eleitores para votarem "
+"com credenciais únicas para esta eleição, é necessário enviar email para os "
+"mesmos, para que recebam usuário e senha para votação. Sem esses dados, eles "
+"não poderão votar."
 
 #: helios/templates/election_view.html:169
 msgid ""
@@ -2360,6 +2361,36 @@ msgstr ""
 
 #: helios/templatetags/voters_help.py:18
 msgid ""
+"<p>If you upload a csv file containing the fields unique_id,email,full name, "
+"like the example bellow:</p><pre>1122233344,eleitor@email.com,Eleitor "
+"Nonono<br>12345678900,segundo@email.com,Segundo Nomomom <br></pre><p>the "
+"system will consider they are voters that will vote using the same type of "
+"credentials that you, the election administrator used to login.That is, if "
+"you used your ldap account for that they will have to be able to "
+"authenticate using the same ldap as well.</p><p>Please not that: In this "
+"case, the login1, login2... must match the login of the ldap user.</p><p>You "
+"won't have to sent them email with credentials for them to be able to vote."
+"However, it is nice to send anyway, to let them know that the election is "
+"open and they can vote.</p><p>To do that, use the option <em>email voters.</"
+"em></p>"
+msgstr ""
+"<p>Se você fizer upload de um arquivo contendo os campos <em>login, endereço-"
+"de-email,Nome Completo</em>, conforme o exemplo abaixo:</p><pre>1122233344,"
+"eleitor@email.com,Eleitor Nonono<br>12345678900,segundo@email.com,Segundo "
+"Nomomom <br></pre><p> o sistema irá considerar que você está carregando "
+"eleitores que irão votar com o mesmo tipo de autenticação que você, o "
+"administrador da eleição utilizou para logar no sistema. Isto é, se você "
+"logou com as credenciais dos sistemas do IFSC, os eleitores carregados "
+"conseguirão conectar para votar nesta eleição usando as credenciais deles do "
+"IFSC. Porém perceba que, neste caso, login1, login2, etc… precisa bater com "
+"o login do IFSC. Quando você congelar a cédula, não será necessário enviar "
+"email para os eleitores para que eles possam começar a votar, eles poderão "
+"logar no sistema e ver as eleições disponíveis em que eles podem votar. "
+"Porém, é interessante enviar mesmo assim, usando a opção <em> enviar email "
+"para eleitores</em>, para que eles saibam que a eleição está aberta.</p>"
+
+#: helios/templatetags/voters_help.py:33
+msgid ""
 "<p> The voter type <em>password</em> indicates that the uploaded voters will "
 "vote using a user and password unique for this election, one that will be "
 "sent to them by email. That is, once you freeze the ballot, you'll have to "
@@ -2376,7 +2407,25 @@ msgstr ""
 "com as credenciais pelos eleitores é que eles conseguirão acessar o sistema "
 "e votar. </p>"
 
-#: helios/templatetags/voters_help.py:25
+#: helios/templatetags/voters_help.py:40
+msgid ""
+"<p> The voter type <em>ldap</em> indicates that the uploaded voters will "
+"vote using the same type of authentication you've used to login. That is, if "
+"you used your ldap account for that they will have to be able to "
+"authenticate using the same ldap as well.</p><p>You don't have to sent them "
+"email with credentials for them to be able to vote.However, it is nice to "
+"send anyway to let them know that the election is open and they can vote.</"
+"p><p>To do that, use the option <em>email voters.</em></p>"
+msgstr ""
+"<p> O tipo de eleitor <em>ldap</em> indica que os eleitores carregados aqui "
+"irão votar com as credenciais de acesso aos sistemas do IFSC. Quando você "
+"congelar a cédula, não será necessário enviar email para os eleitores para "
+"que eles possam começar a votar, eles poderão logar no sistema e ver as "
+"eleições disponíveis em que eles podem votar. Porém, é interessante enviar "
+"mesmo assim, usando a opção <em> enviar email para eleitores</em>, para que "
+"eles saibam que a eleição está aberta.</p>"
+
+#: helios/templatetags/voters_help.py:48
 msgid ""
 "<p> Alternatively you can upload a voter file mixing voter types.For "
 "instance, voter type password and voter type ldap or another authentication "
@@ -2396,7 +2445,7 @@ msgstr ""
 "<em>enviar email para eleitores</em> para que esses eleitores recebem as "
 "credenciais de votação (usuário e senha) para que possam votar.</p>"
 
-#: helios/templatetags/voters_help.py:36
+#: helios/templatetags/voters_help.py:59
 msgid ""
 "<p>If you select this option, any person that can login in helios will be "
 "able to vote in this election.You won't have to upload a voter file.</p>"
@@ -2405,7 +2454,7 @@ msgstr ""
 "Helios poderá votar nesta eleição. Você não conseguirá carregar um arquivo "
 "de eleitores.</p>"
 
-#: helios/templatetags/voters_help.py:40
+#: helios/templatetags/voters_help.py:63
 msgid ""
 "<p>If you select this option, you will have to upload a voter file, "
 "informing the type of the authentication system. For example, if you, the "
@@ -2520,30 +2569,30 @@ msgstr "registro fechado para essa eleição"
 msgid "Constraints successfully saved"
 msgstr "Restrições salvas com sucesso."
 
-#: helios/views.py:1376
+#: helios/views.py:1390
 #, python-format
 msgid "your CSV file could not be processed because %s"
 msgstr ""
 "o seu arquivo CSV não pôde ser processado pelo(s) motivo(s): %s. Por favor, "
 "verifique o arquivo CSV e tente novamente."
 
-#: helios/views.py:1400
+#: helios/views.py:1417
 msgid "Time to Vote"
 msgstr "Hora de Votar"
 
-#: helios/views.py:1401
+#: helios/views.py:1418
 msgid "Simple"
 msgstr "Simples"
 
-#: helios/views.py:1402
+#: helios/views.py:1419
 msgid "Additional Info"
 msgstr "Informação Adicional"
 
-#: helios/views.py:1403
+#: helios/views.py:1420
 msgid "Election Result"
 msgstr "Resultado da Eleição"
 
-#: helios/views.py:1408
+#: helios/views.py:1425
 msgid "bad template"
 msgstr "template inválido"
 
