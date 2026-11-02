@@ -37,7 +37,10 @@
 </p>
 {% if not election.has_helios_trustee %}
 <p>
-    <a href="{% url "election@trustees@add-helios" election.uuid %}">{% trans "add Helios as a trustee" %}</a>
+    <form method="post" action="{% url "election@trustees@add-helios" election.uuid %}" style="display:inline">
+    <input type="hidden" name="csrf_token" value="{{csrf_token}}" />
+    <button type="submit" class="btn btn-link" style="padding:0;">{% trans "add Helios as a trustee" %}</button>
+    </form>
 </p>
 {% endif %}
 
@@ -89,15 +92,28 @@
   {% if admin_p %}
     {% if t.secret_key %}
       {% if not election.frozen_at %}
-          <a class="remove_helios_as_trustee" class="glyphicon glyphicon-remove" href="{% url "election@trustees@delete" election.uuid %}?uuid={{t.uuid}}">
-           <i title="{% trans "Remove trustee" %}" class="glyphicon glyphicon-remove"></i></a>
+          <form method="post" action="{% url "election@trustees@delete" election.uuid %}" style="display:inline" onsubmit="return confirm('{% trans "Are you sure you want to remove Helios as a trustee?" %}');">
+          <input type="hidden" name="csrf_token" value="{{csrf_token}}" />
+          <input type="hidden" name="uuid" value="{{t.uuid}}" />
+          <button type="submit" class="btn btn-link" style="padding:0;">
+           <i title="{% trans "Remove trustee" %}" class="glyphicon glyphicon-remove"></i></button>
+          </form>
       {% endif %}
     {% else %}
       {{t.email}}
       {% if not election.frozen_at %}
-              <a class="remove_trustee" class="glyphicon glyphicon-remove" href="{% url "election@trustees@delete" election.uuid %}?uuid={{t.uuid}}"><i title="{% trans "Remove trustee" %}" class="glyphicon glyphicon-remove"></i></a>
+              <form method="post" action="{% url "election@trustees@delete" election.uuid %}" style="display:inline" onsubmit="return confirm('{% trans "Are you sure you want to remove this Trustee?" %}');">
+              <input type="hidden" name="csrf_token" value="{{csrf_token}}" />
+              <input type="hidden" name="uuid" value="{{t.uuid}}" />
+              <button type="submit" class="btn btn-link" style="padding:0;">
+              <i title="{% trans "Remove trustee" %}" class="glyphicon glyphicon-remove"></i></button>
+              </form>
       {% endif %}
-               <a title="{% trans "send login" %}" class="glyphicon glyphicon-envelope send_trustee_url" href="{% url "election@trustee@send-url" election.uuid t.uuid %}"></a>
+               <form method="post" action="{% url "election@trustee@send-url" election.uuid t.uuid %}" style="display:inline" onsubmit="return confirm('{% trans "Are you sure you want to send this trustee his/her admin URL?" %}');">
+               <input type="hidden" name="csrf_token" value="{{csrf_token}}" />
+               <button type="submit" class="btn btn-link" style="padding:0;">
+               <i title="{% trans "send login" %}" class="glyphicon glyphicon-envelope"></i></button>
+               </form>
     {% endif %}
   {% endif %}
   </td>

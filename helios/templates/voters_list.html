@@ -71,7 +71,13 @@
 	{% endif %}
 {% endif %}
 	{% if email_voters and election.frozen_at and admin_p %}
-	<p><a class="btn btn-primary" href="{% url "election@voters@email" election.uuid %}">{% trans "email voters" %}</a></p>
+	<p>
+	{% if can_send_emails %}
+	<a class="btn btn-primary" href="{% url "election@voters@email" election.uuid %}">{% trans "email voters" %}</a>
+	{% else %}
+	<button class="btn btn-primary" disabled style="opacity: 0.5; cursor: not-allowed;" title="{{email_disabled_reason}}">{% trans "email voters" %} ({% trans "disabled" %}: {{email_disabled_reason}})</button>
+	{% endif %}
+	</p>
 	{% endif %}
 
 
@@ -82,7 +88,11 @@
 		<!-- Add a Voter: WORK HERE-->
 			{% if upload_p and not election.openreg %}
 			<div class="form-group" id="bulk_upload_voters">
+				{% if can_modify_voters %}
 				<a class="btn btn-primary" href="{% url "election@voters@upload" election_uuid=election.uuid %}">{% trans "bulk upload voters" %}</a>
+				{% else %}
+				<button class="btn btn-primary" disabled style="opacity: 0.5; cursor: not-allowed;" title="{{modify_voters_disabled_reason}}">{% trans "bulk upload voters" %} ({% trans "disabled" %}: {{modify_voters_disabled_reason}})</button>
+				{% endif %}
 			</div>
 			{% endif %}
 		{% endif %}
@@ -162,7 +172,12 @@
 				{% if email_voters and election.frozen_at %}
 				<a href="{% url "election@voters@email" election.uuid %}?voter_id={{voter.id}}"><i title="{% trans "Send email to this voter. This action will only be possible if the ballot is already frozen." %}" class="glyphicon glyphicon-envelope"></i></a>
 				{% endif %}
-				<a href="{% url "election@voter@delete" election.uuid voter.uuid %}"><i data-name="{{voter.name}}" title="{% trans "Remove voter" %}" class="glyphicon glyphicon-remove remove_voter"></i></a>
+				{% if can_modify_voters %}
+				<form method="post" action="{% url "election@voter@delete" election.uuid voter.uuid %}" style="display:inline" onsubmit="return confirm('{% trans "are you sure you want to remove" %} {{voter.name}} ?');">
+				<input type="hidden" name="csrf_token" value="{{csrf_token}}" />
+				<button type="submit" class="btn btn-link" style="padding:0;"><i data-name="{{voter.name}}" title="{% trans "Remove voter" %}" class="glyphicon glyphicon-remove remove_voter"></i></button>
+				</form>
+				{% endif %}
 
 			<!--<img class="small-logo" src="/static/auth/login-icons/{{voter.voter_type}}.png" alt="{{voter.voter_type}}" />--> {{voter.name}}</td>
 			{% if election.use_voter_aliases %}
@@ -207,6 +222,10 @@
 </div>
 <br>
 
+<p>
+<a class="btn btn-primary" href="{% url "election@voters@download-csv" election.uuid %}{% if q %}?q={{q|urlencode}}{% endif %}">{% trans "Download Voters as CSV" %}</a>
+</p>
+
 {% if admin_p %}
 	{% if voter_files %}
 		{% trans "Prior Bulk Uploads:" %}
@@ -234,6 +253,16 @@
 		</ul>
 	{% endif %}
 {% endif %}
+
+{% if admin_p and not election.frozen_at and election.num_voters > 0 %}
+<p>
+<form style="display: inline;" method="post" action="{% url "election@voters@clear" election.uuid %}" onsubmit="return confirm('{% blocktrans with num=election.num_voters %}Are you sure you want to remove ALL {{num}} voter(s)? This action cannot be undone.{% endblocktrans %}');">
+<input type="hidden" name="csrf_token" value="{{csrf_token}}" />
+<input class="btn btn-danger" type="submit" value="{% trans "clear all voters" %}" />
+</form>
+</p>
+{% endif %}
+
 {% modal votersAnyModal Eleitores %}
   {% voters_help_text "any" %}
 {% endmodal %}

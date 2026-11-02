@@ -4,16 +4,18 @@ Helios URLs for Election related stuff
 Ben Adida (ben@adida.net)
 """
 
-from django.conf.urls import url
+from django.urls import path
 
-from helios.stats_views import (home, force_queue, elections, recent_problem_elections, recent_votes, admin_actions)
+from helios.stats_views import (home, force_queue, elections, recent_problem_elections, recent_votes, user_search, deleted_elections, undelete_election)
 import helios.stats_url_names as names
 
 urlpatterns = [
-    url(r'^$', home, name=names.STATS_HOME),
-    url(r'^force-queue$', force_queue, name=names.STATS_FORCE_QUEUE),
-    url(r'^elections$', elections, name=names.STATS_ELECTIONS),
-    url(r'^problem-elections$', recent_problem_elections, name=names.STATS_ELECTIONS_PROBLEMS),
-    url(r'^recent-votes$', recent_votes, name=names.STATS_RECENT_VOTES),
-    url(r'^admin-actions$', admin_actions, name=names.STATS_ADMIN_ACTIONS),
+    path('', home, name=names.STATS_HOME),
+    path('force-queue', force_queue, name=names.STATS_FORCE_QUEUE),
+    path('elections', elections, name=names.STATS_ELECTIONS),
+    path('problem-elections', recent_problem_elections, name=names.STATS_ELECTIONS_PROBLEMS),
+    path('recent-votes', recent_votes, name=names.STATS_RECENT_VOTES),
+    path('user-search', user_search, name=names.STATS_USER_SEARCH),
+    path('deleted-elections', deleted_elections, name=names.STATS_DELETED_ELECTIONS),
+    path('deleted-elections/<str:election_uuid>/undelete', undelete_election, name=names.STATS_UNDELETE_ELECTION),
 ]

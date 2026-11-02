@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 import json
-import ldap
 import os
-from django.utils.translation import ugettext_lazy as _
-from django_auth_ldap.config import LDAPSearch, GroupOfNamesType
-
-# a massive hack to see if we're testing, in which case we use different settings
 import sys
 
+import ldap
+from django.utils.translation import gettext_lazy as _
+from django_auth_ldap.config import LDAPSearch
+
+# a massive hack to see if we're testing, in which case we use different settings
 TESTING = 'test' in sys.argv
 
 # go through environment variables and override them
@@ -57,7 +57,7 @@ SHOW_USER_INFO = (get_from_env('SHOW_USER_INFO', '1') == '1')
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'ENGINE': 'django.db.backends.postgresql',
         'NAME': get_from_env('DB_NAME', 'helios'),
         'USER': get_from_env('DB_USER', 'helios'),
         'PASSWORD': get_from_env('DB_PWD', 'helios'),
@@ -71,7 +71,10 @@ DATABASES = {
 if get_from_env('DATABASE_URL', None):
     import dj_database_url
     DATABASES['default'] = dj_database_url.config(conn_max_age=600, ssl_require=True)
-    DATABASES['default']['ENGINE'] = 'django.db.backends.postgresql_psycopg2'
+    DATABASES['default']['ENGINE'] = 'django.db.backends.postgresql'
+
+# explicitly set the default auto-created primary field to silence warning models.W042
+DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
@@ -120,6 +123,9 @@ STATICFILES_DIRS = (
 )
 
 
+# Secret key for HMAC confirmation codes (separate from Django SECRET_KEY)
+EMAIL_OPTOUT_SECRET = get_from_env('EMAIL_OPTOUT_SECRET', 'replace-with-secure-random-key')
+
 # If debug is set to false and ALLOWED_HOSTS is not declared, django raises  "CommandError: You must set settings.ALLOWED_HOSTS if DEBUG is False."
 # If in production, you got a bad request (400) error
 #More info: https://docs.djangoproject.com/en/1.7/ref/settings/#allowed-hosts (same for 1.6)
@@ -135,6 +141,13 @@ if get_from_env('SSL', '0') == '1':
 
 SESSION_COOKIE_HTTPONLY = True
 
+# Set this explicitly rather than relying on the Django default: it is a load-bearing
+# part of our CSRF defense, since Helios does its own CSRF checking (check_csrf) rather
+# than using Django's CsrfViewMiddleware. 'Lax' keeps the session cookie off every
+# cross-site POST and off cross-site GET subresources (images, iframes, fetch), while
+# still allowing ordinary inbound links to Helios to stay logged in.
+SESSION_COOKIE_SAMESITE = get_from_env('SESSION_COOKIE_SAMESITE', 'Lax')
+
 # let's go with one year because that's the way to do it now
 STS = False
 if get_from_env('HSTS', '0') == '1':
@@ -147,12 +160,42 @@ if get_from_env('HSTS', '0') == '1':
 SECURE_BROWSER_XSS_FILTER = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
 
+# Content Security Policy Configuration (django-csp)
+# https://django-csp.readthedocs.io/
+#
+# 'unsafe-inline' and 'unsafe-eval' are required due to legacy inline scripts,
+# onclick handlers, and jQuery JSON eval usage. Future improvement: use nonces.
+
+CSP_DEFAULT_SRC = ("'self'",)
+CSP_SCRIPT_SRC = ("'self'", "'unsafe-inline'", "'unsafe-eval'")
+CSP_STYLE_SRC = ("'self'", "'unsafe-inline'")
+CSP_IMG_SRC = ("'self'", "data:")
+CSP_FONT_SRC = ("'self'",)
+CSP_CONNECT_SRC = ("'self'",)
+CSP_WORKER_SRC = ("'self'", "blob:")
+CSP_FORM_ACTION = ("'self'",)
+CSP_FRAME_ANCESTORS = ("'self'",)
+CSP_BASE_URI = ("'self'",)
+CSP_OBJECT_SRC = ("'none'",)
+
+# Set CSP_REPORT_ONLY=1 to test without enforcing
+if get_from_env('CSP_REPORT_ONLY', '0') == '1':
+    CSP_REPORT_ONLY = True
+else:
+    CSP_REPORT_ONLY = False
+
+# Optional: URI to receive CSP violation reports
+_csp_report_uri = get_from_env('CSP_REPORT_URI', None)
+if _csp_report_uri:
+    CSP_REPORT_URI = _csp_report_uri
+
 SILENCED_SYSTEM_CHECKS = ['urls.W002']
 
 MIDDLEWARE = [
     # secure a bunch of things
     'django.middleware.security.SecurityMiddleware',
     'helios.security.HSTSMiddleware',
+    'csp.middleware.CSPMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     # 'django.middleware.csrf.CsrfViewMiddleware',
 
@@ -205,10 +248,16 @@ INSTALLED_APPS = (
     'django_celery_beat'
 )
 
+# Email backend configuration
+# In development mode, set EMAIL_USE_CONSOLE=1 to print emails to stdout
+if DEBUG and get_from_env('EMAIL_USE_CONSOLE', '0') == '1':
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
 ANYMAIL = {
     "MAILGUN_API_KEY": get_from_env('MAILGUN_API_KEY', None),
 }
 
+# Mailgun overrides console backend if configured
 if ANYMAIL["MAILGUN_API_KEY"]:
     EMAIL_BACKEND = "anymail.backends.mailgun.EmailBackend"
 
@@ -261,14 +310,22 @@ HELIOS_ADMIN_ONLY = True
 HELIOS_VOTERS_UPLOAD = True
 HELIOS_VOTERS_EMAIL = True
 
+# Number of weeks after tallying when voter emails should be disabled
+HELIOS_VOTER_EMAIL_CUTOFF_WEEKS = int(get_from_env('HELIOS_VOTER_EMAIL_CUTOFF_WEEKS', '3'))
+
 # are elections private by default?
 HELIOS_PRIVATE_DEFAULT = True
 
 # authentication systems enabled
-# AUTH_ENABLED_SYSTEMS = ['password','facebook','twitter', 'google', 'yahoo']
+# AUTH_ENABLED_SYSTEMS = ['password','facebook', 'google', 'yahoo']
 AUTH_ENABLED_SYSTEMS = get_from_env('AUTH_ENABLED_SYSTEMS',
-                                    get_from_env('AUTH_ENABLED_AUTH_SYSTEMS', 'ldap')
+                                    get_from_env('AUTH_ENABLED_AUTH_SYSTEMS', 'ldap,password,google,facebook')
                                     ).split(",")
+
+# Add development login in debug mode
+if DEBUG:
+    AUTH_ENABLED_SYSTEMS = ['devlogin'] + AUTH_ENABLED_SYSTEMS
+
 AUTH_DEFAULT_SYSTEM = get_from_env('AUTH_DEFAULT_SYSTEM', get_from_env('AUTH_DEFAULT_AUTH_SYSTEM', None))
 
 # google
@@ -280,18 +337,9 @@ FACEBOOK_APP_ID = get_from_env('FACEBOOK_APP_ID','')
 FACEBOOK_API_KEY = get_from_env('FACEBOOK_API_KEY','')
 FACEBOOK_API_SECRET = get_from_env('FACEBOOK_API_SECRET','')
 
-# twitter
-TWITTER_API_KEY = ''
-TWITTER_API_SECRET = ''
-TWITTER_USER_TO_FOLLOW = 'heliosvoting'
-TWITTER_REASON_TO_FOLLOW = "we can direct-message you when the result has been computed in an election in which you participated"
-
-# the token for Helios to do direct messaging
-TWITTER_DM_TOKEN = {"oauth_token": "", "oauth_token_secret": "", "user_id": "", "screen_name": ""}
-
 # LinkedIn
-LINKEDIN_API_KEY = ''
-LINKEDIN_API_SECRET = ''
+LINKEDIN_CLIENT_ID = get_from_env('LINKEDIN_CLIENT_ID', '')
+LINKEDIN_CLIENT_SECRET = get_from_env('LINKEDIN_CLIENT_SECRET', '')
 
 # CAS (for universities)
 CAS_USERNAME = get_from_env('CAS_USERNAME', "")
@@ -299,13 +347,13 @@ CAS_PASSWORD = get_from_env('CAS_PASSWORD', "")
 CAS_ELIGIBILITY_URL = get_from_env('CAS_ELIGIBILITY_URL', "")
 CAS_ELIGIBILITY_REALM = get_from_env('CAS_ELIGIBILITY_REALM', "")
 
-# Clever
-CLEVER_CLIENT_ID = get_from_env('CLEVER_CLIENT_ID', "")
-CLEVER_CLIENT_SECRET = get_from_env('CLEVER_CLIENT_SECRET', "")
-
 # GitHub
 GH_CLIENT_ID = get_from_env('GH_CLIENT_ID', '')
 GH_CLIENT_SECRET = get_from_env('GH_CLIENT_SECRET', '')
+
+# Gitlab
+GITLAB_CLIENT_ID = get_from_env('GITLAB_CLIENT_ID', "")
+GITLAB_CLIENT_SECRET = get_from_env('GITLAB_CLIENT_SECRET', "")
 
 # email server
 EMAIL_HOST = get_from_env('EMAIL_HOST', 'localhost')
@@ -331,7 +379,8 @@ logging.basicConfig(
 # set up celery
 if TESTING:
     CELERY_TASK_ALWAYS_EAGER = True
-#database_url = DATABASES['default']
+else:
+    CELERY_TASK_ALWAYS_EAGER = (get_from_env('CELERY_TASK_ALWAYS_EAGER', '0') == '1')
 
 CELERY_BROKER_URL = get_from_env('CELERY_BROKER_URL', 'redis://127.0.0.1:6379')
 CELERY_ACCEPT_CONTENT = ['application/json']

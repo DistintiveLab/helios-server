@@ -8,6 +8,17 @@ Some basic utils
 import json
 
 
+class AuthenticationError(Exception):
+  """
+  Raised by an auth system when sign-in fails for a reason the person can fix
+  themselves. The message is shown to them, so it must not contain secrets.
+  """
+  def __init__(self, message, help_url=None):
+    super().__init__(message)
+    self.message = message
+    self.help_url = help_url
+
+
 ## JSON
 def to_json(d):
     return json.dumps(d, sort_keys=True)
@@ -34,3 +45,13 @@ def JSONFiletoDict(filename):
     with open(filename, 'r') as f:
         content = f.read()
     return from_json(content)
+
+
+def format_recipient(name, email):
+    """
+    Format an email recipient as "name" <email>.
+    Truncates name to 70 characters to avoid issues with Python3's email module.
+    Quotes the name per RFC 5322 to handle special characters.
+    """
+    truncated_name = name[:70] if name else email
+    return "\"%s\" <%s>" % (truncated_name, email)

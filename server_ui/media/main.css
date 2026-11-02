@@ -2,3 +2,96 @@
 #contentbody {
   padding: 20px 30px 20px 30px;
 }
+
+/*
+  State-changing actions have to be POSTs so they can carry a CSRF token, but a
+  few of them (deleting a voter, deleting a trustee) read better as inline links
+  than as buttons. These rules let a <button> inside an inline form look like the
+  <a> it replaced.
+*/
+form.inline-action {
+  display: inline;
+  margin: 0;
+}
+
+button.link-button {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+  color: #2ba6cb;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+button.link-button:hover {
+  text-decoration: underline;
+}
+
+/*
+  The trustee heading carries those inline action forms next to the trustee's name.
+  They cannot live inside the <h5> (a form is flow content, a heading takes phrasing
+  content), so the heading is inlined and the wrapper keeps the block spacing.
+*/
+.trustee-heading {
+  margin: 1.25rem 0 0.5rem;
+}
+
+.trustee-heading h5 {
+  display: inline;
+  margin: 0;
+}
+
+/*
+  On phones and tablets, wide content (ballot trackers, key fingerprints, the
+  voter table) used to make the page wider than the screen: the browser zoomed
+  out to fit it, and the header and footer only covered part of the page. Keep
+  everything within the screen: long unbroken strings wrap, and tables that
+  still don't fit scroll sideways on their own.
+*/
+@media only screen and (max-width: 64em) {
+  #contentbody tt,
+  #contentbody pre {
+    overflow-wrap: anywhere;
+  }
+
+  #contentbody pre {
+    white-space: pre-wrap;
+  }
+
+  #contentbody textarea,
+  #contentbody img {
+    max-width: 100%;
+  }
+
+  table.pretty {
+    display: block;
+    width: fit-content;
+    max-width: 100%;
+    margin-left: 0;
+    margin-right: 0;
+    overflow-x: auto;
+  }
+
+  #contentbody table.pretty tt {
+    overflow-wrap: normal;
+  }
+}
+
+@media only screen and (max-width: 40em) {
+  #contentbody {
+    padding: 15px;
+  }
+
+  #contentbody pre {
+    margin: 10px 0 !important;
+    padding: 10px !important;
+  }
+
+  .highlight-box-margin {
+    margin-right: 0;
+  }
+}

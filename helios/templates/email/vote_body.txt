@@ -13,7 +13,7 @@
 
 <p>Código de Identificação da Eleição: {{election_hash}}</p>
 <br>
-{% ifequal voter.voter_type "password" %}
+{% if voter.voter_type == "password" %}
   <p> URL da Eleição: {{election_vote_url}}</p>
 <br>
 <p>
@@ -23,7 +23,7 @@
 {% else %}
 <p><a href="{{helios_url}}"> Conecte-se com seu usuário e senha dos sistemas do IFSC para acessar a lista de eleições nas quais você pode votar.</a></p>
 
-{% endifequal %}
+{% endif %}
 <p>Código de Identificação da Eleição: {{election_hash}}</p>
 
 {% if voter.vote_hash %}
@@ -54,5 +54,10 @@ IMPORTANTE: quando você for solicitado a informar seu login para votar, informe
 <br>
 <u><a href="http://www.ifsc.edu.br" target="_blank" style=""><font style="" face="verdana, sans-serif">www.ifsc.edu.br</font></a></u>
 
+{% if unsubscribe_url %}
+<p style="font-size:0.8em;">To stop receiving all emails from Helios, click here:<br>
+{{ unsubscribe_url }}
+</p>
+{% endif %}
 </body>
 </html>

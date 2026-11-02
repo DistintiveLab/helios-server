@@ -36,7 +36,10 @@ You have uploaded a file of voters. The first few rows of this file are
 {% endfor %}
 </p>
 <br />
-<a href="{% url "election@voters@upload-cancel" election.uuid %}" class="btn btn-primary" >{% trans "never mind, upload a different file" %}</a>
+<form class="inline-action" method="post" action="{% url "election@voters@upload-cancel" election.uuid %}">
+<input type="hidden" name="csrf_token" value="{{csrf_token}}" />
+<button type="submit" class="btn btn-primary">{% trans "never mind, upload a different file" %}</button>
+</form>
 <a href="{% url "election@view" election.uuid %}" class="btn btn-danger" >{% trans "back to election" %}</a>
 </p>
 </div>
@@ -45,6 +48,7 @@ You have uploaded a file of voters. The first few rows of this file are
 
 <form method="post" role="form" class="form" action="" id="upload_form">
  <input type="hidden" name="confirm_p" value="1" />
+ <input type="hidden" name="csrf_token" value="{{csrf_token}}" />
 <div class="form-group">
   <label for="upload">{% trans "Does this look right to you?" %}</label>
  </div>
@@ -53,7 +57,10 @@ You have uploaded a file of voters. The first few rows of this file are
 </div>
 </form>
 <div class="form-group">
-<a class="btn btn-danger" href="{% url "election@voters@upload-cancel" election.uuid %}">{% trans "no, let me upload a different file" %}</a>
+<form class="inline-action" method="post" action="{% url "election@voters@upload-cancel" election.uuid %}">
+<input type="hidden" name="csrf_token" value="{{csrf_token}}" />
+<button type="submit" class="btn btn-danger">{% trans "no, let me upload a different file" %}</button>
+</form>
  <a class="btn btn-danger" href="{% url "election@view" election.uuid %}"> {% trans "back to election" %}</a>
 
 {% endif %}

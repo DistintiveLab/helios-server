@@ -6,16 +6,17 @@ e-mail: shirlei@gmail.com
 version: 1.0 - 2015 
 """
 import re
-from urlparse import urlsplit
+from urllib.parse import urlsplit
 
 from django import forms
 from django.conf import settings
-from django.conf.urls import url
 from django.core.mail import send_mail
 from django.http import HttpResponseRedirect
-from django.urls import reverse
+from django.urls import re_path, reverse
 from django.utils import timezone
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
+
+from helios_auth.utils import format_recipient
 
 # some parameters to indicate that status updating is possible
 STATUS_UPDATES = False
@@ -41,7 +42,7 @@ def shibboleth_login_view(request):
 
     return render_template(request, 'shibboleth/login_box', {
         'error': error,
-    'enabled_auth_systems': settings.AUTH_ENABLED_AUTH_SYSTEMS,
+    'enabled_auth_systems': settings.AUTH_ENABLED_SYSTEMS,
     })
 
 
@@ -90,7 +91,7 @@ def send_message(user_id, name, user_info, subject, body):
   """
   send email to shibboleth users. user_id is the email for shibboleth.
   """
-  send_mail(subject, body, settings.SERVER_EMAIL, ["%s <%s>" % (name, user_id)],
+  send_mail(subject, body, settings.SERVER_EMAIL, [format_recipient(name, user_id)],
           fail_silently=False, html_message=body)
 
 
@@ -242,6 +243,6 @@ SHIBBOLETH_LOGIN_URL_NAME = "auth@shibboleth@login"
 SHIBBOLETH_REGISTER_URL_NAME = "auth@shibboleth@register"
 
 urlpatterns = [
-    url(r'^shib/login', shibboleth_login_view, name=SHIBBOLETH_LOGIN_URL_NAME),
-    url(r'^shib/register', shibboleth_register, name=SHIBBOLETH_REGISTER_URL_NAME),
+    re_path(r'^shib/login', shibboleth_login_view, name=SHIBBOLETH_LOGIN_URL_NAME),
+    re_path(r'^shib/register', shibboleth_register, name=SHIBBOLETH_REGISTER_URL_NAME),
 ]

@@ -6,6 +6,8 @@ Ben Adida - ben@adida.net
 """
 
 import datetime
+import hashlib
+import hmac
 import re
 import string
 import urllib.parse
@@ -108,7 +110,7 @@ def xss_strip_all_tags(s):
                     return str(entity, "iso-8859-1")
         return text # leave as is
         
-    return re.sub("(?s)<[^>]*>|&#?\w+;", fixup, s)
+    return re.sub(r"(?s)<[^>]*>|&#?\w+;", fixup, s)
     
 
 def random_string(length=20, alphabet=None):
@@ -182,3 +184,41 @@ def lock_row(model, pk):
     pass
 
   return row
+
+
+##
+## Email opt-out utilities
+##
+
+import hashlib
+import hmac
+
+
+def hash_email(email):
+    if not email:
+        return None
+    
+    normalized_email = email.lower().strip()
+    return hashlib.sha256(normalized_email.encode('utf-8')).hexdigest()
+
+
+def generate_email_confirmation_code(email, action):
+    if not email or not action:
+        return None
+    
+    normalized_email = email.lower().strip()
+    message = f"{normalized_email}:{action}"
+    
+    return hmac.new(
+        settings.EMAIL_OPTOUT_SECRET.encode('utf-8'),
+        message.encode('utf-8'),
+        hashlib.sha256
+    ).hexdigest()
+
+
+def verify_email_confirmation_code(email, action, code):
+    if not email or not action or not code:
+        return False
+    
+    expected_code = generate_email_confirmation_code(email, action)
+    return expected_code == code

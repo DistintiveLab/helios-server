@@ -6,8 +6,8 @@ Ben Adida (12-30-2008)
 
 from django.conf import settings
 from django.http import HttpResponse
-from django.shortcuts import render_to_response
-from django.template import loader
+from django.shortcuts import render
+from django.template import Context, loader
 # nicely update the wrapper function
 from functools import update_wrapper
 
@@ -52,7 +52,7 @@ def render_template(request, template_name, values = None, include_user=True):
   if not include_user:
     del vars_with_user['user']
 
-  return render_to_response('helios/templates/%s.html' % template_name, vars_with_user)
+  return render(request, 'helios/templates/%s.html' % template_name, vars_with_user)
 
 
 def render_template_raw(request, template_name, values=None):
@@ -67,6 +67,15 @@ def render_template_raw(request, template_name, values=None):
   return t.render(context=full_vars, request=request)
 
 
+def render_text_template(template_name, values=None):
+  """
+  Render a plain-text template (email, notification) without HTML autoescaping,
+  so names and URLs with &, ' or < come out as typed rather than as entities.
+  """
+  t = loader.get_template(template_name)
+  return t.template.render(Context(values or {}, autoescape=False))
+
+
 def render_json(json_txt):
   return HttpResponse(utils.to_json(json_txt), content_type="application/json")
 
@@ -79,6 +88,9 @@ def return_json(func):
     """
     def convert_to_json(self, *args, **kwargs):
       return_val = func(self, *args, **kwargs)
+      # let a view return an error response (e.g. a 400) as-is
+      if isinstance(return_val, HttpResponse):
+        return return_val
       try:
         return render_json(return_val)
       except Exception as e:

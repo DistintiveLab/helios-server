@@ -42,6 +42,11 @@ Parece que você não votou nessa eleição. Se você acha que votou, por favor,
 <br>
 <u><a href="http://www.ifsc.edu.br" target="_blank" style=""><font style="" face="verdana, sans-serif">www.ifsc.edu.br</font></a></u>
 
+{% if unsubscribe_url %}
+<p style="font-size:0.8em;">To stop receiving all emails from Helios, click here:<br>
+{{ unsubscribe_url }}
+</p>
+{% endif %}
 </body>
 </html>
 

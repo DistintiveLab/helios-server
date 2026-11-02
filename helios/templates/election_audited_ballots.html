@@ -32,10 +32,10 @@ These ballots are <em>not cast</em>, and they will not be counted. They are just
 <a href="?after={{next_after}}&offset={{offset_plus_limit}}">{% trans "next " %}{{limit}}</a> &nbsp;&nbsp;
 {% endif %}
 
-{% ifequal offset 0 %}
+{% if offset == 0 %}
 {% else %}
 <a href="?">{% trans "back to start" %}</a> &nbsp;&nbsp;
-{% endifequal %}
+{% endif %}
 {% if more_p %}
 <a href="?after={{next_after}}&offset={{next_offset}}">{% trans "next" %} {{limit}}</a>
 {% endif %}

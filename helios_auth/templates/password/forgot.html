@@ -15,6 +15,6 @@
 <form class="prettyform" action="" method="POST">
     <input type="hidden" name="csrf_token" value="{{csrf_token}}" />
     <input type="hidden" name="return_url" value="{{return_url}}" />
-{% trans "Your Username" %} : <input type="text" name="username" /> <input type="submit" value="{% trans "Send Reminder" %}" />
+{% trans "Your Username" %} : <input type="text" name="username" /> <input class="button" type="submit" value="{% trans "Send Reminder" %}" />
 </form>
 {% endblock %}

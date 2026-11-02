@@ -4,11 +4,10 @@ Forms for Helios
 
 from django import forms
 from django.conf import settings
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
-from .fields import SplitDateTimeField
+from .fields import DateTimeLocalField
 from .models import Election
-from .widgets import SplitSelectDateTimeWidget
 
 
 class ElectionForm(forms.Form):
@@ -63,12 +62,12 @@ class ElectionTimesForm(forms.Form):
     help_text = _('UTC date and time when voting begins'),
     input_formats=['%d/%m/%Y %H:%M'],
     widget=forms.DateTimeInput(format='%d/%m/%Y %H:%M'),
-
-    )
-  voting_ends_at = forms.DateTimeField(help_text = _('UTC date and time when voting ends'),
+    required = False)
+  voting_ends_at = forms.DateTimeField(help_text = _("UTC date and time when voting ends"),
     label = _("Voting ends at"),
     input_formats=['%d/%m/%Y %H:%M'],
-    widget=forms.DateTimeInput(format='%d/%m/%Y %H:%M'))
+    widget=forms.DateTimeInput(format='%d/%m/%Y %H:%M'),
+    required=False)
 
 class ElectionTimeExtensionForm(forms.Form):
   voting_extended_until = forms.DateTimeField(help_text = _("UTC date and time voting extended to"),
@@ -83,6 +82,17 @@ class EmailVotersForm(forms.Form):
   send_to = forms.ChoiceField(label=_("Send To"), initial="all", choices= [('all', _('all voters')), ('voted', _('voters who have cast a ballot')), ('not-voted', _('voters who have not yet cast a ballot'))])
 
 
+  # placeholders shown in the email preview, which voters would receive literally
+  PREVIEW_PLACEHOLDERS = ['<SUBJECT>', '<BODY>', '<VOTER_NAME>', '<VOTER_LOGIN_ID>', '<VOTER_PASSWORD>', '<SMART_TRACKER>']
+
+  def clean(self):
+    cleaned_data = super().clean()
+    for field in ['subject', 'body']:
+      placeholders = [p for p in self.PREVIEW_PLACEHOLDERS if p in cleaned_data.get(field, '')]
+      if placeholders:
+        self.add_error(field, "Remove %s: it is only shown in the preview, and voters would receive it as is. Helios fills in each voter's details itself, so this box is only for your own message." % ", ".join(placeholders))
+    return cleaned_data
+
 class TallyNotificationEmailForm(forms.Form):
   subject = forms.CharField(max_length=80)
   body = forms.CharField(max_length=2000, widget=forms.Textarea, required=False)
@@ -94,3 +104,7 @@ class TallyNotificationEmailForm(forms.Form):
 class VoterPasswordForm(forms.Form):
   voter_id = forms.CharField(max_length=50, label=_("Voter ID"))
   password = forms.CharField(widget=forms.PasswordInput(), max_length=100)
+
+class VoterPasswordResendForm(forms.Form):
+  voter_id = forms.CharField(max_length=50, label="Voter ID", help_text="Enter the voter ID you were assigned for this election")
+

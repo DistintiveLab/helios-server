@@ -18,16 +18,24 @@
 {% trans "Voters" %} {{offset_plus_one}} - {{offset_plus_limit}} &nbsp;&nbsp;
 
 {% if next_after %}
-<a href="{% url "election@bboard" election.uuid %}?after={{next_after}}&offset={{offset_plus_limit}}">next {{limit}}</a> &nbsp;&nbsp;
+<a href="{% url "election@bboard" election.uuid %}?after={{next_after}}&offset={{offset_plus_limit}}&limit={{limit}}">next {{limit}}</a> &nbsp;&nbsp;
 {% endif %}
 
-{% ifequal offset 0 %}
+{% if offset == 0 %}
 {% else %}
-<a href="{% url "election@bboard" election.uuid %}">{% trans" back to start" %}</a> &nbsp;&nbsp;
-{% endifequal %}
-{% if more_p %}
-<a href="{% url "election@bboard" election.uuid %}?after={{next_after}}&offset={{next_offset}}">{% trans "next" %} {{limit}}</a>
+<a href="{% url "election@bboard" election.uuid %}?limit={{limit}}">{% trans" back to start" %}</a> &nbsp;&nbsp;
 {% endif %}
+{% if more_p %}
+<a href="{% url "election@bboard" election.uuid %}?after={{next_after}}&offset={{next_offset}}&limit={{limit}}">{% trans "next" %} {{limit}}</a>
+{% endif %}
+<span style="margin-left: 20px;">
+{% trans "Show" %}:
+{% for allowed_limit in allowed_limits %}
+{% if allowed_limit == limit %}
+<strong>{{allowed_limit}}</strong>{% else %}<a href="{% url "election@bboard" election.uuid %}?limit={{allowed_limit}}">{{allowed_limit}}</a>{% endif %}{% if not forloop.last %} | {% endif %}
+{% endfor %}
+{% trans "per page" %}
+</span>
 <table class="pretty">
 <tr><th>
 {% if election.use_voter_aliases %}

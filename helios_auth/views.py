@@ -5,6 +5,7 @@ Ben Adida
 2009-07-05
 """
 
+import logging
 from urllib.parse import urlencode
 
 from django.http import HttpResponseRedirect, HttpResponse
@@ -17,7 +18,10 @@ from helios_auth.url_names import AUTH_INDEX, AUTH_START, AUTH_AFTER, AUTH_WHY, 
 from .auth_systems import AUTH_SYSTEMS, password
 from .models import User
 from .security import FIELDS_TO_SAVE
+from .utils import AuthenticationError
 from .view_utils import render_template, render_template_raw
+
+logger = logging.getLogger(__name__)
 
 
 def index(request):
@@ -45,25 +49,28 @@ def index(request):
                                             'default_auth_system': DEFAULT_AUTH_SYSTEM,
                                             'default_auth_system_obj': default_auth_system_obj})
 
-def login_box_raw(request, return_url='/', auth_systems = None):
+def login_box_raw(request, return_url='/', auth_systems = None, use_default_auth_system=True):
   """
   a chunk of HTML that shows the various login options
+
+  use_default_auth_system=False lists every system in auth_systems even when
+  AUTH_DEFAULT_SYSTEM is set, e.g. for an election whose voters use other systems.
   """
+  default_auth_system = DEFAULT_AUTH_SYSTEM if use_default_auth_system else None
   default_auth_system_obj = None
-  if DEFAULT_AUTH_SYSTEM:
-    default_auth_system_obj = AUTH_SYSTEMS[DEFAULT_AUTH_SYSTEM]
+  if default_auth_system:
+    default_auth_system_obj = AUTH_SYSTEMS[default_auth_system]
 
   # make sure that auth_systems includes only available and enabled auth systems
-  if auth_systems is not None:
-    enabled_auth_systems = set(auth_systems).intersection(set(ENABLED_AUTH_SYSTEMS)).intersection(set(AUTH_SYSTEMS.keys()))
-  else:
-    enabled_auth_systems = set(ENABLED_AUTH_SYSTEMS).intersection(set(AUTH_SYSTEMS.keys()))
+  if auth_systems is None:
+    auth_systems = ENABLED_AUTH_SYSTEMS
+  enabled_auth_systems = [s for s in auth_systems if s in ENABLED_AUTH_SYSTEMS and s in AUTH_SYSTEMS]
 
   form = password.LoginForm()
 
   return render_template_raw(request, 'login_box', {
       'enabled_auth_systems': enabled_auth_systems, 'return_url': return_url,
-      'default_auth_system': DEFAULT_AUTH_SYSTEM, 'default_auth_system_obj': default_auth_system_obj,
+      'default_auth_system': default_auth_system, 'default_auth_system_obj': default_auth_system_obj,
       'form' : form})
   
 def do_local_logout(request):
@@ -171,6 +178,16 @@ def perms_why(request):
 
   return _do_auth(request)
 
+def _login_failed(request, error_message=None, help_url=None):
+  response = render_template(request, 'login_failed', {
+    'system_name': request.session['auth_system_name'],
+    'return_url': request.session.get('auth_return_url') or request.session.get('auth_last_return_url', '/'),
+    'error_message': error_message,
+    'help_url': help_url,
+  })
+  response.status_code = 400
+  return response
+
 def after(request):
   # which auth system were we using?
   if 'auth_system_name' not in request.session:
@@ -179,8 +196,17 @@ def after(request):
     
   system = AUTH_SYSTEMS[request.session['auth_system_name']]
   
-  # get the user info
-  user = system.get_user_info_after_auth(request)
+  # get the user info. This fails when the callback is replayed (back button,
+  # refresh, double click), since the OAuth state was already used up, or when
+  # the provider rejects the code. Show a "try again" page rather than a 500.
+  try:
+    user = system.get_user_info_after_auth(request)
+  except AuthenticationError as e:
+    logger.warning("login callback rejected for auth system %s: %s", request.session['auth_system_name'], e.message, exc_info=True)
+    return _login_failed(request, error_message=e.message, help_url=e.help_url)
+  except Exception:
+    logger.warning("login callback failed for auth system %s", request.session['auth_system_name'], exc_info=True)
+    return _login_failed(request)
 
   if user:
     # get the user and store any new data about him
@@ -206,5 +232,7 @@ def after_intervention(request):
   if 'auth_return_url' in request.session:
     return_url = request.session['auth_return_url']
     del request.session['auth_return_url']
+    # kept so a callback replayed after sign-in (back button) can still offer the way back
+    request.session['auth_last_return_url'] = return_url
   return HttpResponseRedirect(settings.URL_HOST + return_url)
 

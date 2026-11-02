@@ -13,7 +13,7 @@ from django.core.exceptions import PermissionDenied
 from django.http import Http404
 from django.http import HttpResponseRedirect
 from django.urls import reverse
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 import helios
 from helios_auth.security import get_user
 from .models import Voter, Trustee, Election
@@ -104,9 +104,10 @@ def get_election_by_uuid(uuid):
 # frozen - is the election frozen
 # newvoters - does the election accept new voters
 def election_view(**checks):
-  
+
   def election_view_decorator(func):
     def election_view_wrapper(request, election_uuid=None, *args, **kw):
+      # Get election (excludes deleted by default)
       election = get_election_by_uuid(election_uuid)
 
       if not election:
@@ -123,18 +124,19 @@ def election_view(**checks):
           return HttpResponseRedirect("%s?%s" % (reverse(password_voter_login, args=[election.uuid]), urllib.parse.urlencode({
                   'return_url' : return_url
                   })))
-    
+
       return func(request, election, *args, **kw)
 
     return update_wrapper(election_view_wrapper, func)
-    
+
   return election_view_decorator
 
 def user_can_admin_election(user, election):
   if not user:
     return False
 
-  return election.admin == user and user.admin_p
+  # site administrator, election creator, or listed administrator
+  return user.admin_p or election.admin == user or election.admins.filter(pk=user.pk).exists()
   
 def user_can_see_election(request, election):
   user = get_user(request)
@@ -165,10 +167,14 @@ def api_client_can_admin_election(api_client, election):
 # frozen - is the election frozen
 # newvoters - does the election accept new voters
 def election_admin(**checks):
-  
+
   def election_admin_decorator(func):
     def election_admin_wrapper(request, election_uuid=None, *args, **kw):
+      # Get election (excludes deleted)
       election = get_election_by_uuid(election_uuid)
+
+      if not election:
+        raise Http404
 
       user = get_user(request)
       if not user_can_admin_election(user, election):
@@ -176,24 +182,28 @@ def election_admin(**checks):
 
       # do checks
       do_election_checks(election, checks)
-        
+
       return func(request, election, *args, **kw)
 
     return update_wrapper(election_admin_wrapper, func)
-    
+
   return election_admin_decorator
   
 def trustee_check(func):
   def trustee_check_wrapper(request, election_uuid, trustee_uuid, *args, **kwargs):
+    # Get election (excludes deleted)
     election = get_election_by_uuid(election_uuid)
-    
+
+    if not election:
+      raise Http404
+
     trustee = Trustee.get_by_election_and_uuid(election, trustee_uuid)
-    
+
     if trustee == get_logged_in_trustee(request):
       return func(request, election, trustee, *args, **kwargs)
     else:
       raise PermissionDenied()
-  
+
   return update_wrapper(trustee_check_wrapper, func)
 
 def can_create_election(request):

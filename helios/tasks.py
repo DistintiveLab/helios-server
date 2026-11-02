@@ -7,13 +7,16 @@ ben@adida.net
 import copy
 from celery import shared_task
 from celery.utils.log import get_logger
+from django.conf import settings
+from django.urls import reverse
+from urllib.parse import urlparse
 
 from . import signals
-from .models import CastVote, Election, Voter, VoterFile
-from .view_utils import render_template_raw
+from . import utils
+from .models import CastVote, Election, Voter, VoterFile, EmailOptOut
+from .view_utils import render_template_raw, render_text_template
 
-from django.conf import settings
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 from django.utils.translation import activate
 
 @shared_task
@@ -70,13 +73,31 @@ def voters_notify(election_id, notification_template, extra_vars={}):
 def single_voter_email(voter_uuid, subject_template, body_template, extra_vars={}):
     activate(settings.LANGUAGE_CODE)
     voter = Voter.objects.get(uuid=voter_uuid)
-    print('voter: ', voter)
+
+    # Check if voter email is opted out
+    voter_email = voter.voter_email or (voter.user and voter.user.user_id)
+    if voter_email and EmailOptOut.is_opted_out(voter_email):
+        logger = get_logger(single_voter_email.__name__)
+        logger.info(f"Skipping email to opted-out voter {voter.uuid}")
+        return
+
     the_vars = copy.copy(extra_vars)
     the_vars.update({'election': voter.election})
     the_vars.update({'voter': voter})
+    
+    # Add unsubscribe link to email context
+    if voter_email:
+        unsubscribe_code = utils.generate_email_confirmation_code(voter_email, 'optout')
+        unsubscribe_path = reverse('optout_confirm', kwargs={'email': voter_email, 'code': unsubscribe_code})
+        unsubscribe_url = f"{settings.URL_HOST}{unsubscribe_path}"
+        
+        the_vars.update({
+            'unsubscribe_url': unsubscribe_url,
+            'unsubscribe_code': unsubscribe_code
+        })
 
-    subject = render_template_raw(None, subject_template, the_vars)
-    body = render_template_raw(None, body_template, the_vars)
+    subject = render_text_template(subject_template, the_vars)
+    body = render_text_template(body_template, the_vars)
 
     voter.send_message(subject, body)
 
@@ -136,17 +157,63 @@ def voter_file_process(voter_file_id, election_auth_type=None):
     activate(settings.LANGUAGE_CODE)
     voter_file = VoterFile.objects.get(id=voter_file_id)
     voter_file.process(election_auth_type)
-    subject = _(u'voter file processed')
-    body = _(u'Your voter file upload for %(election_name)s has been processed\n ') % {'election_name': voter_file.election.name}
-    body += _(u'%(number_of_voters)s voters have been created \n\n') % {'number_of_voters': voter_file.num_voters}
 
-    body += """
-    --
-    \n
-    %s
-    """ % settings.DEFAULT_FROM_NAME
-    election_id = voter_file.election.id
-    election_notify_admin.delay(election_id, subject, body)
+    skipped = ""
+    if voter_file.num_skipped:
+        skipped = """
+%s in the file %s not added, because those voters were already
+on the voter list (or listed twice in the file), or have opted out of
+Helios emails. Opted-out voters are listed in a separate email.
+""" % ("1 row" if voter_file.num_skipped == 1 else "%d rows" % voter_file.num_skipped,
+               "was" if voter_file.num_skipped == 1 else "were")
+
+    subject = _('voter file processed')
+    body = """
+Your voter file upload for election %s
+has been processed.
+
+%s been created.
+%s
+--
+%s
+""" % (voter_file.election.name,
+           "1 voter has" if voter_file.num_voters == 1 else "%d voters have" % voter_file.num_voters,
+           skipped,
+           settings.DEFAULT_FROM_NAME)
+    election_notify_admin.delay(election_id=voter_file.election.id, subject=subject, body=body)
+
+
+@shared_task
+def notify_admin_opted_out_voters(election_id, opted_out_voters):
+    election = Election.objects.get(id=election_id)
+    
+    if not opted_out_voters:
+        return
+    
+    subject = f"Opted-out voters not added to election {election.name}"
+    
+    body = f"""
+The following {len(opted_out_voters)} voters could not be added to election "{election.name}" 
+because they have opted out of receiving Helios emails:
+
+"""
+    
+    for voter in opted_out_voters:
+        body += f"- {voter['name']} ({voter['email']}) [ID: {voter['voter_id']}, Type: {voter['voter_type']}]\n"
+    
+    optin_path = reverse('optin_form')
+    optin_url = f"{settings.URL_HOST}{optin_path}"
+    
+    body += f"""
+
+These voters will need to opt back in before they can be added to elections.
+They can opt back in at: {optin_url}
+
+--
+Helios
+"""
+    
+    election.admin.send_message(subject, body)
 
 
 @shared_task
