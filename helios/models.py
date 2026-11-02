@@ -15,7 +15,7 @@ import nh3
 from django.conf import settings
 from django.db import models, transaction
 from django.utils import timezone
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from validate_email import validate_email
 
 from helios import datatypes
@@ -867,9 +867,6 @@ class VoterFile(models.Model):
         'email': voter_email,
         'name': voter_name,
       }
-
-    if close:
-      voter_stream.close()
 
   def process(self, election_auth_type=None):
     self.processing_started_at = timezone.now()

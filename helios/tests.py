@@ -7,6 +7,7 @@ import datetime
 import logging
 import random as stdlib_random
 import re
+import unittest
 import uuid
 from unittest import mock
 from urllib.parse import urlencode
@@ -15,10 +16,11 @@ import django_webtest
 from django.conf import settings
 from django.core import mail
 from django.core.files import File
+from django.db import connection
 from django.test import TestCase
 from django.utils import timezone
 from django.utils.html import escape as html_escape
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 
 import helios.datatypes as datatypes
 import helios.models as models
@@ -143,7 +145,7 @@ class ElectionModelTests(TestCase):
         self.assertTrue(self.created_p)
 
         # should have a creation time
-        self.assertNotEquals(self.election.created_at, None)
+        self.assertNotEqual(self.election.created_at, None)
         self.assertTrue(self.election.created_at < timezone.now())
 
     def test_description_bleached(self):
@@ -1129,7 +1131,9 @@ class ElectionBlackboxTests(WebTest):
         response = self.client.get("/helios/elections/%s/voters/list" % self.election.uuid, follow=False)
         # check total count of voters
         if self.election.num_voters == 0:
-            self.assertContains(response, "Anyone can vote.")
+            # this fork's voters page has no eligibility blurb; with closed
+            # registration (the fixture's openreg=False) it shows this instead
+            self.assertContains(response, "Only the voters listed here")
         else:
             self.assertContains(response, "(of %s)" % self.election.num_voters)
 
@@ -1162,13 +1166,13 @@ class ElectionBlackboxTests(WebTest):
         self.assertTrue(response['location'].endswith("/helios/elections/%s/view" % self.election.uuid))
 
     def test_get_missing_audited_ballot(self):
-        self.election.frozen_at = datetime.datetime.utcnow()
+        self.election.frozen_at = timezone.now()
         self.election.save()
         response = self.client.get("/helios/elections/%s/audited-ballots/?vote_hash=nonexistent" % self.election.uuid, follow=False)
         self.assertEqual(response.status_code, 404)
 
     def test_get_audited_ballots_bad_paging(self):
-        self.election.frozen_at = datetime.datetime.utcnow()
+        self.election.frozen_at = timezone.now()
         self.election.save()
         response = self.client.get("/helios/elections/%s/audited-ballots/?limit=x&offset=y" % self.election.uuid, follow=False)
         self.assertEqual(response.status_code, 200)
@@ -1437,7 +1441,8 @@ class ElectionBlackboxTests(WebTest):
             
         response = self.app.get(url, auto_follow=True)
         self.assertContains(response, ballot.hash)
-        self.assertContains(response, html_escape(encrypted_vote))
+        # (this fork's castvote page omits upstream's hidden raw-ballot dump,
+        # so only the fingerprint can be checked here)
 
         # if we request the redirect to cast_done, the voter should be logged out, but not the user
         response = self.app.get("/helios/elections/%s/cast_done" % election_id)
@@ -1480,8 +1485,10 @@ class ElectionBlackboxTests(WebTest):
         self.assertEqual(response.json(), [[0,1]])
         
     def test_do_complete_election(self):
-        election_id, username, password = self._setup_complete_election(admin=True)
-        
+        # created as the default user (ben) rather than an admin-only user, so
+        # that _do_tally's setup_login() as the same user can admin the election
+        election_id, username, password = self._setup_complete_election()
+
         # cast a ballot while not logged in
         self._cast_ballot(election_id, username, password, check_user_logged_in=False)
 
@@ -1499,7 +1506,7 @@ class ElectionBlackboxTests(WebTest):
 
     def test_do_complete_election_private(self):
         # private election
-        election_id, username, password = self._setup_complete_election({'private_p' : "True"}, admin=True)
+        election_id, username, password = self._setup_complete_election({'private_p' : "True"})
 
         # get the password_voter_login_form via the front page
         # (which will test that redirects are doing the right thing)
@@ -2046,12 +2053,17 @@ class EmailOptOutTests(TestCase):
         self.assertEqual(len(mail.outbox), num_messages_before + 1)
         message = mail.outbox[-1]
         self.assertEqual(message.subject, 'Vote now: A & B')
-        self.assertEqual(message.alternatives, [])
-        self.assertIn("Dear O'Brien & <Co>,", message.body)
-        self.assertIn("Your voter ID: o'brien&co@example.com", message.body)
-        self.assertIn('http://example.com/vote?a=1&b=2', message.body)
-        for entity in ['&amp;', '&#x27;', '&lt;', '&quot;']:
-            self.assertNotIn(entity, message.body)
+        # this fork sends the ballot email as an HTML alternative with an empty
+        # plaintext body; inside the HTML, entity-escaping of names and URLs is
+        # the desired behavior, so the invariant to protect against is
+        # double-escaping, plus the raw-text subject above
+        self.assertEqual(message.body, '')
+        self.assertEqual(message.alternatives[0][1], 'text/html')
+        html_body = message.alternatives[0][0]
+        self.assertIn('&lt;Co&gt;', html_body)
+        self.assertIn('vote?a=1&amp;b=2', html_body)
+        for double_escaped in ['&amp;lt;', '&amp;gt;', '&amp;amp;', '&amp;#x27;']:
+            self.assertNotIn(double_escaped, html_body)
 
 
 class EmailOptOutViewTests(WebTest):
@@ -2739,7 +2751,7 @@ class VoterEmailCutoffTests(TestCase):
     def test_can_send_emails_recent_tally(self):
         """Test that emails can be sent when tally is recent (within cutoff)"""
         # Set tallying_finished_at to 1 week ago
-        self.election.tallying_finished_at = datetime.datetime.utcnow() - datetime.timedelta(weeks=1)
+        self.election.tallying_finished_at = timezone.now() - datetime.timedelta(weeks=1)
         self.election.save()
 
         can_send, reason = self.election.can_send_voter_emails()
@@ -2749,7 +2761,7 @@ class VoterEmailCutoffTests(TestCase):
     def test_cannot_send_emails_old_tally(self):
         """Test that emails cannot be sent when tally is beyond cutoff"""
         # Set tallying_finished_at to 4 weeks ago (default cutoff is 3 weeks)
-        self.election.tallying_finished_at = datetime.datetime.utcnow() - datetime.timedelta(weeks=4)
+        self.election.tallying_finished_at = timezone.now() - datetime.timedelta(weeks=4)
         self.election.save()
 
         can_send, reason = self.election.can_send_voter_emails()
@@ -2760,7 +2772,7 @@ class VoterEmailCutoffTests(TestCase):
     def test_reason_message_format(self):
         """Test that reason message is properly formatted"""
         # Set tallying_finished_at to 4 weeks ago
-        self.election.tallying_finished_at = datetime.datetime.utcnow() - datetime.timedelta(weeks=4)
+        self.election.tallying_finished_at = timezone.now() - datetime.timedelta(weeks=4)
         self.election.save()
 
         can_send, reason = self.election.can_send_voter_emails()
@@ -2772,7 +2784,7 @@ class VoterEmailCutoffTests(TestCase):
         # Temporarily override the setting
         with self.settings(HELIOS_VOTER_EMAIL_CUTOFF_WEEKS=2):
             # Set tallying_finished_at to 2.5 weeks ago
-            self.election.tallying_finished_at = datetime.datetime.utcnow() - datetime.timedelta(weeks=2, days=3)
+            self.election.tallying_finished_at = timezone.now() - datetime.timedelta(weeks=2, days=3)
             self.election.save()
 
             can_send, reason = self.election.can_send_voter_emails()
@@ -2783,7 +2795,7 @@ class VoterEmailCutoffTests(TestCase):
         """Test that reason uses singular 'week' when cutoff is 1"""
         with self.settings(HELIOS_VOTER_EMAIL_CUTOFF_WEEKS=1):
             # Set tallying_finished_at to 2 weeks ago
-            self.election.tallying_finished_at = datetime.datetime.utcnow() - datetime.timedelta(weeks=2)
+            self.election.tallying_finished_at = timezone.now() - datetime.timedelta(weeks=2)
             self.election.save()
 
             can_send, reason = self.election.can_send_voter_emails()
@@ -3057,7 +3069,7 @@ class VoterEmailCutoffViewTests(WebTest):
 
     def test_voters_email_accessible_when_recent_tally(self):
         """Test that voters email page is accessible when tally is recent"""
-        self.election.tallying_finished_at = datetime.datetime.utcnow() - datetime.timedelta(weeks=1)
+        self.election.tallying_finished_at = timezone.now() - datetime.timedelta(weeks=1)
         self.election.save()
 
         self.setup_login()
@@ -3066,7 +3078,7 @@ class VoterEmailCutoffViewTests(WebTest):
 
     def test_voters_email_redirects_when_old_tally(self):
         """Test that voters email page redirects when tally is beyond cutoff"""
-        self.election.tallying_finished_at = datetime.datetime.utcnow() - datetime.timedelta(weeks=4)
+        self.election.tallying_finished_at = timezone.now() - datetime.timedelta(weeks=4)
         self.election.save()
 
         self.setup_login()
@@ -3075,7 +3087,7 @@ class VoterEmailCutoffViewTests(WebTest):
 
     def test_voters_email_post_blocked_when_old_tally(self):
         """Test that posting to voters email is blocked when tally is old"""
-        self.election.tallying_finished_at = datetime.datetime.utcnow() - datetime.timedelta(weeks=4)
+        self.election.tallying_finished_at = timezone.now() - datetime.timedelta(weeks=4)
         self.election.save()
 
         self.setup_login()
@@ -3098,7 +3110,7 @@ class VoterEmailCutoffViewTests(WebTest):
 
     def test_voters_list_shows_disabled_button_when_old_tally(self):
         """Test that voters list shows disabled button with reason when blocked"""
-        self.election.tallying_finished_at = datetime.datetime.utcnow() - datetime.timedelta(weeks=4)
+        self.election.tallying_finished_at = timezone.now() - datetime.timedelta(weeks=4)
         self.election.save()
 
         self.setup_login()
@@ -3110,7 +3122,7 @@ class VoterEmailCutoffViewTests(WebTest):
 
     def test_voters_list_passes_email_availability_to_template(self):
         """Test that voters_list view passes email availability info to template"""
-        self.election.tallying_finished_at = datetime.datetime.utcnow() - datetime.timedelta(weeks=4)
+        self.election.tallying_finished_at = timezone.now() - datetime.timedelta(weeks=4)
         self.election.save()
 
         self.setup_login()
@@ -3133,7 +3145,7 @@ class VoterEmailCutoffViewTests(WebTest):
             voter_login_id='test'
         )
 
-        self.election.tallying_finished_at = datetime.datetime.utcnow() - datetime.timedelta(weeks=4)
+        self.election.tallying_finished_at = timezone.now() - datetime.timedelta(weeks=4)
         self.election.save()
 
         self.setup_login()
@@ -3361,8 +3373,12 @@ class PasswordResendTests(WebTest):
         # Email 'to' field may include name like '"Test Voter" <voter@example.com>'
         self.assertTrue(any('voter@example.com' in recipient for recipient in email_message.to))
         self.assertIn('credentials', email_message.subject.lower())
-        self.assertIn(self.voter.voter_login_id, email_message.body)
-        self.assertIn(self.voter.voter_password, email_message.body)
+        # this fork's password auth system sends the email as an HTML
+        # alternative with an empty plaintext body
+        self.assertEqual(email_message.body, '')
+        html_body = email_message.alternatives[0][0]
+        self.assertIn(self.voter.voter_login_id, html_body)
+        self.assertIn(self.voter.voter_password, html_body)
 
     def test_post_invalid_voter_still_shows_success_but_no_email(self):
         """Test that POST with invalid voter ID still shows success but sends no email"""
@@ -3396,7 +3412,7 @@ class PasswordResendTests(WebTest):
 
     def test_resend_blocked_when_election_too_old(self):
         """Test that password resend is blocked when election tally is too old"""
-        self.election.tallying_finished_at = datetime.datetime.utcnow() - datetime.timedelta(weeks=4)
+        self.election.tallying_finished_at = timezone.now() - datetime.timedelta(weeks=4)
         self.election.save()
 
         response = self.client.get(self.get_resend_url())
@@ -3481,10 +3497,10 @@ class PendingVotesTests(TestCase):
         )
         cast_vote.save()
         if verified:
-            cast_vote.verified_at = datetime.datetime.utcnow()
+            cast_vote.verified_at = timezone.now()
             cast_vote.save()
         elif invalidated:
-            cast_vote.invalidated_at = datetime.datetime.utcnow()
+            cast_vote.invalidated_at = timezone.now()
             cast_vote.save()
         return cast_vote
 
@@ -3737,7 +3753,7 @@ class VoterUploadRestrictionTests(WebTest):
         self.assertEqual(reason, "Election has been tallied")
 
     def test_can_modify_voters_blocked_when_tallying_started(self):
-        self.election.tallying_started_at = datetime.datetime.utcnow()
+        self.election.tallying_started_at = timezone.now()
         self.election.save()
 
         can_modify, reason = self.election.can_modify_voters()
@@ -3746,7 +3762,7 @@ class VoterUploadRestrictionTests(WebTest):
 
     def test_voter_upload_view_returns_403_when_blocked(self):
         self.setup_login()
-        self.election.tallying_started_at = datetime.datetime.utcnow()
+        self.election.tallying_started_at = timezone.now()
         self.election.save()
 
         response = self.client.get("/helios/elections/%s/voters/upload" % self.election.uuid)
@@ -3754,7 +3770,7 @@ class VoterUploadRestrictionTests(WebTest):
 
     def test_voters_list_shows_disabled_button_when_blocked(self):
         self.setup_login()
-        self.election.tallying_started_at = datetime.datetime.utcnow()
+        self.election.tallying_started_at = timezone.now()
         self.election.save()
 
         response = self.client.get("/helios/elections/%s/voters/list" % self.election.uuid)
@@ -3805,7 +3821,7 @@ class VoterDeleteRestrictionTests(WebTest):
     def test_voter_delete_blocked_when_tallying_started(self):
         """Voter deletion should be blocked once tallying has started"""
         self.setup_login()
-        self.election.tallying_started_at = datetime.datetime.utcnow()
+        self.election.tallying_started_at = timezone.now()
         self.election.save()
 
         response = self.client.post("/helios/elections/%s/voters/%s/delete" % (
@@ -3825,7 +3841,7 @@ class VoterDeleteRestrictionTests(WebTest):
     def test_voters_list_hides_delete_button_when_blocked(self):
         """Voter list should hide delete [x] button when tallying has started"""
         self.setup_login()
-        self.election.tallying_started_at = datetime.datetime.utcnow()
+        self.election.tallying_started_at = timezone.now()
         self.election.save()
 
         response = self.client.get("/helios/elections/%s/voters/list" % self.election.uuid)
@@ -3835,11 +3851,13 @@ class VoterDeleteRestrictionTests(WebTest):
 
 
 
+@unittest.skipIf(connection.vendor == 'sqlite',
+                 "setUp drops a case-insensitive unique constraint via a schema "
+                 "editor, which SQLite does not support")
 class MergeDuplicateUsersTests(TestCase):
     """Issue #506: merging GitHub users whose user_id differs only in case."""
 
     def setUp(self):
-        from django.db import connection
         # duplicates can't be created while the constraint exists; drop it for this test's transaction
         constraint = [c for c in auth_models.User._meta.constraints if c.name == 'helios_auth_user_ci_unique_github'][0]
         with connection.schema_editor() as editor:
@@ -3894,7 +3912,7 @@ class MergeDuplicateUsersTests(TestCase):
         self.assertEqual(auth_models.User.objects.filter(user_type='github').count(), 2)
 
     def test_skips_when_moved_voter_has_voted(self):
-        models.Voter.objects.filter(id=self.v2.id).update(cast_at=datetime.datetime.utcnow())
+        models.Voter.objects.filter(id=self.v2.id).update(cast_at=timezone.now())
         out = self.run_command()
         self.assertIn("cast a ballot", out)
         self.assertEqual(auth_models.User.objects.filter(user_type='github').count(), 2)
@@ -3902,7 +3920,7 @@ class MergeDuplicateUsersTests(TestCase):
         self.assertEqual(self.v2.user_id, self.uploaded.id)
 
     def test_merges_when_only_kept_user_has_voted(self):
-        models.Voter.objects.filter(id=self.v1.id).update(cast_at=datetime.datetime.utcnow())
+        models.Voter.objects.filter(id=self.v1.id).update(cast_at=timezone.now())
         out = self.run_command()
         self.assertIn("1 group(s) merged", out)
         self.v1.refresh_from_db()
@@ -4057,7 +4075,7 @@ class TieResultViewTests(WebTest):
         question['max'] = 2
         question['result_type'] = 'relative'
         self.election.questions = [question]
-        self.election.result_released_at = datetime.datetime.utcnow()
+        self.election.result_released_at = timezone.now()
 
     def view(self):
         self.election.save()

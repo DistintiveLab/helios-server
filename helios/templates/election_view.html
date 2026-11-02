@@ -252,7 +252,7 @@ Once you do this, the tally will visible to you, the administrator, only.
 		{% endfor %}
 		</table>
 		{% if question.unfilled_seats %}
-		<p><em>{% blocktrans with seats=question.unfilled_seats %}Tie: the answers marked (tied) received the same number of votes, so {{seats}} seats are left unfilled.{% endblocktrans %}</em></p>
+		<p><em>{% blocktrans with seats=question.unfilled_seats count question.unfilled_seats as num_seats %}Tie: the answers marked (tied) received the same number of votes, so {{seats}} seat is left unfilled.{% plural %}Tie: the answers marked (tied) received the same number of votes, so {{seats}} seats are left unfilled.{% endblocktrans %}</em></p>
 		{% endif %}
 	{% endfor %}
 {% else %}

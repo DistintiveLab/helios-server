@@ -350,7 +350,9 @@ class UserBlackboxTests(TestCase):
     def test_logout(self):
         response = self.client.post(reverse("auth@logout"), follow=True)
 
-        self.assertContains(response, "not logged in")
+        # the fork's navbar has no "not logged in" marker: assert the session
+        # was cleared and the user's name is gone from the rendered page
+        self.assertNotIn("user", self.client.session)
         self.assertNotContains(response, "Foobar User")
 
     def test_email(self):
@@ -406,8 +408,9 @@ class LDAPAuthTests(TestCase):
     def test_logout(self):
         """ test if logs out using the auth system logout view """
         response = self.client.post(reverse(views.logout), follow=True)
-        print(response.content)
-        self.assertContains(response, "not logged in")
+        # the fork's navbar has no "not logged in" marker: assert the session
+        # was cleared and the LDAP user's name is gone from the rendered page
+        self.assertNotIn("user", self.client.session)
         self.assertNotContains(response, "euclid")
 
 

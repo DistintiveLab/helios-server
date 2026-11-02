@@ -6,7 +6,7 @@ Ben Adida (2009-07-18)
 
 from django.template import Context, Template, loader
 from django.http import HttpResponse, Http404
-from django.shortcuts import render_to_response
+from django.shortcuts import render
 
 from helios_auth.security import get_user
 
@@ -27,5 +27,5 @@ def render_template(request, template_name, vars = {}):
   if request.session.has_key('csrf_token'):
     vars_with_user['csrf_token'] = request.session['csrf_token']
   
-  return render_to_response('heliosinstitution/templates/%s.html' % template_name, vars_with_user)
+  return render(request, 'heliosinstitution/templates/%s.html' % template_name, vars_with_user)
   

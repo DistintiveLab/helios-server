@@ -1,7 +1,7 @@
 from functools import update_wrapper
 
 from django.core.exceptions import *
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 
 from helios_auth.security import get_user
 

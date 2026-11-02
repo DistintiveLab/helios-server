@@ -97,7 +97,10 @@ def single_voter_email(voter_uuid, subject_template, body_template, extra_vars={
         })
 
     subject = render_text_template(subject_template, the_vars)
-    body = render_text_template(body_template, the_vars)
+    # this fork's email bodies are HTML templates sent as an html_message
+    # alternative, so they render with autoescaping on (as before the
+    # upstream merge) to keep voter-controlled values entity-escaped
+    body = render_template_raw(None, body_template, the_vars)
 
     voter.send_message(subject, body)
 

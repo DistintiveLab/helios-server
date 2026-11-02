@@ -173,10 +173,7 @@
 				<a href="{% url "election@voters@email" election.uuid %}?voter_id={{voter.id}}"><i title="{% trans "Send email to this voter. This action will only be possible if the ballot is already frozen." %}" class="glyphicon glyphicon-envelope"></i></a>
 				{% endif %}
 				{% if can_modify_voters %}
-				<form method="post" action="{% url "election@voter@delete" election.uuid voter.uuid %}" style="display:inline" onsubmit="return confirm('{% trans "are you sure you want to remove" %} {{voter.name}} ?');">
-				<input type="hidden" name="csrf_token" value="{{csrf_token}}" />
-				<button type="submit" class="btn btn-link" style="padding:0;"><i data-name="{{voter.name}}" title="{% trans "Remove voter" %}" class="glyphicon glyphicon-remove remove_voter"></i></button>
-				</form>
+				[<form class="inline-action" method="post" action="{% url "election@voter@delete" election.uuid voter.uuid %}" onsubmit="return confirm('{% trans "are you sure you want to remove" %} {{voter.name}} ?');"><input type="hidden" name="csrf_token" value="{{csrf_token}}" /><button type="submit" class="btn btn-link link-button" style="padding:0; color:inherit;" title="{% trans "Remove voter" %}">x</button></form>]
 				{% endif %}
 
 			<!--<img class="small-logo" src="/static/auth/login-icons/{{voter.voter_type}}.png" alt="{{voter.voter_type}}" />--> {{voter.name}}</td>

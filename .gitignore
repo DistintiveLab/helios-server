@@ -10,3 +10,6 @@ env.sh
 .cache
 .idea/
 *.mo
+
+# local sqlite test settings (uncommitted by design)
+settings_sqlite.py

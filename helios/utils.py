@@ -13,7 +13,7 @@ import string
 import urllib.parse
 
 from django.conf import settings
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 
 from helios.crypto.utils import random
 # utils from helios_auth, too
@@ -174,7 +174,12 @@ def lock_row(model, pk):
   from django.db import connection, transaction
   cursor = connection.cursor()
 
-  cursor.execute("select * from " + model._meta.db_table + " where id = %s for update", [pk])
+  # sqlite (local test runs) does not support FOR UPDATE and instead locks
+  # the whole database on write, so a plain read is sufficient there
+  sql = "select * from " + model._meta.db_table + " where id = %s"
+  if connection.vendor != 'sqlite':
+    sql += " for update"
+  cursor.execute(sql, [pk])
   row = cursor.fetchone()
 
   # if this is under transaction management control, mark the transaction dirty

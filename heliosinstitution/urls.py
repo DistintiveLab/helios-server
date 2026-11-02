@@ -4,7 +4,7 @@ Shirlei Chaves (shirlei@gmail.com)
 
 """
 
-from django.conf.urls import url
+from django.urls import re_path as url
 
 from . import url_names
 from .views import *

@@ -2,7 +2,7 @@ import json
 
 from django.contrib.auth.models import User as DjangoUser, Group
 from django.core.paginator import Paginator
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 from django.views.decorators.http import require_http_methods
 
 from helios.models import Election
