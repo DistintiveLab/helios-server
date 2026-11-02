@@ -14,3 +14,10 @@ DATABASES = {
         'CONN_MAX_AGE': 600,
     },
 }
+
+# plain users can create elections in tests (fork prod restricts this to
+# institution admins, which the upstream test fixtures know nothing about)
+HELIOS_ADMIN_ONLY = False
+
+# the CSRF smoke test exercises the feature-election toggle
+FEATURE_ELECTION = True

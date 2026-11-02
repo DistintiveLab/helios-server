@@ -79,6 +79,25 @@ is local-only and contains:
 
 If it's missing, recreate it from this list; do not commit it.
 
+## CI (GitHub Actions)
+
+`.github/workflows/ci.yml` runs `uv run python -Wall manage.py test -v 2
+--settings=settings_ci` on a PostgreSQL 16 service container (Python 3.13). So the
+suite must ALSO pass under Postgres — `settings_ci.py` is the committed CI
+counterpart of `settings_sqlite.py`: besides pointing DATABASES at localhost
+Postgres it sets the same two flags (`HELIOS_ADMIN_ONLY = False`,
+`FEATURE_ELECTION = True`, with the same rationale). When a test needs another
+environment flag, add it to BOTH files.
+
+Consequences of CI running Postgres:
+
+- `MergeDuplicateUsersTests` only ever execute on CI (skipped on local sqlite).
+- The fork runs `USE_TZ = True` with `TIME_ZONE = 'America/Sao_Paulo'`
+  (upstream uses `USE_TZ = False`) — tests MUST use timezone-aware datetimes;
+  naive ones are reinterpreted in UTC-3 and come back shifted by 3 hours after a
+  DB roundtrip (this broke `MergeDuplicateUsersTests` on CI while passing locally
+  only because sqlite skips them).
+
 ## Gotchas
 
 - **Test output goes to stderr** (see command above). Reading only stdout looks like
@@ -95,7 +114,12 @@ If it's missing, recreate it from this list; do not commit it.
   because its CI runs Postgres — do not "simplify" this back.
 - **`MergeDuplicateUsersTests` is skipped on sqlite** (`@unittest.skipIf`) because its
   setUp drops a case-insensitive unique constraint via a schema editor, which sqlite
-  cannot do.
+  cannot do. They run (only) on CI's Postgres.
+- **Election creation through the UI** is gated by `can_create_election`
+  (helios/security.py): with `HELIOS_ADMIN_ONLY = True` (the fork prod default in
+  settings.py) only `admin_p` users may create elections, and the users.json fixture
+  gives ben@adida.net `admin_p = False`. That is why both test settings files must
+  set `HELIOS_ADMIN_ONLY = False`.
 - **Emails are HTML-only**: `send_mail(subject, '', ..., html_message=body)` with an
   empty plaintext body — see tests like `test_plaintext_email_is_not_html_escaped`
   asserting `message.body == ''` and content in `alternatives[0][0]`.
