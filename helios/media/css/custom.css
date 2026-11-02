@@ -41,10 +41,16 @@ a:hover, a:focus {
   /*border-color: #0d4f4d;*/
 }
 
-.panel-primary > .panel-heading {
+.panel-primary>.panel-heading {
     color: #fff;
-    background-color: #0f5f5c;
-    border-color: #0f5f5c;
+    background-color:#0d4f4d;
+	border-color:#0d4f4d;
+}
+
+.panel-default>.panel-heading {
+    color: #fff;
+    background-color:#0d4f4d;
+	border-color:#0d4f4d;
 }
 
 .panel-primary {

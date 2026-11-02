@@ -1,0 +1,7 @@
+#!/bin/sh
+
+set -o errexit
+set -o nounset
+
+
+celery -A helios.celery_app worker -l INFO --concurrency=$CELERY_WORKER_CONCURRENCY -O fair --logfile=/var/log/celery_worker.log

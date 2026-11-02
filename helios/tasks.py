@@ -8,9 +8,9 @@ import copy
 from celery import shared_task
 from celery.utils.log import get_logger
 
-import signals
-from models import CastVote, Election, Voter, VoterFile
-from view_utils import render_template_raw
+from . import signals
+from .models import CastVote, Election, Voter, VoterFile
+from .view_utils import render_template_raw
 
 from django.conf import settings
 from django.utils.translation import ugettext as _
@@ -70,8 +70,9 @@ def voters_notify(election_id, notification_template, extra_vars={}):
 def single_voter_email(voter_uuid, subject_template, body_template, extra_vars={}):
     activate(settings.LANGUAGE_CODE)
     voter = Voter.objects.get(uuid=voter_uuid)
-
+    print('voter: ', voter)
     the_vars = copy.copy(extra_vars)
+    the_vars.update({'election': voter.election})
     the_vars.update({'voter': voter})
 
     subject = render_template_raw(None, subject_template, the_vars)
@@ -88,12 +89,7 @@ def single_voter_notify(voter_uuid, notification_template, extra_vars={}):
     the_vars = copy.copy(extra_vars)
     the_vars.update({'voter': voter})
 
-    try:
-        default_from_name = settings.DEFAULT_FROM_NAME.decode('utf8')
-    except UnicodeDecodeError:
-        default_from_name = settings.DEFAULT_FROM_NAME.decode('latin1')
-
-    the_vars.update({'default_from_name': default_from_name})
+    the_vars.update({'default_from_name': settings.DEFAULT_FROM_NAME})
 
     notification = render_template_raw(None, notification_template, the_vars)
 
@@ -136,23 +132,19 @@ Helios
 
 
 @shared_task
-def voter_file_process(voter_file_id):
+def voter_file_process(voter_file_id, election_auth_type=None):
     activate(settings.LANGUAGE_CODE)
     voter_file = VoterFile.objects.get(id=voter_file_id)
-    voter_file.process()
+    voter_file.process(election_auth_type)
     subject = _(u'voter file processed')
     body = _(u'Your voter file upload for %(election_name)s has been processed\n ') % {'election_name': voter_file.election.name}
     body += _(u'%(number_of_voters)s voters have been created \n\n') % {'number_of_voters': voter_file.num_voters}
-    try:
-        default_from_name = settings.DEFAULT_FROM_NAME.decode('utf8')
-    except UnicodeDecodeError:
-        default_from_name = settings.DEFAULT_FROM_NAME.decode('latin1')
 
     body += """
     --
     \n
     %s
-    """ % default_from_name
+    """ % settings.DEFAULT_FROM_NAME
     election_id = voter_file.election.id
     election_notify_admin.delay(election_id, subject, body)
 

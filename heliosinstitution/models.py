@@ -8,7 +8,7 @@ from django.contrib.auth.models import User
 
 
 from helios.models import Election
-import utils
+from . import utils
 
 
 class Institution(models.Model):

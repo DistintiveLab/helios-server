@@ -1,35 +1,60 @@
 {% extends TEMPLATE_BASE %}
 {% load i18n %}
+{% load modals %}
+{% load voters_help %}
 {% block content %}
 <div class="row">
+  <div class="col-md-12">
+   <h3> <a href="{% url "election@view" election.uuid %}"><< {{election.name}}</a></span></h3>
+  </div>
+</div>
+
+<div class="row">
+<div class="panel panel-default">
+  <div class="panel-heading">{% trans "Bulk Upload Voters" %}</div>
+<div class="panel-body">
 <div class="col-md-12">
-<form method="post" role="form" class="form-horizontal" action="" id="upload_form" enctype="multipart/form-data">
-   <div class="form-group">
-  <h2 class="title">{% trans "Bulk Upload Voters" %}</h2>
-  <h3 class="title">{{election.name}}</h3>
- <pre>
-   {% trans "&lt;unique_id&gt;,&lt;email&gt,&lt;full name&gt;" %}
+<form method="post" class="form-horizontal" action="" id="upload_form" enctype="multipart/form-data">
+<p>
+  {% blocktrans %}
+    If you would like to specify your list of voters by name and email address,<br>
+    you can bulk upload a list of such voters here.<br><br>
+
+    Please prepare a text file of comma-separated values with the fields
+  {% endblocktrans%}
+  (<a href="#" class="float-right" data-toggle="modal" data-target="#votersModal">{% trans "click here for more details" %}</a>):
+</p>
+<pre>
+   {% trans "password,unique_id,email,full name" %}
+</pre>
+{% if show_voter_upload_misc %}
+<p>
+{% trans "or" %}
+</p>
+
+<pre>
+  {% trans "github, username" %}
 </pre>
 
 <p>
-{% trans "For example:" %}
+{% trans "For example" %}  (<a href="#" class="float-right" data-toggle="modal" data-target="#votersMiscModal">{% trans "click here for more details" %}</a>):
+
   </p>
   <pre>
-      benadida,ben@adida.net,Ben Adida
-      bobsmith,bob@acme.org,Bob Smith
+      password,bobsmith,bob@acme.org,Bob Smith
+      github,benadida
       ...
   </pre> 
-
-  </div>
+{% endif %}
   {% if error %}
   <div style="color: red;">{{error}}</div>
   {% endif %}
-    <input type="hidden" name="csrf_token" value="{{csrf_token}}" />
+    <input type="hidden" name="csrf_token" value="{{csrf_token}}">
     <div class="form-group">
-    <input class="btn btn-primary" type="file" name="voters_file" value="{% trans "Browse" %}"/>
+    <input class="btn btn-primary" type="file" name="voters_file">
     </div>
     <div class="form-group">
-        <input class="btn btn-primary" type="submit" value="{% trans "go" %}" />
+        <input class="btn btn-primary" type="submit" value="{% trans "go" %}">
         <a class="btn btn-danger" href="{% url "election@view" election.uuid %}">{% trans "back to election" %}</a>
     </div>
 </form>
@@ -38,10 +63,20 @@
 </div>
 
 <div id="done" style="display:none;">
-  {% trans "OK, done uploading." %}<br />
+  {% trans "OK, done uploading." %}<br>
   {% trans "You can now" %} <a href="./manage">{% trans "view the list of voters" %}</a>.
 </div>
+</div>
+</div>
+</div>
+</div>
 
-</div>
-</div>
+{% modal votersModal Eleitores %}
+  {% voters_help_text "default" election_auth_type %}
+{% endmodal %}
+
+{% modal votersMiscModal Eleitores %}
+  {% voters_help_text "misc" election_auth_type %}
+{% endmodal %}
+
 {% endblock %}

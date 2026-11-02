@@ -3,8 +3,12 @@
 {% block title %}{% trans "Trustees for" %} {{election.name}}{% endblock %}
 
 {% block content %}
-  <h3 class="title">{% trans "Trustees" %} <span style="font-size:0.7em;">[<a href="{% url "election@view" election.uuid %}">{% trans "back to election" %}</a>]</span></h3>
-  <h3 class="title">{{election.name}}</h3>
+<div class="row">
+	<div class="col-md-8">
+	 <h3> <a href="{% url "election@view" election.uuid %}"><< {{election.name}}</a></span></h3>
+	</div>
+</div>
+  <h3 class="title">{% trans "Trustees" %}</h3>
 <p>
 <br>
 {% if admin_p %}

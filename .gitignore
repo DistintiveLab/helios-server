@@ -3,10 +3,9 @@ deploy-latest.sh
 .DS_Store
 *~
 media/*
-venv
-celery*.log
-*.pid
-*.mo
+venv*
+celerybeat-*
 env.sh
 .cache
 .idea/
+*.mo

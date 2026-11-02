@@ -2,14 +2,16 @@
 Twitter Authentication
 """
 
-from django.conf import settings
+from .oauthclient import client
+
 from django.conf.urls import url
 from django.urls import reverse
 from django.http import HttpResponseRedirect
 
 from helios_auth import utils
-from oauthclient import client
+from .oauthclient import client
 
+from django.conf import settings
 API_KEY = settings.TWITTER_API_KEY
 API_SECRET = settings.TWITTER_API_SECRET
 USER_TO_FOLLOW = settings.TWITTER_USER_TO_FOLLOW

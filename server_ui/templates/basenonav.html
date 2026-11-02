@@ -5,9 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
   <title>{% block title %}{% endblock %}</title>
 
-  <link rel="stylesheet" type="text/css" media="screen" href="{% static "bootstrap/css/bootstrap.min.css" %}"/>
+  <link rel="stylesheet" type="text/css" media="screen" href="{% static "bootstrap/css/bootstrap.min.css" %}">
   <link rel="stylesheet" type="text/css" media="screen" href="{% static "css/custom.css" %}"/>
   <link rel="stylesheet" type="text/css" media="screen" href="{% static "css/ui-lightness/jquery-ui-1.8.1.custom.css" %}">
+  <link rel="stylesheet" type="text/css" media="screen" href="{% static "datetimepicker/jquery.datetimepicker.css" %}">
 
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700|Roboto+Mono">
   <style>
@@ -18,11 +19,11 @@
 
 
   <script src={% static "foundation/js/vendor/custom.modernizr.js" %}></script>
-  <script language="javascript" src={% static "js/jquery-1.11.2.min.js" %}></script>
-  <script language="javascript" src={% static "js/jquery-ui-1.8.1.custom.min.js" %}></script>
-  <script language="javascript" src={% static "js/jqsplitdatetime.js" %}></script>
-  <script language="javascript" src={% static "js/jquery.json.min.js" %}></script>
-  <script language="javascript" src={% static "foundation/js/foundation.min.js" %}></script>
+  <script src={% static "js/jquery-1.11.2.min.js" %}></script>
+  <script src={% static "js/jquery-ui-1.8.1.custom.min.js" %}></script>
+  <script src={% static "js/jqsplitdatetime.js" %}></script>
+  <script src={% static "js/jquery.json.min.js" %}></script>
+  <script src={% static "foundation/js/foundation.min.js" %}></script>
 
   {% block js %}
   {% endblock %}
@@ -50,13 +51,12 @@
       </div>
   {% endif %}
 
-      <script>
-	$(document).foundation();
-      </script>
+  <script>
+	  $(document).foundation();
+  </script>
+  <script src={% static "datetimepicker/jquery.datetimepicker.full.js" %}></script>
+  <script src={% static "js/utils.js" %}></script>
 
 </body>
-<link rel="stylesheet" type="text/css" media="screen" href="{% static "datetimepicker/jquery.datetimepicker.css" %}"/ >
-<script language="javascript" src={% static "datetimepicker/jquery.datetimepicker.full.js" %}></script>
-<script language="javascript" src={% static "js/utils.js" %}></script>
 
 </html>

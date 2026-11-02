@@ -6,8 +6,8 @@ Shirlei Chaves (shirlei@gmail.com)
 
 from django.conf.urls import url
 
-import url_names
-from views import *
+from . import url_names
+from .views import *
 
 urlpatterns = [
     url(r'^$', home, name=url_names.INSTITUTION_INDEX),

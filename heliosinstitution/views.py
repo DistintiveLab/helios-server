@@ -12,7 +12,7 @@ from heliosinstitution import utils
 from heliosinstitution.decorators import *
 from heliosinstitution.models import InstitutionUserProfile, Institution
 from helioslog.models import HeliosLog
-from view_utils import *
+from .view_utils import *
 
 
 def home(request):
@@ -252,7 +252,7 @@ def elections_by_year(request, year=None):
 def elections_by_type_year(request, institution_pk, type=None, year=None):
     user = get_user(request)
     try:
-	institution = Institution.objects.get(pk=institution_pk)
+        institution = Institution.objects.get(pk=institution_pk)
         status = 200
         if type == 'new':
             response_data = {'success': _('Success'), 'elections': institution.elections_new(year) }

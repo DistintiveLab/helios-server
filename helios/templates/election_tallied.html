@@ -15,6 +15,11 @@
   </p>
   
   <p>
-      <a href="{% url "election@view" election.uuid %}"> {%trans "view the election tally" %}</a>
+      {% if election.voting_start_at %}{% trans "Voting start at" %} {{election.voting_start_at}}<br />{% endif %}
+      {% if election.voting_end_at %}{%trans "Voting end at" %} {{election.voting_end_at}}<br />{% endif %}
+  </p>
+  
+  <p>
+      <a href="{% url "election@view" election.uuid %}">{% trans "view the election tally" %}</a>
   </p>
 {% endblock %}

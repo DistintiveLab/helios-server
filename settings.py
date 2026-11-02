@@ -12,7 +12,7 @@ TESTING = 'test' in sys.argv
 
 # go through environment variables and override them
 def get_from_env(var, default):
-    if not TESTING and os.environ.has_key(var):
+    if not TESTING and var in os.environ:
         return os.environ[var]
     else:
         return default
@@ -36,8 +36,11 @@ ROOT_PATH = os.path.dirname(__file__)
 # add admins of the form:
 #    ('Ben Adida', 'ben@adida.net'),
 # if you want to be emailed about errors.
-ADMINS = (
-)
+admin_email = get_from_env('ADMIN_EMAIL', None)
+if admin_email:
+    ADMINS = [(get_from_env('ADMIN_NAME', ''), admin_email)]
+else:
+    ADMINS = []
 
 MANAGERS = ADMINS
 
@@ -60,18 +63,15 @@ DATABASES = {
         'PASSWORD': get_from_env('DB_PWD', 'helios'),
         'HOST': get_from_env('POSTGRES_HOST', 'db'),
         'PORT': get_from_env('POSTGRES_PORT', '5432'),
+        'CONN_MAX_AGE': 600,
     }
 }
 
 # override if we have an env variable
 if get_from_env('DATABASE_URL', None):
     import dj_database_url
-    DATABASES['default'] =  dj_database_url.config()
+    DATABASES['default'] = dj_database_url.config(conn_max_age=600, ssl_require=True)
     DATABASES['default']['ENGINE'] = 'django.db.backends.postgresql_psycopg2'
-    DATABASES['default']['CONN_MAX_AGE'] = '600'
-
-    # require SSL
-    DATABASES['default']['OPTIONS'] = {'sslmode': 'require'}
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
@@ -108,7 +108,7 @@ MEDIA_URL = ''
 # Examples: "http://foo.com/media/", "/media/".
 STATIC_URL = '/media/'
 
-STATIC_ROOT = ROOT_PATH + '/sitestatic'
+STATIC_ROOT = ROOT_PATH + '/staticfiles'
 
 STATICFILES_DIRS = (
     ROOT_PATH + '/heliosbooth',
@@ -180,6 +180,7 @@ TEMPLATES = [
             'debug': DEBUG,
             'context_processors': [
                 "django.contrib.auth.context_processors.auth",
+                "django.contrib.messages.context_processors.messages",
             ],
         }
     },
@@ -193,6 +194,7 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'django.contrib.messages',
     'django.contrib.admin',
+    'anymail',
     ## HELIOS stuff
     'helios_auth',
     'helios',
@@ -202,6 +204,13 @@ INSTALLED_APPS = (
     'django_celery_results',
     'django_celery_beat'
 )
+
+ANYMAIL = {
+    "MAILGUN_API_KEY": get_from_env('MAILGUN_API_KEY', None),
+}
+
+if ANYMAIL["MAILGUN_API_KEY"]:
+    EMAIL_BACKEND = "anymail.backends.mailgun.EmailBackend"
 
 ##
 ## HELIOS
@@ -256,11 +265,11 @@ HELIOS_VOTERS_EMAIL = True
 HELIOS_PRIVATE_DEFAULT = True
 
 # authentication systems enabled
-#AUTH_ENABLED_AUTH_SYSTEMS = ['password','facebook','twitter', 'google', 'yahoo']
-#AUTH_ENABLED_AUTH_SYSTEMS = get_from_env('AUTH_ENABLED_AUTH_SYSTEMS', 'shibboleth').split(",")
-#AUTH_DEFAULT_AUTH_SYSTEM = get_from_env('AUTH_DEFAULT_AUTH_SYSTEM', 'shibboleth')
-AUTH_ENABLED_AUTH_SYSTEMS = get_from_env('AUTH_ENABLED_AUTH_SYSTEMS', 'ldap').split(",")
-AUTH_DEFAULT_AUTH_SYSTEM = get_from_env('AUTH_DEFAULT_AUTH_SYSTEM', 'ldap')
+# AUTH_ENABLED_SYSTEMS = ['password','facebook','twitter', 'google', 'yahoo']
+AUTH_ENABLED_SYSTEMS = get_from_env('AUTH_ENABLED_SYSTEMS',
+                                    get_from_env('AUTH_ENABLED_AUTH_SYSTEMS', 'ldap')
+                                    ).split(",")
+AUTH_DEFAULT_SYSTEM = get_from_env('AUTH_DEFAULT_SYSTEM', get_from_env('AUTH_DEFAULT_AUTH_SYSTEM', None))
 
 # google
 GOOGLE_CLIENT_ID = get_from_env('GOOGLE_CLIENT_ID', '')
@@ -294,6 +303,10 @@ CAS_ELIGIBILITY_REALM = get_from_env('CAS_ELIGIBILITY_REALM', "")
 CLEVER_CLIENT_ID = get_from_env('CLEVER_CLIENT_ID', "")
 CLEVER_CLIENT_SECRET = get_from_env('CLEVER_CLIENT_SECRET', "")
 
+# GitHub
+GH_CLIENT_ID = get_from_env('GH_CLIENT_ID', '')
+GH_CLIENT_SECRET = get_from_env('GH_CLIENT_SECRET', '')
+
 # email server
 EMAIL_HOST = get_from_env('EMAIL_HOST', 'localhost')
 EMAIL_PORT = int(get_from_env('EMAIL_PORT', "2525"))
@@ -309,11 +322,11 @@ if get_from_env('EMAIL_USE_AWS', '0') == '1':
 
 # set up logging
 import logging
-logging.basicConfig(
-    level = logging.DEBUG,
-    format = '%(asctime)s %(levelname)s %(message)s'
-)
 
+logging.basicConfig(
+    level=logging.DEBUG if TESTING else logging.INFO,
+    format='%(asctime)s %(levelname)s %(message)s'
+)
 
 # set up celery
 if TESTING:
@@ -329,13 +342,20 @@ CELERY_CACHE_BACKEND = 'django-cache'
 CELERY_RESULT_EXPIRES = 5184000  # 60 dias
 
 # see configuration example at https://pythonhosted.org/django-auth-ldap/example.html
-AUTH_LDAP_SERVER_URI = "ldap://ldap.forumsys.com" # replace by your Ldap URI
-AUTH_LDAP_BIND_DN = "cn=read-only-admin,dc=example,dc=com"
-AUTH_LDAP_BIND_PASSWORD = "password"
-AUTH_LDAP_USER_SEARCH = LDAPSearch("dc=example,dc=com",
+AUTH_LDAP_SERVER_URI = get_from_env('LDAP_SERVER_URI', '') # replace by your Ldap URI
+AUTH_LDAP_BIND_DN = get_from_env('LDAP_BIND_DN','')
+AUTH_LDAP_BIND_PASSWORD = get_from_env('LDAP_BIND_PASSWORD', '')
+AUTH_LDAP_USER_SEARCH = LDAPSearch(get_from_env('LDAP_USER_SEARCH',''),
     ldap.SCOPE_SUBTREE, "(uid=%(user)s)"
 )
 
+# Test LDAP
+# AUTH_LDAP_SERVER_URI = "ldap://ldap.forumsys.com" # replace by your Ldap URI
+# AUTH_LDAP_BIND_DN = "cn=read-only-admin,dc=example,dc=com"
+# AUTH_LDAP_BIND_PASSWORD = "password"
+# AUTH_LDAP_USER_SEARCH = LDAPSearch("dc=example,dc=com",
+#     ldap.SCOPE_SUBTREE, "(uid=%(user)s)"
+# )
 AUTH_LDAP_USER_ATTR_MAP = {
     "first_name": "givenName",
     "last_name": "sn",
@@ -377,7 +397,7 @@ USE_EMBEDDED_DS = False
 # Rollbar Error Logging
 ROLLBAR_ACCESS_TOKEN = get_from_env('ROLLBAR_ACCESS_TOKEN', None)
 if ROLLBAR_ACCESS_TOKEN:
-  print "setting up rollbar"
+  print("setting up rollbar")
   MIDDLEWARE += ['rollbar.contrib.django.middleware.RollbarNotifierMiddleware',]
   ROLLBAR = {
     'access_token': ROLLBAR_ACCESS_TOKEN,
@@ -401,3 +421,9 @@ LOGGING = {
         }
      }
 }
+
+# Default voter type, to allow uploading a voter file without
+# informing voter type
+# must be one type valid in AUTH_SYSTEMS (helios_auth/auth_systems/__init__.py)
+DEFAULT_VOTER_TYPE = 'password' 
+SHOW_VOTER_UPLOAD_MISC = True

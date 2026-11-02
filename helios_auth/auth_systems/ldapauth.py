@@ -57,7 +57,7 @@ def ldap_login_view(request):
             
             request.session['auth_system_name'] = 'ldap'
 
-            if request.POST.has_key('return_url'):
+            if 'return_url' in request.POST:
                 request.session['auth_return_url'] = request.POST.get('return_url')
 
             if form.is_valid():
@@ -75,12 +75,12 @@ def ldap_login_view(request):
                     }
                     return HttpResponseRedirect(reverse(after))
                 else:
-                    error = 'Bad Username or Password'
+                    error = _('Bad Username or Password')
 
     return render_template(request, 'ldapauth/login', {
             'form': form,
             'error': error,
-            'enabled_auth_systems': settings.AUTH_ENABLED_AUTH_SYSTEMS,
+            'enabled_auth_systems': settings.AUTH_ENABLED_SYSTEMS,
         })
 
 

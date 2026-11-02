@@ -1,42 +1,112 @@
 version: '3'
-services: 
-    db:
-        image: postgres
-        env_file:
-            - .env
-        ports:
-            - "6432:5432"
-        volumes:
-            - ~/docker-volumes/heliosdb/pgdata:/var/lib/postgresql/data
-            - ./docker/db/init.sql:/docker-entrypoint-initdb.d/init.sql
-        networks:
-            - helios-network
+
+x-app: &app
+    #platform: linux/arm64/v8
+    build:
+        dockerfile: ./docker/app/Dockerfile
+        context: ./
+        args:
+            UID: "${UID:-1000}"
+            GID: "${GID:-1000}"
+    image: djangobase
+    env_file:
+        - .env
+
+    networks:
+        - helios-network
+    restart: "${DOCKER_RESTART_POLICY:-unless-stopped}"
+    stop_grace_period: "${DOCKER_STOP_GRACE_PERIOD:-3s}"
+    volumes:
+        - ./.:/var/www/helios-server
+        - logs_volume:/var/log/
+
+x-celery: &celery
+    <<: *app
+    depends_on:
+        - redis
+
+services:
     helios:
-        build:
-            dockerfile: ./docker/Dockerfile
-            context: ./
-        command: python manage.py runserver 0.0.0.0:8000
-        depends_on:
-            - db
-        env_file:
-            - .env
-        environment:
-            - USER_ID=1000
-            - GROUP_ID=1000
+        <<: *app
+        command: bash -c "python manage.py migrate && python manage.py collectstatic --noinput && /start"
         ports:
             - "80:80"
             - "443:443"
-            - "8000:8000"
+            - 127.0.0.1:8000:8000
         networks:
             - helios-network
-        restart: "${DOCKER_RESTART_POLICY:-unless-stopped}"
-        stop_grace_period: "${DOCKER_STOP_GRACE_PERIOD:-3s}"
+        # depends_on:
+        #     - db
+
+    celeryworker:
+        <<: *celery
+        command: /start-celeryworker
+        ports:
+            - 127.0.0.1:8001:8000
+        networks:
+            - helios-network
+
+    celerybeat:
+        <<: *celery
+        command: /start-celerybeat
+        ports:
+            - 127.0.0.1:8002:8000
+        networks:
+            - helios-network
+
+    redis:
+        image: redis:7.0.10-bullseye
+        environment:
+            TZ: America/Sao_Paulo
+        restart: unless-stopped
+        ports:
+            - 127.0.0.1:6379:6379
+        networks:
+            - helios-network
+    nginx:
+        build:
+            dockerfile: ./docker/nginx/Dockerfile
+            context: ./
         volumes:
-            - ./.:/var/www/helios-server
-            - ~/docker-volumes/heliosapp/apache-logs:/var/log/apache2
-            - ~/docker-volumes/heliosapp/celery-logs:/var/log/celery
-            - ~/docker-volumes/heliosapp/redis-logs:/var/log/redis
-            - ~/docker-volumes/heliosapp/supervisor-logs:/var/log/supervisor
+            - ./staticfiles:/var/www/html/static
+            - logs_volume:/var/log/nginx
+        ports:
+            - 1337:80
+        # para o redis rodar no mesmo uid e gid do usuário do host, 
+        # para evitar problemas de permissão na leitura de staticfiles 
+        user: $UID:$GID 
+        depends_on:
+            - helios
+        networks:
+            - helios-network
+        restart: unless-stopped
+
+    # db:
+    #     image: postgres:12.0-alpine
+    #     ports:
+    #         - 5432:5432
+    #     env_file:
+    #         - .env
+    #     restart: unless-stopped
+    #     volumes:
+    #         - postgres_volume:/var/lib/postgresql/data/
+    #     networks:
+    #         - helios-network
+
 networks:
     helios-network:
         driver: bridge
+
+volumes:
+    logs_volume:
+        driver: local
+        driver_opts:
+            o: bind
+            type: none
+            device: ~/docker-volumes/heliosapp/logs
+    # postgres_volume:
+    #     driver: local
+    #     driver_opts:
+    #         o: bind
+    #         type: none
+    #         device: ~/docker-volumes/heliosapp/postgres

@@ -9,7 +9,44 @@
 {% block content %}
 <!--<div class="row"><div class="large-5 columns large-centered"><a href="/"><img border="0" src="{{ settings.MAIN_LOGO_URL }}" /></a></div></div>-->
 <div class="row">
-  <div class="col-md-8">
+  <p style="font-size: 1.4em;">
+    {{settings.WELCOME_MESSAGE|safe}}
+  </p>
+  {% if user %}
+  <div class="col-md-6">
+    <div class="panel panel-default">
+      <div class="panel-heading">{% trans "Open elections that you can vote" %}</div>
+    <div class="panel-body">
+      {% if elections_can_vote %}
+      <ul class="list-group">
+      {% for election in elections_can_vote %}
+        {% if election.voting_has_started %}
+          {% if not election.voting_has_stopped %}
+            <li class="list-group-item"><a style="font-size: 1.4em;" href="{% url "shortcut@election" election.short_name %}">{{election.name}}</a>{% if settings.SHOW_USER_INFO %} - {% trans "by" %} {{election.admin.pretty_name}}{% endif %} - 
+              {% if election.voting_ends_at %}
+              
+              {% blocktrans  with voting_ends_at=election.voting_ends_at|date:"d/m/Y H:i"%}
+              Election end: {{voting_ends_at}}
+            {% endblocktrans %}
+            {% else %}
+            {% blocktrans with election_type=election.pretty_type %}
+            Ends at the administrator's discretion.
+            {% endblocktrans %}
+            {% endif %}
+            {% trans "Election hash" %} : <em>{{ election.hash}}</em>
+              </li>
+            {% endif %}
+          {% endif %}
+      {% endfor %}
+      </ul>
+    {% else %}
+    <p>{% trans "no elections" %}</p>
+    {% endif %}
+    </div>
+  </div>
+  {% endif %}
+  </div>
+  <div class="col-md-2">
     {% if settings.MASTER_HELIOS %}
 
       {% blocktrans %}
@@ -33,9 +70,6 @@ More than <b>2,000,000 votes</b> have been cast using Helios.
   <a class="button" href="{% url "elections@new" %}">{% trans "create an election" %}</a>
   {% endif %}
     {% else %}
-    <p style="font-size: 1.4em;">
-      {{settings.WELCOME_MESSAGE|safe}}
-    </p>
 
     {% if elections|length %}
 
@@ -97,4 +131,5 @@ More than <b>2,000,000 votes</b> have been cast using Helios.
   </div> <!-- span2 -->
 
 </div> <!-- end row-fluid -->
+
 {% endblock %}

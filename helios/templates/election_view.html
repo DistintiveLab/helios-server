@@ -97,6 +97,10 @@
 	{{election.description_bleached|safe}}
 </div>
 
+<p>
+{% if election.help_email and admin_p%}{% trans "Help Email Address:" %} {{election.help_email}}<br />{% endif %}
+</p>
+
 {% if election.election_info_url %}
 	<p style="font-size:1.5em;">[<a target="_blank" href="{{election.election_info_url}}">download candidate bios &amp; statements</a>]</p>
 {% endif %}
@@ -123,7 +127,7 @@
 	{% if admin_p %}
 		{% if election.frozen_p %}
 		<div style="background: lightyellow; padding:5px; padding-left: 10px; margin-top: 15px; border: 1px solid #aaa; width: 720px;" class="round">
-			<a href="#" onclick="$('#badgebody').slideToggle(250);">Embed an Election Badge</a>
+			<a href="#" onclick="$('#badgebody').slideToggle(250);">{% trans "Embed an Election Badge" %}</a>
 			<div id="badgebody" style="display:none;">
 			<br />
 				<form action="#">
@@ -242,9 +246,8 @@ Once you do this, the tally will visible to you, the administrator, only.
 			<br />
 			{% if election.private_p and voter %}
 				<br />
-{% blocktrans %}
-This election is <em>private</em>. You are signed in as eligible voter:  <em>{{ voter }}</em>.
-{% endblocktrans %}
+{% trans "This election is <em>private</em>. You are signed in as eligible voter: " %}
+<em>{{ voter.pretty_name }}</em>.
 			{% endif %}
             <br>
 			<div class="highlight-box round" style="font-size: 1.2em; margin-right: 400px; display:none;" id="nojava_message">
@@ -294,11 +297,13 @@ Visit <a target="_new" href="http://java.sun.com">java.sun.com</a> to install it
 			  {% endif %}
 			  <br>
 			  {% if election.voting_ends_at %}
-				  {% blocktrans  with voting_starts_at=election.voting_ends_at|date:"d/m/Y H:i"%}
-					  Election end: {{voting_starts_at}}
+				  {% blocktrans  with voting_ends_at=election.voting_ends_at|date:"d/m/Y H:i"%}
+					  Election end: {{voting_ends_at}}
 					  {% endblocktrans %}
 			  {% else %}
-				  {% trans "This {{election.election_type}} ends at the administrator's discretion." %}
+				  {% blocktrans with election_type=election.pretty_type %}
+				  This {{election_type}} ends at the administrator's discretion.
+				  {% endblocktrans %}
 			  {% endif %}
 			  <br>
 			  {% if election.voting_extended_until %}

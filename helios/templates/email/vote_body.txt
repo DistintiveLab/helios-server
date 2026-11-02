@@ -13,15 +13,18 @@
 
 <p>Código de Identificação da Eleição: {{election_hash}}</p>
 <br>
-
 {% ifequal voter.voter_type "password" %}
+  <p> URL da Eleição: {{election_vote_url}}</p>
+<br>
 <p>
     <strong>Seu ID de eleitor</strong>: {{voter.voter_login_id}}<br>
     <strong>Sua senha para essa eleição</strong>: {{voter.voter_password}}<br>
 </p>
 {% else %}
-<p>Conecte-se com seu usuário e senha dos sistemas do IFSC.</p>
+<p><a href="{{helios_url}}"> Conecte-se com seu usuário e senha dos sistemas do IFSC para acessar a lista de eleições nas quais você pode votar.</a></p>
+
 {% endifequal %}
+<p>Código de Identificação da Eleição: {{election_hash}}</p>
 
 {% if voter.vote_hash %}
 <p>
