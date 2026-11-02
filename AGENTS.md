@@ -102,6 +102,15 @@ Consequences of CI running Postgres:
 
 - **Test output goes to stderr** (see command above). Reading only stdout looks like
   the suite produced nothing.
+- **`settings.py` DB defaults are docker-compose values**: host `db`, user/name/password
+  `helios`. Deploying directly on a host requires `POSTGRES_HOST` (and usually
+  `DB_USER`/`DB_PWD`) env vars, or Django fails with `could not translate host name
+  "db"`. Setting `DATABASE_URL` overrides the whole block (that branch also forces
+  `ssl_require=True`).
+- **`reset.sh` is destructive** (`dropdb helios` + `createdb helios`) — dev-only, never
+  run it on a server with data; a fresh deploy only needs `migrate`. Its
+  `dropdb`/`createdb` steps also connect with your shell user via the local socket,
+  unlike the Django steps, which use the env vars above.
 - **Celery eager mode still needs the `redis` package.** settings.py sets
   `CELERY_TASK_ALWAYS_EAGER = True` when `'test' in sys.argv` (a deliberate hack at
   settings.py:11), but celery 5's eager path still resolves the broker transport,
