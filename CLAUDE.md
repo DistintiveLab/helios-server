@@ -14,10 +14,13 @@ Helios is an end-to-end verifiable voting system that provides secure, transpare
 
 - **Python**: 3.13
 - **Framework**: Django 5.2
-- **Database**: PostgreSQL 9.5+
-- **Task Queue**: Celery with RabbitMQ
+- **Database**: PostgreSQL 12+
+- **Task Queue**: Celery 5 with Redis broker (default `redis://127.0.0.1:6379`)
 - **Crypto**: pycryptodome
-- **Package Manager**: uv
+- **Package Manager**: uv (dependencies in `pyproject.toml`)
+
+Note: this is the IFSC/DistintiveLab Brazilian fork. See AGENTS.md for
+fork-specific guidance, which takes precedence over this file.
 
 ## Common Commands
 
@@ -42,17 +45,21 @@ uv run python manage.py test helios.tests.ElectionModelTests -v 2
 uv run python manage.py makemigrations
 uv run python manage.py migrate
 
-# Reset database (drops and recreates)
+# Reset database (drops and recreates; dev-only, never run on a server with data)
 ./reset.sh
 
 # Start Celery worker (for background tasks)
 uv run celery --app helios worker --events --beat --concurrency 1
 ```
 
+On some machines `uv` is not on PATH; use the full path `~/.local/bin/uv`.
+Local testing runs against sqlite via `DJANGO_SETTINGS_MODULE=settings_sqlite`
+(that file is gitignored on purpose; see AGENTS.md for its contents).
+
 ## Project Structure
 
 - `helios/` - Core election system (models, views, crypto, forms)
-- `helios_auth/` - Authentication system with multiple backends
+- `helios_auth/` - Authentication system with multiple backends (Google, GitHub, LDAP, CAS, password, Discourse Connect via `helios_auth/auth_systems/discourse.py`, ...)
 - `server_ui/` - Admin web interface
 - `heliosbooth/` - JavaScript voting booth interface
 - `heliosverifier/` - JavaScript ballot verification interface

@@ -1,13 +1,14 @@
 - [Sistema de votação Helios como serviço de TIC](#sistema-de-votação-helios-como-serviço-de-tic)
   - [Personalizações feitas pelo IFSC no Helios](#personalizações-feitas-pelo-ifsc-no-helios)
 - [Guia de instalação e configuração do Helios](#guia-de-instalação-e-configuração-do-helios)
-  - [Instalação dos pacotes necessários (Ubuntu 18.04)](#instalação-dos-pacotes-necessários-ubuntu-1804)
+  - [Instalação dos pacotes necessários (Ubuntu 22.04/24.04)](#instalação-dos-pacotes-necessários-ubuntu-22042404)
     - [Softwares necessários](#softwares-necessários)
   - [Preparação do ambiente para instalação do Helios](#preparação-do-ambiente-para-instalação-do-helios)
     - [Configuração do banco de dados PostgreSQL](#configuração-do-banco-de-dados-postgresql)
     - [Compilando arquivos com as traduções para português](#compilando-arquivos-com-as-traduções-para-português)
     - [Configuração dos módulos de autenticação](#configuração-dos-módulos-de-autenticação)
       - [Autenticação em uma base LDAP](#autenticação-em-uma-base-ldap)
+      - [Autenticação via Discourse Connect](#autenticação-via-discourse-connect)
     - [Testando a instalação em ambiente de desenvolvimento](#testando-a-instalação-em-ambiente-de-desenvolvimento)
     - [Habilitando usuário com permissão de gestor de eleições](#habilitando-usuário-com-permissão-de-gestor-de-eleições)
   - [Preparando ambiente de produção](#preparando-ambiente-de-produção)
@@ -34,12 +35,15 @@ Sendo assim, com intuito de contribuir com o público brasileiro, optamos por ma
 
 Esse repositório contém as personalizações feitas pelo IFSC no Helios. Ainda assim, buscará o sincronismo periódico com (sempre que possível e dentro do tempo possível) o projeto original do [Ben Adida](https://github.com/benadida/helios-server).
 
+> **Nota:** este *fork* é mantido atualmente pela [DistintiveLab](https://github.com/DistintiveLab) (serviço [Coletivo](https://vote.coletivo.net.br)), que o executa em produção, conduziu a atualização para Python 3.13 / Django 5.2 (com o gerenciador de pacotes [uv](https://docs.astral.sh/uv/)) e adicionou o login via Discourse Connect.
+
 Personalizações e contribuições que fizemos que estão aqui e que não foram para o *upstream*:
 - Tradução da interface para português
 - Melhorias em algumas páginas e adequação para serem responsivas
 - Criação de manuais para eleitores e para gestores de eleição
 - Módulo de autenticação LDAP
 - Módulo de autenticação Shibboleth
+- Módulo de autenticação via Discourse Connect (um fórum Discourse como provedor de login)
 - Ajustes na página inicial e interface de administração para operação do Helios em ambiente Federado (Ex: Federação CAFe)
 - Esse próprio arquivo com instruções para instalação do Helios :smile:
 
@@ -52,27 +56,32 @@ Para saber um pouco mais, acesse http://dtic.ifsc.edu.br/sistemas/sistema-de-vot
 
 # Guia de instalação e configuração do Helios
 
-Neste tutorial são descritos os principais passos para disponibilização do Helios em um servidor com a distribuição Linux Ubuntu (testado nas versões LTS 14.04, 16.04 e 18.04), embora já tenha sido feita instalação com sucesso no CentOS. 
+Neste tutorial são descritos os principais passos para disponibilização do Helios em um servidor com a distribuição Linux Ubuntu (testado nas versões LTS 14.04, 16.04, 18.04, 22.04 e 24.04), embora já tenha sido feita instalação com sucesso no CentOS. 
 
 Para seguir esse tutorial é necessário tenha alguma experiência com administração de sistemas Linux (instalação de pacotes, configuração de serviços, etc.).
 
 
-## Instalação dos pacotes necessários (Ubuntu 18.04)
+## Instalação dos pacotes necessários (Ubuntu 22.04/24.04)
 
 ### Softwares necessários
 
-* python2.7
+* python 3.13 (e o pacote python3-dev da distribuição)
 * apache2
 * libapache2-mod-wsgi
-* postgresql e postgresql-contrib 
-  * [Aqui tem um bom tutorial](https://www.digitalocean.com/community/tutorials/how-to-install-and-use-postgresql-on-ubuntu-18-04) de como instalar no Ubuntu 18.04
+* postgresql (12 ou superior) e postgresql-contrib
+  * [Aqui tem um bom tutorial](https://www.digitalocean.com/community/tutorials/how-to-install-and-use-postgresql-on-ubuntu-22-04) de como instalar no Ubuntu 22.04
+* redis-server
+  * atua como *message broker* do celery (ver seção [Celery](#celery))
 * build-essential
 * git
-* gettext 
-  * para uso das funcionalidade de compilação de mensagens traduzidas
-* python-pip
-* python-ldap python-dev libsasl2-dev libldap2-dev
-  * para utilização do módulo de autenticação LDAP
+* gettext
+  * para uso das funcionalidades de compilação de mensagens traduzidas
+* [uv](https://docs.astral.sh/uv/) — gerenciador de pacotes Python, instalado por exemplo com:
+  ```bash
+  curl -LsSf https://astral.sh/uv/install.sh | sh
+  ```
+* libsasl2-dev e libldap2-dev
+  * cabeçalhos necessários para compilar o pacote python-ldap (usado pelo módulo de autenticação LDAP)
 
 > Obs.: 
 > 1) Para instalação dos pacotes apresentados acima foi necessário editar o arquivo  `/etc/apt/sources.list` e adicionar na seguinte linha a opção `universe`:
@@ -81,10 +90,7 @@ Para seguir esse tutorial é necessário tenha alguma experiência com administr
 >```
 > Depois é só fazer um `sudo apt update` e instalar os pacotes apresentados acima com o `sudo apt install`
 
-> 2) Pode ser necessário instalar também o pacote libq-dev em atualizações mais recentes do Ubuntu. A biblioteca psycopg2 foi atualizada para a versão 2.8.5 e há relatos de que esse pacote é necessário. 
-
-
-> 3) A versão do Django utilizada nesta versão do Helios é a [1.11.28](https://docs.djangoproject.com/en/1.11/).
+> 2) Esta versão do Helios utiliza [Python 3.13](https://docs.python.org/3.13/) e [Django 5.2](https://docs.djangoproject.com/en/5.2/), com as dependências gerenciadas pelo [uv](https://docs.astral.sh/uv/) no arquivo `pyproject.toml` (não existe mais `requirements.txt`). O driver PostgreSQL (`psycopg2-binary`) e o `python-ldap` são instalados automaticamente pelo `uv sync`.
 
 ## Preparação do ambiente para instalação do Helios
 
@@ -127,53 +133,41 @@ Todas as instruções abaixo devem ser executadas com o usuário `helios` e não
 
 Baixe o código fonte desse repositório:
 ```bash
-git clone https://github.com/ifsc/helios-server.git
+git clone https://github.com/DistintiveLab/helios-server.git
 ```
 
-Não é obrigatório, mas é uma boa prática, criar um ambiente virtual python para a disponibilização do Helios, pois isso permite separar as dependências do projeto e não interferir em outros sistemas na mesma máquina. 
-
-Instale o `virtualenv` por meio do `pip`:
-
-```bash
-pip install virtualenv
-```
+As dependências do projeto são gerenciadas pelo [uv](https://docs.astral.sh/uv/), que cria e mantém automaticamente um ambiente virtual (`.venv`) no diretório do projeto, separando as dependências sem interferir em outros sistemas na mesma máquina.
 
 Dentro do diretório onde o Helios foi baixado, execute o comando:
 
 ```bash
-virtualenv venv
+uv sync
 ```
 
-Isso criará um ambiente virtual python dentro do subdiretório chamado `venv`. Por fim, carregue o script `venv/bin/activate` para fazer uso do ambiente virtual: 
+Isso criará o ambiente virtual e instalará os pacotes listados no arquivo `pyproject.toml`, incluindo o `django-auth-ldap` e outros necessários para as personalizações feitas neste *fork* do Helios. Para executar comandos dentro do ambiente use `uv run <comando>`, por exemplo `uv run python manage.py ...` — não é preciso ativar o ambiente manualmente.
+
+> **ATENÇÃO:** apesar de se pretender manter este repositório atualizado com o do [Ben Adida](https://github.com/benadida/helios-server), não necessariamente vai ser simultâneo, então se você utilizar o dele, pode haver versões diferentes de pacotes.
+
+> **Observação:** o pacote `python-ldap` é compilado a partir do código fonte no momento do `uv sync`; se a compilação falhar por falta de cabeçalhos, instale `libsasl2-dev`, `libldap2-dev` e `build-essential` e execute `uv sync` novamente.
+
+A conexão com o banco de dados é configurada por variáveis de ambiente, lidas no `settings.py`. Os valores padrão são os do docker-compose (host `db`, usuário/banco/senha `helios`), portanto numa instalação direta no servidor defina no ambiente (por exemplo no arquivo `.env`; veja o `.env.sample`):
 
 ```bash
-source venv/bin/activate
+POSTGRES_HOST=localhost
+POSTGRES_PORT=5432
+DB_NAME=helios
+DB_USER=helios
+DB_PWD=SENHADOHELIOS
 ```
 
-Com o ambiente virtual ativado, instale os pacotes que estão listados no arquivo `requirements.txt`:
-```bash
-pip install -r requirements.txt
-```
+Alternativamente, a variável `DATABASE_URL` (ex.: `postgres://usuario:senha@localhost:5432/helios`) substitui toda a configuração acima e força o uso de SSL na conexão.
 
-> **ATENÇÃO:** Utilize o `requirements.txt` deste repositório para instalar o pacote `django-auth-ldap` e outros necessários para as personalizações que foram feitas no Helios. Lembrando também que apesar de se pretender manter este repositório atualizado com o do [Ben Adida](https://github.com/benadida/helios-server), não necessariamente vai ser simultâneo, então se você utilizar o dele, pode haver versões diferentes de pacotes.
-
-Edite o arquivo `settings.py` e localize a seção databases. Adicione as informações para conexão no banco de dados, conforme o exemplo:
-
-```bash
-DATABASES = {
-'default': {
-'ENGINE': 'django.db.backends.postgresql_psycopg2',
-'NAME': 'helios',
-'USER': 'helios',
-'HOST': 'localhost',
-'PASSWORD': 'SENHADOHELIOS'
-}}
-```
-
-Por fim, você precisará executar o script `reset.sh` (não faça como root) que fará a inicialização do esquema no banco de dados (criará as tabelas, etc.)
+Por fim, você precisará inicializar o esquema no banco de dados (criar as tabelas, etc.). Em ambiente de desenvolvimento isso pode ser feito com o script `reset.sh` (não faça como root), que além das migrações cria um usuário inicial de exemplo:
 ```bash
 ./reset.sh
 ```
+
+> **ATENÇÃO:** o `reset.sh` é destrutivo: ele **apaga e recria** o banco de dados (`dropdb helios` + `createdb helios`) antes de rodar as migrações. Use-o apenas em ambiente de desenvolvimento; numa implantação nova em servidor basta `uv run python manage.py migrate`. Note também que o `dropdb`/`createdb` conectam pelo socket local com o seu usuário de shell, enquanto os comandos Django usam as variáveis de ambiente (`POSTGRES_HOST`, `DB_USER`, etc.).
 
 > **Observação:** Se tiver algum problema ao executar o script acima, provavelmente vai ser relacionado à configuração do PostgreSQL e, nesse caso, o *Google é seu amigo.* Porém, o erro mais comum é que você tenha executado o script como root e o `postgres` acuse que não há um usuário root. Recomendo criar um usuário que não seja root (por exemplo, helios) e usar o mesmo nome para usuário do banco. Ou executar os comandos contidos no script com o usuário adequado do banco.
 
@@ -181,7 +175,7 @@ Por fim, você precisará executar o script `reset.sh` (não faça como root) qu
 
 A interface do Helios foi traduzida para o português e assim é necessário que compile os arquivos de tradução, caso queira usar a tradução que fizemos. Execute o seguinte comando a partir do diretório do Helios:
 ```bash
-python manage.py compilemessages -l pt_BR
+uv run python manage.py compilemessages -l pt_BR
 ```
 
 Após a compilação, arquivos `.mo` devem ter sido gerados em `locale/pt_BR/LC_MESSAGES`
@@ -193,14 +187,14 @@ Se você adicionou alguma mensagem nova para ser traduzida e gostaria que fossem
 1. Para adicionar strings de arquivos python:
 
 ```bash
-python manage.py makemessages -l pt_BR
+uv run python manage.py makemessages -l pt_BR
 ```
 2. Para adicionar strings de arquivos .js (os que passam pelo engine do Django):
 
 ```bash
-python manage.py makemessages -d djangojs -l pt_BR --ignore=venv
+uv run python manage.py makemessages -d djangojs -l pt_BR --ignore=.venv
 ```
-> **Observação:** Para a coleta de mensagens de arquivos .js, se você tiver criado o diretório de virtualenv relativo ao diretório do helios e chamado de por exemplo `venv`, você pode passar o parâmetro `--ignore=venv` conforme acima, para ignorar esse diretório.
+> **Observação:** Para a coleta de mensagens de arquivos .js, se você tiver criado o diretório do ambiente virtual relativo ao diretório do helios (o `uv` cria o `.venv`), você pode passar o parâmetro `--ignore=.venv` conforme acima, para ignorar esse diretório.
 
 ### Configuração dos módulos de autenticação
 
@@ -220,29 +214,57 @@ A documentação da biblioteca utilizada pode ser encontrada em http://pythonhos
 
 As opções `AUTH_LDAP_BIND_DN` e `AUTH_LDAP_BIND_PASSWORD` deverão ter um valor configurado se o servidor LDAP exigir autenticação de usuário mesmo que seja para fazer consultas.
 
-> Observação: Você pode testar a conexão usando o próprio teste unitário do app de autenticação. Para tal, edite o arquivo [helios_auth/tests.py](helios_auth/tests.py), altere o usuário (euclid) e senha (password) que estão no teste usando o [servidor de testes LDAP da ForumSys](https://www.forumsys.com/tutorials/integration-how-to/ldap/online-ldap-test-server/) para um usuário e senha válidos no LDAP que você configurou no arquivo [settings.py](settings.py) e execute `python manage.py test helios_auth`
+> Observação: Você pode testar a conexão usando o próprio teste unitário do app de autenticação. Para tal, edite o arquivo [helios_auth/tests.py](helios_auth/tests.py), altere o usuário (euclid) e senha (password) que estão no teste usando o [servidor de testes LDAP da ForumSys](https://www.forumsys.com/tutorials/integration-how-to/ldap/online-ldap-test-server/) para um usuário e senha válidos no LDAP que você configurou no arquivo [settings.py](settings.py) e execute `uv run python manage.py test helios_auth`
+
+#### Autenticação via Discourse Connect
+
+Este *fork* dispõe de um módulo de autenticação via [Discourse Connect](https://meta.discourse.org/t/discourseconnect-official-single-sign-on-for-discourse-sso/13045) (o antigo SSO do Discourse), que permite usar um fórum Discourse como provedor de login — adicionado para que usuários do fórum da SEPLA (`foro.sepla21.org`) possam se autenticar no Helios.
+
+O protocolo é o padrão do Discourse Connect com assinatura HMAC-SHA256: o Helios gera um *nonce* e redireciona o usuário para `<DISCOURSE_URL>/session/sso_provider`; no retorno, valida a assinatura e o *nonce* da sessão antes de criar o login (implementação em [helios_auth/auth_systems/discourse.py](helios_auth/auth_systems/discourse.py)).
+
+Para habilitá-lo:
+
+1. Inclua `discourse` na lista de sistemas de autenticação habilitados (já consta no padrão do `settings.py`):
+
+```bash
+AUTH_ENABLED_AUTH_SYSTEMS = get_from_env('AUTH_ENABLED_AUTH_SYSTEMS', 'ldap,password,google,facebook,discourse').split(",")
+```
+
+2. Configure o provedor pelas variáveis de ambiente (lidas no `settings.py` via `get_from_env`; defina por exemplo no arquivo `.env`, veja o `.env.sample`):
+
+```bash
+DISCOURSE_URL=https://seu-forum.exemplo.org
+DISCOURSE_SECRET=chave-secreta-compartilhada
+```
+
+3. No painel administrativo do Discourse (`/admin/settings`), habilite o provedor **Discourse Connect** (*enable discourse connect provider*) e cadastre em *discourse connect provider secrets* a mesma chave secreta, no formato `endereco-do-seu-helios:chave-secreta` (apenas a chave, sem host, aceita qualquer origem).
+
+> **Observações:**
+> - O identificador do usuário no Helios é o `username` do Discourse; o e-mail usado é o cadastrado no fórum.
+> - A chave secreta é compartilhada entre o Helios e o Discourse e deve ser mantida sigilosa, pois é ela que assina e valida as mensagens trocadas entre os dois sistemas.
+> - As variáveis `DISCOURSE_URL` e `DISCOURSE_SECRET` são lidas do ambiente pelo `settings.py` (via `get_from_env`); o mesmo vale para as demais configurações (banco, email, broker) — prefira usar o arquivo `.env` em vez de editar o `settings.py`.
 
 ### Testando a instalação em ambiente de desenvolvimento
 
 Ao executar o script `reset.sh`, você teve que criar um usuário de administração do django. Isso se deve ao fato de aplicação `admin` estar habilitada no arquivo `settings.py` (django.contrib.admin), pois iremos utilizá-la em algumas personalizações feitas para este *fork* do Helios.
 
->*Observação*: você sempre pode criar um novo usuário para o django admin site executando o comando `python manage.py createsuperuser`
+>*Observação*: você sempre pode criar um novo usuário para o django admin site executando o comando `uv run python manage.py createsuperuser`
 
 Se tudo estiver correto até aqui, agora você poderá executar o servidor web para desenvolvimento que é provido pelo próprio django. Use esse servidor somente para verificar se a instalação foi feita com sucesso, porém não use-o caso queira colocar o Helios no ambiente de produção.
 
 Execute o seguinte comando:
 
 ```bash
-python manage.py runserver 0.0.0.0:8000
+uv run python manage.py runserver 0.0.0.0:8000
 ```
 
 Além disso, você precisa ter o celery rodando, pois algumas tarefas como processamento de arquivo de eleitores e envio de emails dependem dele.
 
-Abra um outro terminal para deixar o [celery](https://docs.celeryproject.org/en/stable/) em execução. Se você estiver usando o virtualenv, lembre-se de ativá-lo nesse novo terminal também.
+Abra um outro terminal para deixar o [celery](https://docs.celeryq.dev/) em execução (com o `uv` não é necessário ativar ambiente algum; o Redis precisa estar acessível, pois é o *broker* padrão `redis://127.0.0.1:6379`):
 
 
 ```bash
-celery -A helios worker -l info
+uv run celery --app helios worker -l info
 ```
 
 > Refrisando, essa parte é importante, pois é o celery responsável pelas tarefas de gravação dos votos, envio de emails, processamento do arquivo de eleitores, etc.
@@ -256,7 +278,7 @@ Esse usuário não conseguirá criar eleições ainda, mas esse passo é necess�
 
 Acesse a URL http://endereco-do-seu-servidor-helios/admin e se autentique com o usuário e senha de administração (você fez isso quando executou o script `reset.sh`). 
 
->*Observação*: Se você não lembra qual senha você criou, mas lembra o usuário, então é possível mudar a senha executando o comando `python manage.py changepassword <usuario>`
+>*Observação*: Se você não lembra qual senha você criou, mas lembra o usuário, então é possível mudar a senha executando o comando `uv run python manage.py changepassword <usuario>`
 
 Na página de administração são apresentados os *apps* habilitados. Localize a opção `Helios_Auth` e clique em *Users*. Na página seguinte, escolha o usuário que você deseja editar (basta clicar somente o login do mesmo). Na página de edição, marque a opção *Admin_p* e salve.
 
@@ -267,9 +289,9 @@ Pronto! O usuário em questão recebeu o papel de **gestor de eleição** e ser�
 
 ## Preparando ambiente de produção
 
-Na seção anterior foi usado o servidor web de desenvolvimento provido pelo próprio Django (`python manage.py runserver 0.0.0.0:8000`). No entanto, ele é apenas para desenvolvimento e **não deve** ser usado em um ambiente de produção.
+Na seção anterior foi usado o servidor web de desenvolvimento provido pelo próprio Django (`uv run python manage.py runserver 0.0.0.0:8000`). No entanto, ele é apenas para desenvolvimento e **não deve** ser usado em um ambiente de produção.
 
-É possível trabalhar com diversos servidores web, porém no caso em questão optou-se pelo [Apache](https://docs.djangoproject.com/en/1.8/topics/install/#install-apache-and-mod-wsgi).
+É possível trabalhar com diversos servidores web, porém no caso em questão optou-se pelo [Apache](https://docs.djangoproject.com/en/5.2/topics/install/#install-apache-and-mod-wsgi).
 
 ### Configuração apache
 
@@ -278,7 +300,7 @@ Módulos a serem habilitados, para a configuração exemplo:
 sudo a2enmod rewrite
 sudo a2enmod ssl
 ```
-Para configurar o `httpd.conf` ou equivalente, siga as instruções em [How to use Django with Apache and mod_wsgi](https://docs.djangoproject.com/en/1.8/howto/deployment/wsgi/modwsgi/).
+Para configurar o `httpd.conf` ou equivalente, siga as instruções em [How to use Django with Apache and mod_wsgi](https://docs.djangoproject.com/en/5.2/howto/deployment/wsgi/modwsgi/). Neste repositório há um exemplo de configuração em produção no arquivo [helios.conf.exemplo](helios.conf.exemplo).
 
 A parte de servir os arquivos estáticos é a mais trabalhosa. Essa configuração é necessária porque no servidor de desenvolvimento o django serve esses arquivos, porém na produção, eles precisam ser configurados para serem servidos pelo servidor *web*.
 
@@ -295,9 +317,13 @@ Alias /booth /`<path_to_site>`/sitestatic/booth
 Alias /verifier /`<path_to_site>`/sitestatic/verifier
 ```
 
-Além desses, todos os demais arquivos a serem servidos diretamente pelo apache, como os do módulo `admin` do django estão com links simbólicos no diretório `sitestatic`, que está sob controle do git. 
+Além desses, os demais arquivos estáticos (CSS, JavaScript, imagens, incluindo os do módulo `admin` do django) devem ser reunidos no diretório `staticfiles` (definido em `STATIC_ROOT`) com o comando:
 
-Ou seja, se você clonar este projeto e utilizar a estrutura tal como está, não é necessário rodar o comando `collectstatic`, apenas configurar o apache para apontar para o diretório `sitestatic` contido neste projeto, conforme exemplo de configuração acima. Normalmente, para coletar esses arquivos, é preciso executar o comando `collectstatic`, conforme descrito em [Collect static app](/https://docs.djangoproject.com/en/1.11/ref/contrib/staticfiles/).
+```bash
+uv run python manage.py collectstatic
+```
+
+Configure então o apache para apontar também para esse diretório, conforme descrito em [Collect static app](https://docs.djangoproject.com/en/5.2/ref/contrib/staticfiles/).
 
 >**Observações:**
 >
@@ -307,22 +333,22 @@ Ou seja, se você clonar este projeto e utilizar a estrutura tal como está, nã
 
 ### Celery
 
-Lembrando mais uma vez que o [celery](http://www.celeryproject.org/) precisa estar em execução, pois ele é o enfileirador de tarefas, como a tarefa de envio de emails e a tarefa de registro de votos.
+Lembrando mais uma vez que o [celery](https://docs.celeryq.dev/) precisa estar em execução, pois ele é o enfileirador de tarefas, como a tarefa de envio de emails e a tarefa de registro de votos.
 
-Em produção é interessante rodar o celery com múltiplos processos, para acelerar por exemplo envio de emails.  Na prática, 5 processos em paralelo se mostrou suficiente. 
+Esta versão utiliza o celery 5, que suporta o Django [*out of the box*](https://docs.celeryq.dev/en/stable/django/first-steps-with-django.html), com o [Redis](https://redis.io/) como *message broker* (padrão `redis://127.0.0.1:6379`, configurável pela variável `CELERY_BROKER_URL`). O resultado das tarefas é guardado no próprio banco do Django através do app `django_celery_results` (junto com o `django_celery_beat`, ambos em `INSTALLED_APPS`).
 
-Com a atualização para o Django 1.11.28, o celery foi atualizado para a versão [4.2.1](https://docs.celeryproject.org/en/v4.2.1/index.html), na qual ele não depende mais de uma biblioteca separada para trabalhar com o Django (no caso, era usada a django-celery). Agora o celery suporta o  Django [*out of the box*](https://docs.celeryproject.org/en/v4.2.1/django/first-steps-with-django.html#using-celery-with-django). Essa alteração fez com que não fosse mais necessária a biblioteca django-celery, assim como mudou o *message broker* utilizado para a fila de mensagens. Não é mais possível utilizar a própria base de dados para enfileirar as mensagens. Dentre as opções disponíveis estão o RabbitMQ e o Redis, por exemplo. Tanto para o RabbitMQ como para o Redis, é necessário instalar os pacotes necessários. Optou-se pelo uso do Redis e se você optar por ele também, no diretório [docker](docker) há exemplo de configuração dele pra rodar supervisionado pelo supervisor, assim como no Dockerfile há indicação do pacote necessário (redis-server).
+Em produção é interessante rodar o celery com múltiplos processos, para acelerar por exemplo envio de emails. Na prática, 5 processos em paralelo se mostrou suficiente:
 
-Também mudou a forma como o celery é executado. Como agora não é utilizado através de uma biblioteca separada para trabalhar com o django, bastar rodar direto o próprio celery, como por exemplo:
-
-`celery -A helios worker -l info --concurrency=5`
+```bash
+uv run celery -A helios worker -l info --concurrency=5
+```
 
 
 Para que o resultado da execução das tarefas seja guardado no backend, adicionou-se o app `django_celery_results` e o `django_celery_beat` em INSTALLED_APPS.
 
-O celery beat, agendador de tarefas periódicas, como limpar a tabela de resultados de execução de tarefas de tempos em tempos (o que pode crescer bastante), pode ser executado pelo comando celery, mas passando o parâmetro *beat* ao invér de *worker*:
+O celery beat, agendador de tarefas periódicas, como limpar a tabela de resultados de execução de tarefas de tempos em tempos (o que pode crescer bastante), pode ser executado pelo comando celery, mas passando o parâmetro *beat* ao invés de *worker*:
 
-`celery -A helios beat -l info`
+`uv run celery -A helios beat -l info`
 
 No arquivo [`settings.py`](settings.py) , colocou-se 60 dias como o prazo para apagar essas tarefas:
 
@@ -331,7 +357,7 @@ CELERY_RESULT_EXPIRES = 5184000 # 60 days
 ```
 
 Se não desejar limpar da tabela de resultados das tarefas (`django_celery_results_taskresult`) dessa forma, basta não iniciar o celery beat.
-Conforme documentação, a tarefa de limpeza dessa tabela, considerando o prazo de expiração configurado, executa todo dia às 4 horas da manhã (GMT-3, então 1:00 da madrugada horário de Brasília). É possível ver esses resultados direto no banco na tabela `django_celery_results_taskresult` ou então via interface administrativa do django, na seção Celery Results -> Task results. A aplicação responsável por guardar esses resultados no backend do Django é a [django-celery-results)[https://docs.celeryproject.org/en/v4.2.1/django/first-steps-with-django.html#extensions].
+Conforme documentação, a tarefa de limpeza dessa tabela, considerando o prazo de expiração configurado, executa todo dia às 4 horas da manhã (GMT-3, então 1:00 da madrugada horário de Brasília). É possível ver esses resultados direto no banco na tabela `django_celery_results_taskresult` ou então via interface administrativa do django, na seção Celery Results -> Task results. A aplicação responsável por guardar esses resultados no backend do Django é a [django-celery-results](https://django-celery-results.readthedocs.io/).
 
 
 >**Observação:**
@@ -353,7 +379,7 @@ Além do que já foi relatado na seção [Personalizações feitas no Helios](#p
 
 ### Habilitar Interface de Administração do Django
 
-O projeto original do Helios não vem com essa aplicação habilitada. [A interface de administração automática](https://docs.djangoproject.com/en/1.11/ref/contrib/admin/) facilita algumas atividades de gerenciamento dentro da organização, como por exemplo dar permissão de criação de eleição para um usuário. Você encontra diversas referências a essa interface ao longo deste tutorial.
+O projeto original do Helios não vem com essa aplicação habilitada. [A interface de administração automática](https://docs.djangoproject.com/en/5.2/ref/contrib/admin/) facilita algumas atividades de gerenciamento dentro da organização, como por exemplo dar permissão de criação de eleição para um usuário. Você encontra diversas referências a essa interface ao longo deste tutorial.
 
 ### Listar eleições na página inicial do Helios
 
@@ -411,33 +437,39 @@ Os arquivos relacionados ao docker são os seguintes:
 
 - [docker-compose.yml](docker-compose.yml)
 
-Execute `docker-compose up -d`, por exemplo, para iniciar os containeres. Imagens inexistentes serão baixadas (postgres e ubuntu:18.04) e os builds necessários serão realizados, assim como a inicialização dos containers.
+Execute `docker-compose up -d`, por exemplo, para iniciar os containeres. Imagens inexistentes serão baixadas (python e redis) e os builds necessários serão realizados, assim como a inicialização dos containers.
 Se você já executou essa operação e quer forçcar fazer build novamente, pode por exemplo rodar o mesmo comando, adicionando também o parâmetro *--build*
 Como a intenção deste tutorial não é ensinar a usar o docker, por favor verifique a [documentação](https://docs.docker.com/compose/reference/overview/) para outras informações e detalhes.
 
-Ao término, você deve ter dois containeres rodando, um com o postgres e outro com o helios e dependências. O container do helios vai possuir tanto a aplicação Django helios, como também Apache e celery rodando. Não foram feitas maiores separações pelo entendimento de que para brevidade de disponilibidade de desenvolvimento não há necessidade.
-Além disso, como geralmente há muitas dúvidas com configurações de Apache, esse container já vai estar também simulando uma configuração de ambiente de produção em uma VM, por exemplo, com as devidas configurações de Apache e *supervisor* para controle tanto do Apache como do celery.
+Ao término, você terá os seguintes serviços em containeres:
 
-Você pode logar no container e verificar as configurações e também pode, supondo que nenhuma modificação foi feita nos arquivos de build, acessar tanto localhost:8000 para o ambiente de dev, como https://localhost , no navegador, para acesso via Apache.
+- `helios`: a aplicação Django servida por gunicorn (script `/start`; na inicialização o container executa `migrate` e `collectstatic` automaticamente); o servidor de desenvolvimento fica disponível em `127.0.0.1:8000`;
+- `celeryworker` e `celerybeat`: os processos de tarefas assíncronas e agendadas do celery;
+- `redis`: o *message broker* do celery;
+- `nginx`: serve os arquivos estáticos de `staticfiles/` na porta 1337.
 
->Obs.: alterações que você faça localmente no código fonte (veja que o código fonte foi montado como um volume), se refletirão 'automaticamente' apenas para localhost:8000 (ou outra porta que você tenha configurado), que é onde está rodando o servidor de desenvolvimento. Para refletir para o Apache e celery você precisa reiniciar o supervidor ou o container.
+O serviço de banco PostgreSQL (`db`) está comentado no `docker-compose.yml`: usa-se um PostgreSQL externo, ajustando `POSTGRES_HOST` (e usualmente `DB_USER`/`DB_PWD`) no `.env`.
+
+Você pode logar no container e verificar as configurações e também pode, supondo que nenhuma modificação foi feita nos arquivos de build, acessar localhost:8000 no navegador para o ambiente de dev, e localhost:1337 para os arquivos estáticos servidos pelo nginx.
+
+>Obs.: alterações que você faça localmente no código fonte (veja que o código fonte foi montado como um volume), se refletirão 'automaticamente' apenas para localhost:8000 (ou outra porta que você tenha configurado), que é onde está rodando o servidor de desenvolvimento. Para refletir para os demais serviços você precisa reiniciar o container correspondente.
 
 - [docker folder](docker)
-    - [Dockerfile](docker/Dockerfile)
-    Arquivo de build da imagem a ser usada pelo container do serviço helios.
+    - [Dockerfile](docker/app/Dockerfile)
+    Arquivo de build da imagem a ser usada pelos containeres do serviço helios.
     - [Arquivos supervisor](docker/supervisor)
-    Arquivos que serão carregados na imagem do helios, para utilização pelo gerenciador de processos [*supervisor*](http://supervisord.org/)
+    Arquivos de exemplo de configuração de processos (apache, celery, redis) pelo gerenciador [*supervisor*](http://supervisord.org/)
     - [Arquivos Apache2](docker/apache)
     Arquivo de configuração para o helios ser servido pelo Apache. Os arquivos de certificados não são válidos, você deve gerar um autoassinado para testes em desenvolvimento, como uma ferramenta como o *openssl* ou usar algum que você já possua para esse propósito. Basta substituir os arquivos.
-    - [docker-entrypoint.sh](docker/docker-entrypoint.sh)
-    Script com as execuções necessárias para inicialização da aplicação helios pelo Django, especialmente, além da inicialização do *supervisor*.
+    - [docker-entrypoint.sh](docker/app/docker-entrypoint.sh)
+    Script que aguarda a disponibilidade do PostgreSQL antes de iniciar a aplicação.
     - [Arquivos postgres](docker/db/init.sql)
     Script de inicialização da base de dados a ser usada pelo helios.
 
 
 Antes de executar o docker-compose, você pode criar um arquivo .env na raiz deste projeto, contendo as seguintes variáveis de ambiente listadas abaixo. Essa configuração é boa prática, mas não é obrigatória, você pode deixar os valores informados no próprio arquivo [settings.py](settings.py).
 
->**Atenção**: como o celery está rodando supervisionado pelo supervisor neste caso, por questões de funcionamento de subprocessos e variáveis de ambiente, essas variáveis acabam não ficando disponíveis no contexto de execução das tarefas pelo celery e então elas devem estar configuradas, especialmente as de email, no próprio settings.py. Ver mais detalhes em [Subprocess Environment](http://supervisord.org/subprocess.html#subprocess-environment) ou então configuradas como estão na indicação do manual do supervisor, como parâmetro, no arquivo de configuração do supervisor. Se você tiver uma ideia melhor, por favor compartilhe!
+>**Atenção**: se o celery estiver rodando supervisionado pelo supervisor, por questões de funcionamento de subprocessos e variáveis de ambiente, essas variáveis podem não ficar disponíveis no contexto de execução das tarefas pelo celery e então elas devem estar configuradas, especialmente as de email, no próprio settings.py. Ver mais detalhes em [Subprocess Environment](http://supervisord.org/subprocess.html#subprocess-environment) ou então configuradas como estão na indicação do manual do supervisor, como parâmetro, no arquivo de configuração do supervisor. Se você tiver uma ideia melhor, por favor compartilhe!
 
         DEBUG=1
         ALLOWED_HOSTS='localhost,192.168.15.7'
@@ -479,15 +511,15 @@ URL_HOST indica endereço sem considerar HTTPS e SECURE_URL_HOST indica o endere
 
 >**Observação**: Para o caso de desenvolvimento, é importante indicar a porta na qual o servidor de desenvolvimento foi iniciado (no caso do nosso docker-compose.yml, a porta 8000), para que a navegação se direcione para essa porta e possa ser utilizada a funcionalidade de *reload* automático para mudanças de código.
 
-DJANGO_SUPERUSER_USERNAME, DJANGO_SUPERUSER_EMAIL e  DJANGO_SUPERUSER_PASSWORD são as informações para criar um usuário admin (você pode configurar outro username no arquivo .env, assim como outra senha!), aquele que você normalmente criaria executando no shell o comando `python manage.py createsuperuser`. Esse usuário é o usuário do app django admin site, que foi habilitado para essa personalização do helios. Com ele você acessa, por exemplo, http://localhost:8000/admin e consegue executar algumas operações administrativas, como habilitar um usuário que já logou previamente no helios para ser gestor de eleições ou então visualizar lista de usuários do helios. Não confundir com usuário gestor de eleição do helios! Esse usuário não é usuário que consegue logar na aplicação Helios. A aplicação Helios depende de módulo de autenticação próprio habilitado, dentre os disponíveis (Google ou Ldap, por exemplo).
+DJANGO_SUPERUSER_USERNAME, DJANGO_SUPERUSER_EMAIL e  DJANGO_SUPERUSER_PASSWORD são as informações para criar um usuário admin (você pode configurar outro username no arquivo .env, assim como outra senha!), aquele que você normalmente criaria executando no shell o comando `uv run python manage.py createsuperuser`. Esse usuário é o usuário do app django admin site, que foi habilitado para essa personalização do helios. Com ele você acessa, por exemplo, http://localhost:8000/admin e consegue executar algumas operações administrativas, como habilitar um usuário que já logou previamente no helios para ser gestor de eleições ou então visualizar lista de usuários do helios. Não confundir com usuário gestor de eleição do helios! Esse usuário não é usuário que consegue logar na aplicação Helios. A aplicação Helios depende de módulo de autenticação próprio habilitado, dentre os disponíveis (Google ou Ldap, por exemplo).
 
-O GROUP_ID e USER_ID você pode usar o do usuário local, no host em que você vai rodar o docker-compose, para evitar problemas de permissão de diretórios. Por exemplo, o teu usuário local tem o uid 1000 e você montou o diretório local onde baixou o helios para um volume do docker, no qual o usuário criado tem outro uid. Importante: se você não quiser fornecer esse valor, remova o parâmetro -g e -u do comando `RUN groupadd -r -g 1000 helios && useradd -r -g helios -u 1000 helios` no [Dockerfile da imagem](docker/Dockerfile).
+O GROUP_ID e USER_ID você pode usar o do usuário local, no host em que você vai rodar o docker-compose, para evitar problemas de permissão de diretórios. Por exemplo, o teu usuário local tem o uid 1000 e você montou o diretório local onde baixou o helios para um volume do docker, no qual o usuário criado tem outro uid. Importante: se você não quiser fornecer esse valor, remova o parâmetro -g e -u do comando `RUN groupadd -r -g 1000 helios && useradd -r -g helios -u 1000 helios` no [Dockerfile da imagem](docker/app/Dockerfile).
 
 CELERY_BROKER_URL indica o endereço e credenciais de acesso ao serviço de message broker, no caso, o Redis.
 
 Importante destacar que para variáveis que não sejam informadas, será utilizado o valor padrão definido em [settings.py](settings.py). Você também pode configurar assim outras variáveis do settings.py que achar necessário, seguindo o mesmo padrão.
 
->**Observação**: Todos os valores de configuração e escolhas de organização de serviços e containeres foram feitas pensando em ambiente de desenvolvimento local, para facilitar configurar o ambiente especialmente considerando questões de versões de software (como o Python2, por exemplo). Questões de segurança e até melhores práticas de separação de serviços por containers e etc não estão aqui consideradas!
+>**Observação**: Todos os valores de configuração e escolhas de organização de serviços e containeres foram feitas pensando em ambiente de desenvolvimento local, para facilitar configurar o ambiente especialmente considerando questões de versões de software (como a versão do Python, por exemplo). Questões de segurança e até melhores práticas de separação de serviços por containers e etc não estão aqui consideradas!
 
 ## Alguns lembretes finais cruciais para o ambiente de produção
 

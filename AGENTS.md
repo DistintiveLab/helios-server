@@ -18,10 +18,14 @@ Fork-specific customizations that MUST be preserved when merging upstream:
   when `openreg=False` it shows "Only the voters listed here" instead of upstream's
   unconditional `pretty_eligibility` rendering
 - `castvote.html` deliberately omits upstream's hidden `<textarea>` raw-ballot dump
+- Discourse Connect login provider (`helios_auth/auth_systems/discourse.py`):
+  `discourse` is in the default `AUTH_ENABLED_AUTH_SYSTEMS` (settings.py), and
+  `DISCOURSE_URL`/`DISCOURSE_SECRET` are env-driven (`get_from_env`) — there is
+  no upstream counterpart for this module
 
 `CLAUDE.md` also exists (came from upstream). Trust this file over CLAUDE.md for
-fork-specific facts: CLAUDE.md says the broker is RabbitMQ, but this fork defaults to
-`redis://127.0.0.1:6379` (settings.py), and CLAUDE.md assumes bare `uv` on PATH.
+fork-specific facts (e.g. the broker is `redis://127.0.0.1:6379`, settings.py,
+and `uv` may need the full path `~/.local/bin/uv`).
 
 ## Commands
 

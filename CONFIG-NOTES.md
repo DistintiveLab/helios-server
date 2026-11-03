@@ -1,54 +1,39 @@
-Errors faced during installation/configuration
+Notes on errors faced during installation/configuration
 
-First, read the instructions at INSTALL.md !
+First, read the instructions at INSTALL.md and README.md !
 
-* Some python libraries where missing from the 'as is' Ubuntu 13.10 install and had to be installed:
+* Build dependencies for python-ldap (the LDAP auth module) and other
+  packages that compile from source:
 
-````
-sudo apt-get install python-dev
-sudo apt-get install libldap2-dev
-sudo apt-get install libsasl2-dev
-sudo apt-get install python-ldap
-sudo apt-get install gettext # to compile messages
-sudo apt-get install libapache2-mod-wsgi # if using apache
-pip install uwsgi
-````
-
-* Helios original settings file come with 
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-apps commented out.
-
-When I've tried to login using ldap user and password, I've got the following error:
-
+```bash
+sudo apt install build-essential python3-dev libsasl2-dev libldap2-dev gettext
 ```
-DatabaseError: relation "auth_user" does not exist
-LINE 1: ...ser"."last_login", "auth_user"."date_joined" FROM "auth_user...
 
-...
-Exception Type:     DatabaseError
-Exception Value: 	
+With uv, all Python dependencies are then installed with:
 
-current transaction is aborted, commands ignored until end of transaction block
+```bash
+uv sync
 ```
-Enabling those apps solved the problem.
 
-* Vote hash was not saving
+* Database connection errors ("could not translate host name db", "Peer
+  authentication failed"): the defaults in `settings.py` point at the
+  docker-compose host `db`. On a direct server install set the environment
+  variables `POSTGRES_HOST`, `DB_USER`, `DB_PWD`, `DB_NAME` (see `.env.sample`),
+  or set `DATABASE_URL` to override the whole block (forces SSL).
 
-Everything was working fine, except that the vote hash wasn't being saved.  This was happening because I didn't started the background job processor (issue kindly answered by Ben Adida)
+* Vote hash was not saving / voter e-mails were not sent: the Celery worker
+  was not running. Celery (5.x) uses Redis as its broker
+  (default `redis://127.0.0.1:6379`, override with `CELERY_BROKER_URL`).
+  Run in a separate terminal:
 
-Run the following command in a separate terminal window:
+```bash
+uv run celery --app helios worker -l info
+```
 
-````
-python manage.py celeryd
-````
+* `module object has no attribute STATUS_UPDATES`: your auth module needs to
+  declare `STATUS_UPDATES` (see `helios_auth/auth_systems/*.py` for examples).
 
-Dont' forget to install rabbitmq (https://www.rabbitmq.com/)
-
-````
-sudo apt-get install rabbitmq-server
-````
-
-* module' object has no attribute 'STATUS_UPDATES
-
-Your auth model needs to declare STATUS_UPDATES
+* Discourse Connect login failing: check that `DISCOURSE_URL` and
+  `DISCOURSE_SECRET` in `settings.py` match the Discourse Connect provider
+  settings on the forum side (same shared secret), and that the forum is
+  reachable from the Helios server.
