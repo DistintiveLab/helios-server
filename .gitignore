@@ -2,7 +2,10 @@ deploy-latest.sh
 *.pyc
 .DS_Store
 *~
-media/*
+# /media: deploy symlink at repo root (runtime uploads); staticfiles: collectstatic output
+/media
+/media/*
+/staticfiles/
 .venv
 venv*
 celerybeat-*
