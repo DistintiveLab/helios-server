@@ -76,6 +76,19 @@ uv run python manage.py runserver
 uv run celery --app helios worker -l info
 ```
 
+## Production (nginx + gunicorn)
+
+Do not use `runserver` in production. Run the app under gunicorn and put nginx in
+front as a reverse proxy (TLS + static files). A ready-to-adapt vhost example is
+[`nginx.conf.example`](nginx.conf.example), and the full walkthrough (URL map,
+collectstatic, TLS/certbot) is in the README section
+[Configuração do nginx (proxy reverso)](README.md#configuração-do-nginx-proxy-reverso).
+
+```
+uv run gunicorn wsgi --workers 3 --bind 127.0.0.1:8013
+uv run python manage.py collectstatic
+```
+
 ## Google Auth Configuration
 
 To get Google Auth working:

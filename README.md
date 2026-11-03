@@ -12,7 +12,7 @@
     - [Testando a instalação em ambiente de desenvolvimento](#testando-a-instalação-em-ambiente-de-desenvolvimento)
     - [Habilitando usuário com permissão de gestor de eleições](#habilitando-usuário-com-permissão-de-gestor-de-eleições)
   - [Preparando ambiente de produção](#preparando-ambiente-de-produção)
-    - [Configuração apache](#configuração-apache)
+    - [Configuração do nginx (proxy reverso)](#configuração-do-nginx-proxy-reverso)
     - [Celery](#celery)
   - [Configurações Gerais:](#configurações-gerais)
   - [Outras personalizações feitas no Helios](#outras-personalizações-feitas-no-helios)
@@ -66,8 +66,10 @@ Para seguir esse tutorial é necessário tenha alguma experiência com administr
 ### Softwares necessários
 
 * python 3.13 (e o pacote python3-dev da distribuição)
-* apache2
-* libapache2-mod-wsgi
+* nginx
+  * atua como *proxy reverso* em produção: TLS, arquivos estáticos e repasse ao gunicorn (ver seção [Configuração do nginx (proxy reverso)](#configuração-do-nginx-proxy-reverso))
+* certbot
+  * emissão e renovação dos certificados Let's Encrypt usados pelo nginx
 * postgresql (12 ou superior) e postgresql-contrib
   * [Aqui tem um bom tutorial](https://www.digitalocean.com/community/tutorials/how-to-install-and-use-postgresql-on-ubuntu-22-04) de como instalar no Ubuntu 22.04
 * redis-server
@@ -291,45 +293,48 @@ Pronto! O usuário em questão recebeu o papel de **gestor de eleição** e ser�
 
 Na seção anterior foi usado o servidor web de desenvolvimento provido pelo próprio Django (`uv run python manage.py runserver 0.0.0.0:8000`). No entanto, ele é apenas para desenvolvimento e **não deve** ser usado em um ambiente de produção.
 
-É possível trabalhar com diversos servidores web, porém no caso em questão optou-se pelo [Apache](https://docs.djangoproject.com/en/5.2/topics/install/#install-apache-and-mod-wsgi).
+Em produção, recomenda-se o [nginx](https://docs.djangoproject.com/en/5.2/howto/deployment/wsgi/) atuando como *proxy reverso*: ele termina o TLS, serve os arquivos estáticos diretamente do disco (muito mais rápido do que a aplicação) e repassa o restante das requisições à aplicação Django, que roda sob o [gunicorn](https://docs.gunicorn.org/) escutando apenas em `127.0.0.1:8013`. O gunicorn já é instalado pelo `uv sync`.
 
-### Configuração apache
+### Configuração do nginx (proxy reverso)
 
-Módulos a serem habilitados, para a configuração exemplo:
-```bash
-sudo a2enmod rewrite
-sudo a2enmod ssl
-```
-Para configurar o `httpd.conf` ou equivalente, siga as instruções em [How to use Django with Apache and mod_wsgi](https://docs.djangoproject.com/en/5.2/howto/deployment/wsgi/modwsgi/). Neste repositório há um exemplo de configuração em produção no arquivo [helios.conf.exemplo](helios.conf.exemplo).
-
-A parte de servir os arquivos estáticos é a mais trabalhosa. Essa configuração é necessária porque no servidor de desenvolvimento o django serve esses arquivos, porém na produção, eles precisam ser configurados para serem servidos pelo servidor *web*.
-
-Os arquivos estáticos não servidos pelo django são os "tradicionais":  css, javascript e imagens, por exemplo.
-
-No caso do Helios em particular, há módulos sendo servidos estaticamente (total ou parcial): o `heliosbooth` e o `heliosverifier`, os quais também precisam ser configurados.
-
-Como o enfoque deste repositório está no desenvolvimento de novas funcionalidades e especialmente na personalização do Helios para o uso por entidades brasileiras, optou-se por uma solução menos elegante para os arquivos estáticos, mas que simplifica muito: 
- - fazer um *link* simbólico dos arquivos desses módulos e  dos demais arquivos que precisam ser servidos estaticamente. E então configurar um *alias* para eles na configuração do apache, conforme os seguintes exemplos:
+Este repositório traz um exemplo funcional e comentado, baseado na configuração em produção de `vote.coletivo.net.br`: o arquivo [nginx.conf.example](nginx.conf.example). Após ajustar nele o domínio, o caminho da instalação e a porta do gunicorn, ative-o com:
 
 ```bash
-Alias /booth /`<path_to_site>`/sitestatic/booth
-
-Alias /verifier /`<path_to_site>`/sitestatic/verifier
+sudo cp nginx.conf.example /etc/nginx/sites-available/helios
+sudo ln -s /etc/nginx/sites-available/helios /etc/nginx/sites-enabled/
+sudo nginx -t && sudo systemctl reload nginx
 ```
 
-Além desses, os demais arquivos estáticos (CSS, JavaScript, imagens, incluindo os do módulo `admin` do django) devem ser reunidos no diretório `staticfiles` (definido em `STATIC_ROOT`) com o comando:
+E inicie a aplicação com o gunicorn (mantenha-o sob systemd ou [supervisor](http://supervisord.org/introduction.html); exemplos do supervisor em [docker/supervisor](docker/supervisor/)):
+
+```bash
+uv run gunicorn wsgi --workers 3 --bind 127.0.0.1:8013
+```
+
+#### Como o nginx serve o Helios
+
+| Prefixo de URL | Servido a partir de | Conteúdo |
+| -------------- | ------------------- | -------- |
+| `/static/` | `staticfiles/` (gerado por `collectstatic`) | admin do Django e demais assets referenciados por `{% static %}` |
+| `/booth/` | `heliosbooth/` | cabine de votação (aplicação JavaScript) |
+| `/verifier/` | `heliosverifier/` | verificador de cédulas (aplicação JavaScript) |
+| `/media/` | `media/` | assets estáticos do fork (bootstrap, css, js) e uploads |
+| `/ajuda/` | `ajuda/` | páginas de ajuda |
+| demais URLs | gunicorn em `127.0.0.1:8013` | a aplicação Django |
+
+Como `heliosbooth` e `heliosverifier` são servidos direto do código-fonte pelo nginx, apenas os demais arquivos estáticos (CSS, JavaScript, imagens, incluindo os do módulo `admin` do Django) precisam ser reunidos no diretório `staticfiles` (definido em `STATIC_ROOT`) após cada atualização do código:
 
 ```bash
 uv run python manage.py collectstatic
 ```
 
-Configure então o apache para apontar também para esse diretório, conforme descrito em [Collect static app](https://docs.djangoproject.com/en/5.2/ref/contrib/staticfiles/).
+#### TLS/HTTPS e outros detalhes importantes
 
->**Observações:**
->
->1. Neste repositório há um arquivo exemplo de configuração do Apache, o arquivo [helios-ssl.conf](docker/apache/helios-ssl.conf). É um exemplo funcional para ambiente de homologação/dev com >Apache, mas é bastante similar à ambiente de produção, especialmente com relação aos alias necessários.
->
->2. Em algumas instalações mais recentes usando Apache tem havido relatos de problemas (internal server erros, com logs com registro de segmentation fault ou >outros), para o qual se identificou que atualizando a biblioteca pyscopg2 (para psycopg2-2.8.5) e instalando a libpq-dev, resolvia. Obrigada ao pessoal do IF >Sudeste MG por compartilhar a solução.
+- Os certificados do exemplo são os padrão do [Certbot / Let's Encrypt](https://certbot.eff.org/); a renovação automática funciona porque o bloco HTTP responde ao prefixo `/.well-known/acme-challenge/` antes de redirecionar tudo para HTTPS.
+- `client_max_body_size 25m` é necessário para o upload do arquivo de eleitores.
+- O cabeçalho `X-Forwarded-Proto` informado no bloco `proxy` é o que permite ao Django saber que a conexão original era HTTPS: com `SSL=1` no `.env`, o `SECURE_PROXY_SSL_HEADER` (ver [`settings.py`](settings.py)) o utiliza para forçar HTTPS e marcar os cookies como seguros.
+
+> **Nota (legado):** a configuração histórica com Apache + mod_wsgi continua disponível como referência em [helios.conf.exemplo](helios.conf.exemplo) e [docker/apache/helios-ssl.conf](docker/apache/helios-ssl.conf), mas o nginx é a configuração recomendada e documentada para produção.
 
 ### Celery
 

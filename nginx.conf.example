@@ -1,0 +1,105 @@
+# Exemplo de virtual host nginx para o Helios em produção.
+# Baseado na configuração em produção de vote.coletivo.net.br.
+#
+# Antes de usar, ajuste:
+#   - o domínio (aqui: votacao.exemplo.org.br)
+#   - o caminho da instalação (aqui: /srv/helios/helios-server)
+#   - a porta do gunicorn (aqui: 8013)
+#
+# Instalação (Debian/Ubuntu):
+#   sudo cp nginx.conf.example /etc/nginx/sites-available/helios
+#   sudo ln -s /etc/nginx/sites-available/helios /etc/nginx/sites-enabled/
+#   sudo nginx -t && sudo systemctl reload nginx
+
+upstream helios_app {
+    server 127.0.0.1:8013 fail_timeout=0;
+    keepalive 32;
+}
+
+# HTTP: apenas a renovação de certificado (Certbot) e o redirecionamento para HTTPS
+server {
+    listen 80;
+    server_name votacao.exemplo.org.br;
+
+    location ^~ /.well-known/acme-challenge/ {
+        root /var/www/html;
+        default_type text/plain;
+    }
+
+    location / {
+        return 301 https://$host$request_uri;
+    }
+}
+
+server {
+    listen 443 ssl;
+    server_name votacao.exemplo.org.br;
+
+    ssl_certificate     /etc/letsencrypt/live/votacao.exemplo.org.br/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/votacao.exemplo.org.br/privkey.pem;
+
+    access_log /var/log/nginx/helios_access.log;
+    error_log  /var/log/nginx/helios_error.log;
+
+    # espaço para o upload do arquivo de eleitores
+    client_max_body_size 25m;
+
+    # Estáticos coletados com "manage.py collectstatic" (STATIC_ROOT):
+    # inclui o admin do Django e os assets referenciados por {% static %}.
+    location /static/ {
+        alias /srv/helios/helios-server/staticfiles/;
+        expires 30d;
+        access_log off;
+    }
+
+    # Cabine de votação (heliosbooth) e verificador de cédulas (heliosverifier):
+    # aplicações JavaScript servidas direto do código-fonte, sem collectstatic.
+    location /booth/ {
+        alias /srv/helios/helios-server/heliosbooth/;
+        expires 30d;
+        access_log off;
+    }
+    location /verifier/ {
+        alias /srv/helios/helios-server/heliosverifier/;
+        expires 30d;
+        access_log off;
+    }
+
+    # Assets estáticos do fork (bootstrap, css, js) e uploads de usuários.
+    # nosniff: nunca deixar um arquivo enviado ser interpretado como página.
+    location /media/ {
+        alias /srv/helios/helios-server/media/;
+        expires 7d;
+        access_log off;
+        add_header X-Content-Type-Options nosniff;
+    }
+
+    # Páginas de ajuda (fork)
+    location /ajuda/ {
+        alias /srv/helios/helios-server/ajuda/;
+        expires 7d;
+        access_log off;
+        add_header X-Content-Type-Options nosniff;
+    }
+
+    # Todo o restante vai para a aplicação Django, via gunicorn
+    location / {
+        proxy_pass http://helios_app;
+
+        proxy_http_version 1.1;
+        proxy_set_header Connection "";    # necessário para o keepalive do upstream
+
+        proxy_set_header Host              $host;
+        proxy_set_header X-Real-IP         $remote_addr;
+        proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;   # requerido quando SSL=1 no .env (SECURE_PROXY_SSL_HEADER)
+        proxy_set_header X-Forwarded-Host  $host;
+        proxy_set_header X-Forwarded-Port  $server_port;
+
+        proxy_connect_timeout 5s;
+        proxy_send_timeout    60s;
+        proxy_read_timeout    75s;
+
+        proxy_redirect off;
+    }
+}
