@@ -2,10 +2,10 @@
 # Para rodar um servidor para testes: mkdocs serve
 
 site_name: Helios - Sistema de votação eletrônica
-site_url: http://localhost:8090/ajuda-gestor/
+site_url: https://vote.coletivo.net.br/ajuda-gestor/
 site_description: 'Ajuda do sistema de votação eletrônica'
-site_author: 'Instituto Federal de Santa Catarina'
-copyright: 'Copyright &copy; 2018 - IFSC'
+site_author: 'Vote Coletivo'
+copyright: 'Copyleft <span class="copyleft">&copy;</span> 2026 - Distintive'
 
 nav:
     - Inicial: index.md
@@ -22,16 +22,16 @@ theme:
   name: 'material'
   features:
     - toc.follow
-  # include_sidebar: false
+  include_sidebar: true
   custom_dir: 'theme'
-  logo:
-    icon: 'home'
-  favicon: 'assets/images/favicon.ico'
+  logo: 'assets/images/favicon.png'
+  favicon: 'assets/images/favicon.png'
   language: 'pt'
   font:
     text: 'Roboto'
     code: 'Roboto Mono'
   extra:
+    platform: github
   search:
     language: 'pt'
   feature:

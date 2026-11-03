@@ -85,11 +85,11 @@
     <svg class="md-svg">
       <defs>
         {% set platform = config.extra.repo_icon or config.repo_url %}
-        {% if "github" in platform %}
+        {% if platform and "github" in platform %}
           {% include "assets/images/icons/github.a4034fb1.svg" %}
-        {% elif "gitlab" in platform %}
+        {% elif platform and "gitlab" in platform %}
           {% include "assets/images/icons/gitlab.d80e5efc.svg" %}
-        {% elif "bitbucket" in platform %}
+        {% elif platform and "bitbucket" in platform %}
           {% include "assets/images/icons/bitbucket.4ebea66e.svg" %}
         {% endif %}
       </defs>
@@ -168,24 +168,6 @@
     </div>
     {% block scripts %}
       <script src="{{ base_url }}/assets/javascripts/application.e30f1499.js"></script>
-      {% if lang.t("search.language") != "en" %}
-        {% set languages = lang.t("search.language").split(",") %}
-        {% if languages | length and languages[0] != "" %}
-          {% set path = base_url + "/assets/javascripts/lunr" %}
-          <script src="{{ path }}/lunr.stemmer.support.js"></script>
-          {% for language in languages | map("trim") %}
-            {% if language != "en" %}
-              {% if language == "jp" %}
-                <script src="{{ path }}/tinyseg.js"></script>
-              {% endif %}
-              <script src="{{ path }}/lunr.{{ language }}.js"></script>
-            {% endif %}
-          {% endfor %}
-          {% if languages | length > 1 %}
-            <script src="{{ path }}/lunr.multi.js"></script>
-          {% endif %}
-        {% endif %}
-      {% endif %}
       <script>app.initialize({version:"{{ mkdocs_version }}",url:{base:"{{ base_url }}"}})</script>
       {% for path in extra_javascript %}
         <script src="{{ path }}"></script>
