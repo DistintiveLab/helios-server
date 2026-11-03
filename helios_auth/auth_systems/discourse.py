@@ -5,11 +5,17 @@ import hmac
 import hashlib
 import urllib.parse
 from django.conf import settings
+from django.core.mail import send_mail
 from django.http import HttpResponseRedirect
+
+from helios_auth.utils import format_recipient
 
 # Ensure these are defined in your main settings.py
 SECRET = getattr(settings, 'DISCOURSE_SECRET', '')
 DISCOURSE_URL = getattr(settings, 'DISCOURSE_URL', '')
+
+# some parameters to indicate that status updating is not possible
+STATUS_UPDATES = False
 
 # helios_auth/auth_systems/discourse.py
 
@@ -64,3 +70,17 @@ def get_user_info_after_auth(request):
 
 def update_status(token, message):
     pass
+
+def send_message(user_id, user_name, user_info, subject, body):
+    email = user_info.get('email')
+    if not email:
+        return
+    name = user_name or email
+    send_mail(subject, '', settings.SERVER_EMAIL, [format_recipient(name, email)],
+        fail_silently=False, html_message=body)
+
+#
+# Election Creation
+#
+def can_create_election(user_id, user_info):
+    return True

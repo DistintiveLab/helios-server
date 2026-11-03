@@ -355,11 +355,9 @@ GH_CLIENT_SECRET = get_from_env('GH_CLIENT_SECRET', '')
 GITLAB_CLIENT_ID = get_from_env('GITLAB_CLIENT_ID', "")
 GITLAB_CLIENT_SECRET = get_from_env('GITLAB_CLIENT_SECRET', "")
 
-# Discourse
-DISCOURSE_URL="https://foro.sepla21.org"
-DISCOURSE_SECRET="aa1h4+vag6=c+xo&@i!+)kwfsd4_kh8ytit65u4$yo*jga42rf$"
-DISCOURSE_CLIENT_ID = get_from_env('DISCOURSE_CLIENT_ID', '')
-DISCOURSE_CLIENT_SECRET = get_from_env('DISCOURSE_CLIENT_SECRET', '')
+# Discourse (Discourse Connect provider: shared-secret HMAC, no client id/secret)
+DISCOURSE_URL = get_from_env('DISCOURSE_URL', '')
+DISCOURSE_SECRET = get_from_env('DISCOURSE_SECRET', '')
 
 
 # email server
