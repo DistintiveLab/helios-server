@@ -319,7 +319,7 @@ HELIOS_PRIVATE_DEFAULT = True
 # authentication systems enabled
 # AUTH_ENABLED_SYSTEMS = ['password','facebook', 'google', 'yahoo']
 AUTH_ENABLED_SYSTEMS = get_from_env('AUTH_ENABLED_SYSTEMS',
-                                    get_from_env('AUTH_ENABLED_AUTH_SYSTEMS', 'ldap,password,google,facebook')
+                                    get_from_env('AUTH_ENABLED_AUTH_SYSTEMS', 'ldap,password,google,facebook,discourse')
                                     ).split(",")
 
 # Add development login in debug mode
@@ -354,6 +354,13 @@ GH_CLIENT_SECRET = get_from_env('GH_CLIENT_SECRET', '')
 # Gitlab
 GITLAB_CLIENT_ID = get_from_env('GITLAB_CLIENT_ID', "")
 GITLAB_CLIENT_SECRET = get_from_env('GITLAB_CLIENT_SECRET', "")
+
+# Discourse
+DISCOURSE_URL="https://foro.sepla21.org"
+DISCOURSE_SECRET="aa1h4+vag6=c+xo&@i!+)kwfsd4_kh8ytit65u4$yo*jga42rf$"
+DISCOURSE_CLIENT_ID = get_from_env('DISCOURSE_CLIENT_ID', '')
+DISCOURSE_CLIENT_SECRET = get_from_env('DISCOURSE_CLIENT_SECRET', '')
+
 
 # email server
 EMAIL_HOST = get_from_env('EMAIL_HOST', 'localhost')

@@ -1,5 +1,5 @@
 from django.conf import settings
-from . import password, linkedin, cas, facebook, google, yahoo, github, ldapauth, gitlab, shibboleth
+from . import password, linkedin, cas, facebook, google, yahoo, github, ldapauth, gitlab, shibboleth, discourse
 
 # Import devlogin only in debug mode
 if settings.DEBUG:
@@ -17,6 +17,7 @@ AUTH_SYSTEMS['github'] = github
 AUTH_SYSTEMS['ldap'] = ldapauth
 AUTH_SYSTEMS['shibboleth'] = shibboleth
 AUTH_SYSTEMS['gitlab'] = gitlab
+AUTH_SYSTEMS['discourse'] = discourse
 
 # Add devlogin only in debug mode
 if settings.DEBUG:
